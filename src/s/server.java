@@ -96,7 +96,7 @@ class Server2Connection implements Runnable {
             	t=a.readUTF();
             	
                 line[i] = b.readUTF();
-                System.out.println( "Received " +" "+t+" "+ line[i] + " from Connection " + id + "." ); //�Ѳ����� ���̵��� ���ϰ� ������ �޾����� �� �ذ���
+                System.out.println( "Received " +" "+t+" "+ line[i] + " from Connection " + id + "." ); 
               
                os.writeObject(test);
             if(line[i].equals("x")){
