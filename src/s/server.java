@@ -1,3 +1,6 @@
+/* 
+ * ë©€í‹° ì“°ë ˆë“œ ì„œë²„
+ */
 package s;
 
 import java.io.DataInputStream;
@@ -93,7 +96,7 @@ class Server2Connection implements Runnable {
             	t=a.readUTF();
             	
                 line[i] = b.readUTF();
-                System.out.println( "Received " +" "+t+" "+ line[i] + " from Connection " + id + "." ); //ÇÑ²¨¹ø¿¡ ¾ÆÀÌµð¶ó´Â °ÍÇÏ°í ³»¿ëÀÌ ¹Þ¾ÆÁö´Â °Å ÇØ°áÇÏ
+                System.out.println( "Received " +" "+t+" "+ line[i] + " from Connection " + id + "." ); //ï¿½Ñ²ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¾ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ø°ï¿½ï¿½ï¿½
               
                os.writeObject(test);
             if(line[i].equals("x")){
