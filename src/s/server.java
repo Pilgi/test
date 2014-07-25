@@ -2,6 +2,8 @@ package s;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -15,7 +17,7 @@ public class server {
 
   
     ServerSocket server = null;
-    Socket clientSocket = null;
+    Socket socket = null;
     int numConnections = 0;
     int port;
 	
@@ -43,10 +45,10 @@ public class server {
 	
 	while ( true ) {
 	    try {
-		clientSocket = server.accept();
+		socket = server.accept();
 		numConnections ++;
 	
-		Server2Connection oneconnection = new Server2Connection(clientSocket, numConnections, this);
+		Server2Connection oneconnection = new Server2Connection(socket, numConnections, this);
 		new Thread(oneconnection).start();
 	    }   
 	    catch (IOException e) {
@@ -57,43 +59,52 @@ public class server {
 }
 
 class Server2Connection implements Runnable {
-    DataInputStream a;
-    DataInputStream b;
+    DataInputStream dis;
+    DataInputStream dis2;
     ObjectOutputStream os;	
-    //DataOutputStream os;
-    Socket clientSocket;
+    Socket socket;
+    InputStream ab = null;
+	ObjectInputStream cd = null;
+	
     int id;
     server server;
     int i=0;
-    types test = new types();
+    data test = new data();
 
-    public Server2Connection(Socket clientSocket, int id, server server) {
-	this.clientSocket = clientSocket;
+    public Server2Connection(Socket socket, int id, server server) {
+	this.socket = socket;
 	this.id = id;
 	this.server = server;
-	System.out.println( "Connection " + id + " established with: " + clientSocket );
+	System.out.println( "Connection " + id + " established with: " + socket );
 	try {
-	    a=new DataInputStream(clientSocket.getInputStream());
-	    b=new DataInputStream(clientSocket.getInputStream());
+	    dis=new DataInputStream(socket.getInputStream());
+	    dis2=new DataInputStream(socket.getInputStream());
 	    
-	    os = new ObjectOutputStream(clientSocket.getOutputStream());
+	    ab=socket.getInputStream();
+	    cd=new ObjectInputStream(ab);
+	    os = new ObjectOutputStream(socket.getOutputStream());
 	} catch (IOException e) {
 	    System.out.println(e);
 	}
     }
 
     public void run() {
-    	String t;
+    	String t = "id",l = "yubin";
         String line[]=new String[10];
+        data.data_structure ab ;
 	try {
 	   
 		boolean serverStop = false;
 
             while (true) {
-            	t=a.readUTF();
+            	ab =  test.new data_structure(t,l);
+            	t=ab.getType();
+            	l=ab.getContent();
             	
-                line[i] = b.readUTF();
-                System.out.println( "Received " +" "+t+" "+ line[i] + " from Connection " + id + "." ); //한꺼번에 아이디라는 것하고 내용이 받아지는 거 해결하
+            	ab = (data.data_structure)cd.readObject();
+            	
+            
+            //   test.toString(); 
               
                os.writeObject(test);
             if(line[i].equals("x")){
@@ -104,15 +115,18 @@ class Server2Connection implements Runnable {
             
             System.out.println( "Connection " + id + " closed." );
             
-            a.close();
-            b.close();
+            dis.close();
+            dis2.close();
             os.close();
-            clientSocket.close();
+            socket.close();
 
 	    if ( serverStop ) server.stopServer();
 
 	}catch (IOException e) {
 	    System.out.println(e);
+	} catch (ClassNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
 	}
     }
 }

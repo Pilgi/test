@@ -1,6 +1,12 @@
 package s;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.net.*;
+import java.util.Scanner;
 
 public class client {
     public static void main(String[] args) throws ClassNotFoundException {
@@ -8,26 +14,19 @@ public class client {
 		String hostname = "localhost";
 		int port = 6795;
 		int i=0;
-		types k = new types();
-		
-        Socket clientSocket = null;  
-        DataOutputStream os = null;
-        DataOutputStream os2 = null;
-        DataInputStream is = null;
-        ObjectInputStream is2 = null;
-        BufferedReader br = null;
+	
+        Socket socket = null;  
+      
+        ObjectInputStream ois = null;
+        BufferedReader read = null;
      
-    	String responseLine[]=new String[10];
     	
      try {
-            clientSocket = new Socket(hostname, port);
-            os = new DataOutputStream(clientSocket.getOutputStream());
-            os2 = new DataOutputStream(clientSocket.getOutputStream());
-            
-            
-            is = new DataInputStream(clientSocket.getInputStream());
-            is2 = new ObjectInputStream(clientSocket.getInputStream());
-            br = new BufferedReader(new InputStreamReader(System.in));
+            socket = new Socket(hostname, port);
+           
+            ois = new ObjectInputStream(socket.getInputStream());
+            read = new BufferedReader(new InputStreamReader(System.in));
+        
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host: " + hostname);
         } catch (IOException e) {
@@ -35,21 +34,23 @@ public class client {
         }
 	
 	
-	if (clientSocket == null || os == null ||	os2 == null || is == null) {
+	if (socket == null ) {
 	    System.err.println( "error" );
 	    return;
 	}
 
 	
 	try {
-		    
+			Scanner keyboard =  new Scanner(System.in);
+		    String a;
 			while ( true ) {
 				System.out.print( "사용자 정보 입력:" );
+		
 				
-		Object o = is2.readObject();
-			if(o instanceof types)
+			Object o = ois.readObject();
+			if(o instanceof data)
 			{
-				types test = (types)o;
+				data test = (data)o;
 				System.out.println("type="+test.purpose);
 				for(int j=0;j<test.content.size();j++)
 				{
@@ -61,18 +62,14 @@ public class client {
 				break;
 			}
 			
-			// responseLine[i] = is.readUTF();
-			// System.out.println("Server returns it as: " + responseLine[i]);
+			
 			i++;
 		    
 		    }   
 	   
-		     
-		    os.close();
-		    os2.close();
-		    is.close();
-		    is2.close();
-		    clientSocket.close();   //서버에서 끝나면 client가 안끝남
+		    
+		    ois.close();
+		    socket.close();    
 		    
 		    
 		} catch (UnknownHostException e) {
