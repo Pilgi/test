@@ -1,3 +1,6 @@
+/* 
+ * 멀티 쓰레드 서버
+ */
 package s;
 
 import java.io.DataInputStream;
@@ -103,8 +106,13 @@ class Server2Connection implements Runnable {
             	
             	ab = (data.data_structure)cd.readObject();
             	
+<<<<<<< HEAD
             
             //   test.toString(); 
+=======
+                line[i] = b.readUTF();
+                System.out.println( "Received " +" "+t+" "+ line[i] + " from Connection " + id + "." ); 
+>>>>>>> origin/master
               
                os.writeObject(test);
             if(line[i].equals("x")){
