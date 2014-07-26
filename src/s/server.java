@@ -3,7 +3,7 @@
  */
 package s;
 
-
+//실행파일에서 보내고 받는 중간 부분
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
