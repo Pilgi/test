@@ -3,6 +3,8 @@ package s;
 import java.io.Serializable;
 import java.util.List;
 
+import s.data.data_structure;
+
 public class data implements Serializable{
 	/**
 	 * 
@@ -12,7 +14,7 @@ public class data implements Serializable{
 	String purpose;
 	List<data_structure> content;
 	
-	protected class data_structure {
+	protected class data_structure implements Serializable {
 		private String type;
 		private String content;
 		
@@ -37,4 +39,6 @@ public class data implements Serializable{
 		}
 		
 	}
+
+	
 }

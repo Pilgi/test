@@ -1,21 +1,25 @@
 /* 
- * 멀티 쓰레드 서버
+ * 硫�떚 �곕젅���쒕쾭
  */
 package s;
 
-import java.io.DataInputStream;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+
+import s.data;
+import s.data.data_structure;
 
 public class server {
     public static void main(String args[]) {
-	int port = 6795;
-	server server = new server( port );
-	server.startServer();
+		int port = 6795;
+		server server = new server( port );
+		server.startServer();
     }
 
   
@@ -25,12 +29,12 @@ public class server {
     int port;
 	
     public server( int port ) {
-	this.port = port;
+    	this.port = port;
     }
 
     public void stopServer() {
-	System.out.println( "Server cleaning up." );
-	System.exit(0);
+		System.out.println( "Server cleaning up." );
+		System.exit(0);
     }
 
     public void startServer() {
@@ -52,6 +56,7 @@ public class server {
 		numConnections ++;
 	
 		Server2Connection oneconnection = new Server2Connection(socket, numConnections, this);
+		
 		new Thread(oneconnection).start();
 	    }   
 	    catch (IOException e) {
@@ -62,79 +67,81 @@ public class server {
 }
 
 class Server2Connection implements Runnable {
-    DataInputStream dis;
-    DataInputStream dis2;
-    ObjectOutputStream os;	
+
+    ObjectOutputStream os = null;	
     Socket socket;
-    InputStream ab = null;
-	ObjectInputStream cd = null;
-	
-    int id;
+    ObjectInputStream is = null;
+	int id;
     server server;
     int i=0;
-    data test = new data();
+   
 
     public Server2Connection(Socket socket, int id, server server) {
-	this.socket = socket;
-	this.id = id;
-	this.server = server;
-	System.out.println( "Connection " + id + " established with: " + socket );
+		this.socket = socket;
+		this.id = id;
+		this.server = server;
+		System.out.println( "Connection " + id + " established with: " + socket );
+		
 	try {
-	    dis=new DataInputStream(socket.getInputStream());
-	    dis2=new DataInputStream(socket.getInputStream());
-	    
-	    ab=socket.getInputStream();
-	    cd=new ObjectInputStream(ab);
+	    is=new ObjectInputStream(socket.getInputStream());
 	    os = new ObjectOutputStream(socket.getOutputStream());
 	} catch (IOException e) {
 	    System.out.println(e);
 	}
-    }
+  }
 
     public void run() {
-    	String t = "id",l = "yubin";
-        String line[]=new String[10];
-        data.data_structure ab ;
+    	String t = null;
+    //    String line[]=new String[10];
+        data test = new data();
+        List<data.data_structure> ab = new ArrayList<data.data_structure>();
+  
 	try {
 	   
-		boolean serverStop = false;
+		   
+			boolean serverStop = false;
 
-            while (true) {
-            	ab =  test.new data_structure(t,l);
-            	t=ab.getType();
-            	l=ab.getContent();
-            	
-            	ab = (data.data_structure)cd.readObject();
-            	
-<<<<<<< HEAD
-            
-            //   test.toString(); 
-=======
-                line[i] = b.readUTF();
-                System.out.println( "Received " +" "+t+" "+ line[i] + " from Connection " + id + "." ); 
->>>>>>> origin/master
-              
-               os.writeObject(test);
-            if(line[i].equals("x")){
-            	serverStop=true;
-            	break;
-            }
-            } 
-            
-            System.out.println( "Connection " + id + " closed." );
-            
-            dis.close();
-            dis2.close();
-            os.close();
-            socket.close();
+	            for(i=0; i<10; i++) {
+	          /*  	test = (data)is.readObject();
+	            	
+	            	t = test.purpose;
+	            	ab = test.content;
+	            	
+	                System.out.println( "Received " +" "+t+" "+ab+ " from Connection " + id + "." ); 
+	  
+		            if(test.equals("x")){
+		            	serverStop=true;
+		            	break;
+		            }
+		       */
+	            	String d = "name";
+/*send 해서 gui나타나게*/	           String s = "americano";
+	            	
+	            	data.data_structure u = test.new data_structure(d,s);
+	            	data.data_structure u2 = test.new data_structure("price","2000");
+	            	
+	            	ab.add(u);
+	            	ab.add(u2);
+	            	
+	            	test.content = ab;
+	            	
+	            	os.reset();
+	            	
+			        os.writeObject(test);
+		            os.flush();
+		            
+	            } 
+	            
+	            System.out.println( "Connection " + id + " closed." );
+	        
+	            os.close();
+	            is.close();
+	            socket.close();
 
-	    if ( serverStop ) server.stopServer();
+		    if ( serverStop ) server.stopServer();
 
 	}catch (IOException e) {
 	    System.out.println(e);
-	} catch (ClassNotFoundException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
 	}
     }
 }

@@ -1,22 +1,22 @@
-package s;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
+/*package s;
+import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
+
+
 public class client {
-    public static void main(String[] args) throws ClassNotFoundException {
+    public static void main(String[] args) {
 	
 		String hostname = "localhost";
 		int port = 6795;
 		int i=0;
-	
+		ObjectOutputStream ss = null;
+	     
         Socket socket = null;  
-      
+        
         ObjectInputStream ois = null;
         BufferedReader read = null;
      
@@ -24,6 +24,7 @@ public class client {
      try {
             socket = new Socket(hostname, port);
            
+            ss=new ObjectOutputStream(socket.getOutputStream());
             ois = new ObjectInputStream(socket.getInputStream());
             read = new BufferedReader(new InputStreamReader(System.in));
         
@@ -40,22 +41,41 @@ public class client {
 	}
 
 	
+	
 	try {
-			Scanner keyboard =  new Scanner(System.in);
-		    String a;
-			while ( true ) {
+			Scanner keyboard = new Scanner(System.in);
+			data k = new data();
+		    String a = "id";
+		    String b;
+		    List<data.data_structure> kkk = new ArrayList<data.data_structure>();
+		    
+			for(i=0; i<10 ; i++){
+				
+				
 				System.out.print( "사용자 정보 입력:" );
-		
+				b = keyboard.next();
+				
+				data.data_structure ab = k.new data_structure(a,b);
+				kkk.add(ab);
+				k.purpose = a;
+				k.content = kkk;
+				ss.reset();
+				
+				ss.writeObject(k);
+				ss.flush();
+				
 				
 			Object o = ois.readObject();
 			if(o instanceof data)
 			{
-				data test = (data)o;
-				System.out.println("type="+test.purpose);
-				for(int j=0;j<test.content.size();j++)
-				{
-					System.out.println(j+"th content =" + test.content.get(j));
-				}
+				k = (data)o;
+				System.out.println("type="+k.purpose);
+//				for(int j=0;j<k.content.size();j++)
+	//			{
+				//	System.out.println("th content =" + k.content.add(ab));
+		//		}
+			//	k.toString();
+			
 			}
 			else
 			{
@@ -63,12 +83,13 @@ public class client {
 			}
 			
 			
-			i++;
+	
 		    
 		    }   
 	   
 		    
 		    ois.close();
+		    ss.close();
 		    socket.close();    
 		    
 		    
@@ -76,6 +97,10 @@ public class client {
 		    System.err.println("Trying to connect to unknown host: " + e);
 		} catch (IOException e) {
 		    System.err.println("IOException:  " + e);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	    }           
 	}
+*/
