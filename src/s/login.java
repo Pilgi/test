@@ -112,16 +112,7 @@ public class login extends JFrame implements ActionListener{//로그인 처음 화면
 			
 			
 		}
-		/*if(e.getActionCommand().equals("LOGIN")){
-			System.out.println("right");
-			logincheck();//로그인 ㅣ체크
-			
-			//접속된 창
-			
-			log.setVisible(false);
-		}/*/// TODO Auto-generated method stub
 		
-	
 	}
 	void logincheck(){
 		id=id_text.getText().trim();
@@ -133,22 +124,19 @@ public class login extends JFrame implements ActionListener{//로그인 처음 화면
 				setVisible(false);
 			
 				m.setVisible(true);
-				m.soc();
+				//m.soc();
 			}
 			else{//다시 입력하라는 문구 나타내기 
 				textClear();
-				/*re_input=new JLabel("다시 입력해주세요");
-				re_input.setBorder(null);
-				re_input.setFont(new Font("Dialog", Font.BOLD, 20));
-				re_input.setBounds(350, 100, 100, 30);
-				add(re_input);
-				*/
+
+
 				}
 			
 		}catch(Exception a){
 			a.printStackTrace();
 		}
 	}//로그인 체크
+	
 	void textClear(){
 		id_text.setText("");
 		pw_text.setText("");

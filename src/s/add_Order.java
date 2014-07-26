@@ -9,6 +9,8 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 
+import s.mainPage;
+
 public class add_Order extends JFrame implements ActionListener{
 
 	private static final String send_Button = "Send";
@@ -19,16 +21,13 @@ public class add_Order extends JFrame implements ActionListener{
 	String menu_N, Price, table_Num;
 	
 	add_Order(){
-		super();
+		
 		
 		super.setVisible(false);
+		
 		super.setSize(500,400);
 		super.setResizable(true);
 		
-		createGui();
-	}
-
-	public void createGui(){
 		this.setLayout(null);
 		
 		send=new JButton(send_Button);
@@ -51,6 +50,7 @@ public class add_Order extends JFrame implements ActionListener{
 		table_num.setBounds(50,150,100,30);
 		
 		add(send);
+		send.addActionListener(this);
 		add(menu_name);
 		add(price);
 		add(table_num);
@@ -60,13 +60,11 @@ public class add_Order extends JFrame implements ActionListener{
 		menu_N = menu_name.getText().trim();
 		Price = price.getText().trim();
 		table_Num = table_num.getText().trim();
-		
+		mainPage a = new mainPage();
 		Object obj=e.getSource();
 		if(obj.equals(send)){// TODO Auto-generated method stub
-			mainPage a = new mainPage();
-			a.soc();
-			
 			this.setVisible(false);
+			a.soc();
 		}
 	}
 }
