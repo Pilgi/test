@@ -102,9 +102,9 @@ class Server2Connection implements Runnable {
 			boolean serverStop = false;
 
 	            for(i=0; i<10; i++) {
-	          
+	            	//어플에서 서버로 서버에서 실행 파일 창에 보이는 것
 	            	String d = "name";
-/*send 해서 gui나타나게*/	           String s = "americano";
+	           String s = "americano";
 	            	
 	            	data.data_structure u = test.new data_structure(d,s);
 	            	data.data_structure u2 = test.new data_structure("price","2000");
@@ -118,7 +118,8 @@ class Server2Connection implements Runnable {
 	            	
 			        os.writeObject(test);
 		            os.flush();
-		            
+		        
+		            //add했을 때 받는 부분  (주문 어플로 안했을 때)        
 		            test = (data)is.readObject();
 	            	
 	            	t = test.purpose;

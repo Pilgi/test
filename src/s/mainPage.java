@@ -165,7 +165,7 @@ class mainPage extends JFrame implements ActionListener{//로그인 후 메인 화면
 		    List<data.data_structure> kkk = new ArrayList<data.data_structure>();
 		    int j = 0;
 		for(i = 0; i<10; i++){		
-		
+			//주문 내역 서버에서 받는 부분
 				k = (data)ois.readObject();
 			
 			
@@ -179,7 +179,8 @@ class mainPage extends JFrame implements ActionListener{//로그인 후 메인 화면
 				add(order);
 			
 				j = j+30;
-				
+			
+				//서버로 보내는 부분 추가된 주문 
 				data.data_structure ab = k.new data_structure("menu_name",AO.menu_N);
 				data.data_structure ac = k.new data_structure("price",AO.Price);
 				data.data_structure ad = k.new data_structure("table_num",AO.table_Num);
