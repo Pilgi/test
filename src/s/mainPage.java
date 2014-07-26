@@ -27,6 +27,8 @@ import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
 import s.data.data_structure;
+import s.add_Order;
+import s.data;
 
 class mainPage extends JFrame implements ActionListener{//로그인 후 메인 화면
 
@@ -44,7 +46,7 @@ class mainPage extends JFrame implements ActionListener{//로그인 후 메인 화면
 	coupon_Page CP=new coupon_Page();
 	game_Page GP=new game_Page();
 	member_Page MP=new member_Page();
-	
+	add_Order AO = new add_Order();
 
 	public  mainPage(){
 		super.setVisible(false);
@@ -163,20 +165,7 @@ class mainPage extends JFrame implements ActionListener{//로그인 후 메인 화면
 		    List<data.data_structure> kkk = new ArrayList<data.data_structure>();
 		    int j = 0;
 		for(i = 0; i<10; i++){		
-				
-		/*		System.out.print( "사용자 정보 입력:" );
-				b = keyboard.next();
-				
-				data.data_structure ab = k.new data_structure(a,b);
-				kkk.add(ab);
-				k.purpose = a;
-				k.content = kkk;
-				ss.reset();
-				
-				ss.writeObject(k);
-				ss.flush();
-				
-		*/		
+		
 				k = (data)ois.readObject();
 			
 			
@@ -188,14 +177,24 @@ class mainPage extends JFrame implements ActionListener{//로그인 후 메인 화면
 			
 				
 				add(order);
-			//	data.data_structure abc = k.new data_structure(k.purpose,k.content.);
-				
-				//for(data.data_structure abc : k.content){
-				//	recv.append(k.toString());
-					
-			//	}
-	
+			
 				j = j+30;
+				
+				data.data_structure ab = k.new data_structure("menu_name",AO.menu_N);
+				data.data_structure ac = k.new data_structure("price",AO.Price);
+				data.data_structure ad = k.new data_structure("table_num",AO.table_Num);
+				
+				kkk.add(ab);
+				kkk.add(ac);
+				kkk.add(ad);
+				
+				k.purpose = "Order_add";
+				k.content = kkk;
+				ss.reset();
+				
+				ss.writeObject(k);
+				ss.flush();
+			
 	   
 		}	
 		    ois.close();

@@ -102,18 +102,7 @@ class Server2Connection implements Runnable {
 			boolean serverStop = false;
 
 	            for(i=0; i<10; i++) {
-	          /*  	test = (data)is.readObject();
-	            	
-	            	t = test.purpose;
-	            	ab = test.content;
-	            	
-	                System.out.println( "Received " +" "+t+" "+ab+ " from Connection " + id + "." ); 
-	  
-		            if(test.equals("x")){
-		            	serverStop=true;
-		            	break;
-		            }
-		       */
+	          
 	            	String d = "name";
 /*send 해서 gui나타나게*/	           String s = "americano";
 	            	
@@ -130,6 +119,14 @@ class Server2Connection implements Runnable {
 			        os.writeObject(test);
 		            os.flush();
 		            
+		            test = (data)is.readObject();
+	            	
+	            	t = test.purpose;
+	            	ab = test.content;
+	            	
+	                System.out.println( "Received " +" "+t+" "+ab+ " from Connection " + id + "." ); 
+	  
+		            
 	            } 
 	            
 	            System.out.println( "Connection " + id + " closed." );
@@ -142,6 +139,9 @@ class Server2Connection implements Runnable {
 
 	}catch (IOException e) {
 	    System.out.println(e);
+	} catch (ClassNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
 	}
     }
 }
