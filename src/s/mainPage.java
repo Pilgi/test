@@ -75,7 +75,6 @@ class mainPage extends JFrame implements ActionListener{//로그인 후 메인 화면
 		super.setResizable(true);
 		createGui();
 
-		soc();
 		}
 	public void createGui(){
 		this.setLayout(null);
@@ -247,15 +246,6 @@ class mainPage extends JFrame implements ActionListener{//로그인 후 메인 화면
 
 	      
 	
-	
-public static void main(String []args){
-		
-		new mainPage();
-		//new mainPage().soc();
-		
-	}
-
-
 }
 
 

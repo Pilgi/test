@@ -49,6 +49,8 @@ public class login extends JFrame implements ActionListener{//로그인 처음 화면
 		super.setSize(900,800);
 		super.setResizable(true);
 		
+		m.soc(); // soc 실행
+		
 		
 	}
 	
