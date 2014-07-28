@@ -89,8 +89,11 @@ public class server {
 			System.out.println( "Connection " + id + " established with: " + socket );
 			
 		try {
+			
+			
 			sos =socket.getOutputStream();
 			sis =socket.getInputStream();
+			
 			
 		    is=new ObjectInputStream(sis);
 		    os = new ObjectOutputStream(sos);
@@ -101,38 +104,40 @@ public class server {
 
 	    public void run() {
 	    	String t = null;
+
+	        data test;
+	    	/* 이 부분 왜있는지 모르겠음.
+	   
 	    //    String line[]=new String[10];
-	        data test = new data();
 	        List<data.data_structure> ab = new ArrayList<data.data_structure>();
-	  
+	  */
 		try {
 		   
 			boolean serverStop = false;
-			data k = new data();
-	           while(true){
+		       while(true){
 	       //어플에서 서버로 서버에서 실행 파일 창에 보이는 것
-	            	String d = "name";
+	        	 
+	            /*	String d = "name";
 	            	String s = "americano";
 	            	
 	            	data.data_structure u = test.new data_structure(d,s);
 	            	data.data_structure u2 = test.new data_structure("price","2000");
-	            	
-	            	ab.add(u);
+	            	*/
+	            	/* ab.add(u);
 	            	ab.add(u2);
-	            	
+	            
 	            	test.content = ab;
 	            	os.reset();
 	            	
 			        os.writeObject(test);
 		            os.flush();
-		            
+		        	*/
+	                
 		  //실행파일 주문목록을 add했을 때 받는 부분          
-		            k = (data)is.readObject();
-	            	
-	            	t = k.purpose;
-	            	ab = k.content;
-	            	ab.toString();
-	                System.out.println( "Received " +" "+" "+ab+ " from Connection " + id + "." ); 
+		    	   
+		            test = (data)is.readObject();
+	            	t = test.purpose;
+	               System.out.println( "Received " +" "+" "+t+ " from Connection " + id + "." ); 
 	  
 	                if(test.equals("\n")){
 	                	serverStop = false;

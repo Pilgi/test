@@ -52,7 +52,7 @@ public class client {
 			for(i=0; i<10 ; i++){
 				
 				
-				System.out.print( "»ç¿ëÀÚ Á¤º¸ ÀÔ·Â:" );
+				System.out.print( "ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô·ï¿½:" );
 				b = keyboard.next();
 				
 				data.data_structure ab = k.new data_structure(a,b);

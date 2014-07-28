@@ -22,7 +22,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 
-public class login extends JFrame implements ActionListener{//·Î±×ÀÎ Ã³À½ È­¸é
+public class login extends JFrame implements ActionListener{//ï¿½Î±ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ È­ï¿½ï¿½
 	private static final String user_id="Username";
 	private static final String user_pw="Password";
 	private static final String OK_button="LOGIN";
@@ -44,12 +44,12 @@ public class login extends JFrame implements ActionListener{//·Î±×ÀÎ Ã³À½ È­¸é
 		
 		createGui();
 		start();
-		
+
 		super.setVisible(true);
 		super.setSize(900,800);
 		super.setResizable(true);
-		
-		m.soc(); // soc ½ÇÇà
+
+		m.soc(); // soc ï¿½ï¿½ï¿½ï¿½
 		
 		
 	}
@@ -108,9 +108,9 @@ public class login extends JFrame implements ActionListener{//·Î±×ÀÎ Ã³À½ È­¸é
 		Object obj=e.getSource();
 		if(obj.equals(ok)){
 			
-			logincheck();//·Î±×ÀÎ ¤ÓÃ¼Å©
+			logincheck();//ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼Å©
 			
-			//Á¢¼ÓµÈ Ã¢
+			//ï¿½ï¿½ï¿½Óµï¿½ Ã¢
 			
 			
 		}
@@ -128,7 +128,7 @@ public class login extends JFrame implements ActionListener{//·Î±×ÀÎ Ã³À½ È­¸é
 				m.setVisible(true);
 				//m.soc();
 			}
-			else{//´Ù½Ã ÀÔ·ÂÇÏ¶ó´Â ¹®±¸ ³ªÅ¸³»±â 
+			else{//ï¿½Ù½ï¿½ ï¿½Ô·ï¿½ï¿½Ï¶ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ 
 				textClear();
 
 
@@ -137,7 +137,7 @@ public class login extends JFrame implements ActionListener{//·Î±×ÀÎ Ã³À½ È­¸é
 		}catch(Exception a){
 			a.printStackTrace();
 		}
-	}//·Î±×ÀÎ Ã¼Å©
+	}//ï¿½Î±ï¿½ï¿½ï¿½ Ã¼Å©
 	
 	void textClear(){
 		id_text.setText("");

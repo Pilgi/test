@@ -14,7 +14,19 @@ public class data implements Serializable{
 	String purpose;
 	List<data_structure> content;
 	
+	data(String p)
+	{
+		purpose = p;
+	}
+	public boolean addContent(String t, String c) {
+		return content.add(new data_structure(t,c));
+		}
+	
 	protected class data_structure implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private String type;
 		private String content;
 		
