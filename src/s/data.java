@@ -21,6 +21,14 @@ public class data implements Serializable{
 	public boolean addContent(String t, String c) {
 		return content.add(new data_structure(t,c));
 		}
+	public data_structure getContent(int index)
+	{
+		if(index>content.size())
+			return null;
+		return content.get(index);
+	}
+	
+
 	
 	protected class data_structure implements Serializable {
 		/**
@@ -28,13 +36,13 @@ public class data implements Serializable{
 		 */
 		private static final long serialVersionUID = 1L;
 		private String type;
-		private String content;
+		private String value;
 		
 		
 		data_structure(String t, String c)
 		{
 			type = t;
-			content = c;
+			value = c;
 		}
 		
 		// read Data
@@ -42,12 +50,12 @@ public class data implements Serializable{
 		{
 			return type;
 		}
-		public String getContent()
+		public String getValue()
 		{
-			return content;
+			return value;
 		}
 		public String toString(){
-			return "Type : " + getType() + ", content: " + getContent();
+			return "Type : " + getType() + ", value: " + getValue();
 		}
 		
 	}

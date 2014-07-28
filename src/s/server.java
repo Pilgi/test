@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,31 +43,26 @@ public class server {
 	    }
 
 	    public void startServer() {
-		
-	        try {
-		    server = new ServerSocket(port);
-	        }
-	        catch (IOException e) {
-		    System.out.println(e);
-	        }   
-		
-		System.out.println( "Server is started and is waiting for connections." );
-
-
-		
-		while ( true ) {
-		    try {
-			socket = server.accept();
-			numConnections ++;
-		
-			Server2Connection oneconnection = new Server2Connection(socket, numConnections, this);
+	    	try {
+	    		server = new ServerSocket(port);
+		        }
+	    	catch (IOException e) {
+	    		System.out.println(e);
+		        }   
+			System.out.println( "Server is started and is waiting for connections." );
+			while ( true ) {
+			    try {
+				socket = server.accept();
+				numConnections ++;
 			
-			new Thread(oneconnection).start();
-		    }   
-		    catch (IOException e) {
-			System.out.println(e);
-		    }
-		}
+				Server2Connection oneconnection = new Server2Connection(socket, numConnections, this);
+				
+				new Thread(oneconnection).start();
+			    }   
+			    catch (IOException e) {
+				System.out.println(e);
+			    }
+			}
 	    }
 	}
 
@@ -83,6 +79,7 @@ public class server {
 	   
 
 	    public Server2Connection(Socket socket, int id, server server) {
+	    	// socket establish 부분
 			this.socket = socket;
 			this.id = id;
 			this.server = server;
@@ -93,10 +90,9 @@ public class server {
 			
 			sos =socket.getOutputStream();
 			sis =socket.getInputStream();
-			
-			
 		    is=new ObjectInputStream(sis);
 		    os = new ObjectOutputStream(sos);
+
 		} catch (IOException e) {
 		    System.out.println(e);
 		}
@@ -136,10 +132,15 @@ public class server {
 		  //실행파일 주문목록을 add했을 때 받는 부분          
 		    	   
 		            test = (data)is.readObject();
-	            	t = test.purpose;
 	               System.out.println( "Received " +" "+" "+t+ " from Connection " + id + "." ); 
+	               try {
+					new server_connector(test);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 	  
-	                if(test.equals("\n")){
+	                if(test.purpose.equals("stop")){
 	                	serverStop = false;
 	                	break;
 	                }
