@@ -19,7 +19,8 @@ public class data implements Serializable{
 		purpose = p;
 	}
 	public boolean addContent(String t, String c) {
-		return content.add(new data_structure(t,c));
+		data_structure temp = new data_structure(t,c);
+		return content.add(temp);
 		}
 	public data_structure getContent(int index)
 	{
