@@ -32,13 +32,17 @@ public class server_connector {
 	}
 	private void start_process() throws ClassNotFoundException, SQLException{
 		Class.forName("com.mysql.jdbc.Driver");
-		Connection con = DriverManager.getConnection("jdbc:mysql://"+sql_url+"\"","root","gkqpfla");
+		Connection con = DriverManager.getConnection("jdbc:mysql://"+sql_url,"root","gkqpfla");
 		System.out.println("sql 서버와 연결되었습니다..");
 		//querry 문을 주고 받고 하기 위한 stmt 구문.
 		stmt = con.createStatement();
 		// TODO Auto-generated method stub
+
+		System.out.println(recv_data.purpose);
+		
 		if(recv_data.purpose.equals("JOIN"))
 		{
+			System.out.println("join 확인 ㄱㄱ");
 			joinUser();
 		}
 	//	stmt.execute("INSERT INTO user_info (user_id,password,user_num,name,sex,e_mail) VALUES ('y30916','sbxjs314',002,'�紩��',0,'y30916@naver.com')");
@@ -54,10 +58,13 @@ public class server_connector {
 		int sex = 0;
 		int i=0;
 		data.data_structure temp ;
+
+		System.out.println("join 확인 ㄱㄱㄱ");
 		while(recv_data.getContent(i)!=null)
 		{
-			temp = recv_data.getContent(i);
+			temp = recv_data.getContent(i++);
 			//gettype으로 가져온 자료가 join일 경우 실행될 부분
+			System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 			switch (temp.getType()) {
 			case "id":
 				user_id = temp.getValue();
@@ -81,11 +88,14 @@ public class server_connector {
 			default:
 				break;
 			}
-			
 		}
 		if(user_id != null && password !=null && name != null && e_mail !=null)
+		{
+			System.out.println("입력시도");
 			return stmt.execute("INSERT INTO user_info (user_id,password,user_num,name,sex,e_mail) VALUES ("
-				+user_id+","+password+","+ ++u_num + "," + name + "," + sex + "," + e_mail+")");
+				+user_id+","+password+","+ ++u_num + "," + name + "," + sex + "," + e_mail+ ")");
+			
+		}
 		else
 			return false;
 	}

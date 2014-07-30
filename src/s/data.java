@@ -22,7 +22,7 @@ public class data implements Serializable{
 		}
 	public data_structure getContent(int index)
 	{
-		if(index>content.size())
+		if(index>=content.size())
 			return null;
 		return content.get(index);
 	}
