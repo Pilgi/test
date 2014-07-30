@@ -46,6 +46,8 @@ public class server_connector {
 
 	}
 	
+	
+	//JOIN 일 경우 동작하는 부분.
 	protected boolean joinUser() throws SQLException
 	{
 		String user_id = null,password = null,name = null,e_mail = null;

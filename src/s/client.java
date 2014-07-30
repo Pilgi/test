@@ -1,4 +1,7 @@
-/*package s;
+/*
+ * join test를 위해 7월30일날 수정함.
+ */
+package s;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -39,53 +42,29 @@ public class client {
 	    System.err.println( "error" );
 	    return;
 	}
-
+/*
+ * 소켓 연결 완료
+ */
 	
 	
 	try {
-			Scanner keyboard = new Scanner(System.in);
-			data k = new data();
-		    String a = "id";
-		    String b;
-		    List<data.data_structure> kkk = new ArrayList<data.data_structure>();
-		    
-			for(i=0; i<10 ; i++){
-				
-				
-				System.out.print( "����� ���� �Է�:" );
-				b = keyboard.next();
-				
-				data.data_structure ab = k.new data_structure(a,b);
-				kkk.add(ab);
-				k.purpose = a;
-				k.content = kkk;
-				ss.reset();
-				
-				ss.writeObject(k);
-				ss.flush();
+		data k = new data("JOIN");
+		System.out.println("JOIN 정보 입력");
+		k.addContent("id", "root");
+		k.addContent("password", "1234");
+		k.addContent("sex", "0");
+		k.addContent("e_mail", "pil13@naver.com");
+		k.addContent("name", "김필기");
+		
+		ss.reset();
+		ss.writeObject(k);
+		ss.flush();
+
+		System.out.println("소켓 전송 완료");
 				
 				
 			Object o = ois.readObject();
-			if(o instanceof data)
-			{
-				k = (data)o;
-				System.out.println("type="+k.purpose);
-//				for(int j=0;j<k.content.size();j++)
-	//			{
-				//	System.out.println("th content =" + k.content.add(ab));
-		//		}
-			//	k.toString();
-			
-			}
-			else
-			{
-				break;
-			}
-			
-			
-	
-		    
-		    }   
+
 	   
 		    
 		    ois.close();
@@ -103,4 +82,3 @@ public class client {
 		}
 	    }           
 	}
-*/
