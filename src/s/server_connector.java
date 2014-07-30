@@ -91,9 +91,8 @@ public class server_connector {
 		}
 		if(user_id != null && password !=null && name != null && e_mail !=null)
 		{
-			System.out.println("입력시도");
-			return stmt.execute("INSERT INTO user_info (user_id,password,user_num,name,sex,e_mail) VALUES ("
-				+user_id+","+password+","+ ++u_num + "," + name + "," + sex + "," + e_mail+ ")");
+			return stmt.execute("INSERT INTO user_info (user_id,password,user_num,name,sex,e_mail) VALUES ('"
+				+user_id+"','"+password+"',"+ ++u_num + ",'" + name + "','" + sex + "','" + e_mail+ "')");
 			
 		}
 		else
