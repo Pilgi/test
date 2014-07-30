@@ -263,7 +263,6 @@ class mainPage extends JFrame implements ActionListener{//로그인 후 메인 �
 
 
 				k.purpose = "Order_add";
-				k.content = kkk;
 				ss.reset();
 				ss.writeObject(k);
 				ss.flush();

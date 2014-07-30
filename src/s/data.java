@@ -1,9 +1,7 @@
 package s;
 
 import java.io.Serializable;
-import java.util.List;
-
-import s.data.data_structure;
+import java.util.ArrayList;
 
 public class data implements Serializable{
 	/**
@@ -12,7 +10,7 @@ public class data implements Serializable{
 	private static final long serialVersionUID = 225217573093265697L;
 	
 	String purpose;
-	List<data_structure> content;
+	ArrayList<data_structure> content = new ArrayList<data_structure>();
 	
 	data(String p)
 	{
