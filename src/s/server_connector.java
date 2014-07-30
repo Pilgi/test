@@ -1,5 +1,9 @@
 package s;
 
+/*
+ * sql injection 해킹에 대비해 모든 statement를 preparestatement 로 수정할 것!!!
+ * 14.07.30 
+ */
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
