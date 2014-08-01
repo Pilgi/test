@@ -51,10 +51,9 @@ public class server_connector {
 		if(recv_data.purpose.equals("JOIN"))
 		{
 			System.out.println("join 확인 ㄱㄱ");
+			//joinuser가 false면 query 전달 부분에 문제가 있는것 -> 관련된 내용을 client로 보내줄 것.
 			joinUser();
 		}
-	//	stmt.execute("INSERT INTO user_info (user_id,password,user_num,name,sex,e_mail) VALUES ('y30916','sbxjs314',002,'�紩��',0,'y30916@naver.com')");
-	//	stmt.execute("insert into user_info(user_id,password,user_num,name,sex,e_mail) values ('pil113','sbxjs314',001,'���ʱ�',0,'pil113@naver.com')");
 
 	}
 	//JOIN 일 경우 동작하는 부분.
@@ -109,5 +108,56 @@ public class server_connector {
 			return p_st.execute();
 	}
 	
+	//Login일 경우 동작하는 부분
+	protected boolean loginUser(){
+		return false;
+	}
+	//menu를 불러올때 사용되는 부분
+	protected boolean showMenu()
+	{
+		return false;
+	}
+	//주문할 경우 실행될 부분
+	protected boolean orderMenu()
+	{
+		return false;
+	}
+	protected boolean addMenu()
+	{
+		return false;
+	}
+	protected boolean modifyMenu()
+	{
+		return false;
+	}
+	protected boolean deleteMenu()
+	{
+		return false;
+	}
+	protected boolean addStamp()
+	{
+		return false;
+	}
 
+	protected boolean addBalance()
+	{
+		return false;
+	}
+
+	protected boolean makeCoupon()
+	{
+		return false;
+	}
+	protected boolean giftStamp()
+	{
+		return false;
+	}
+	protected boolean giftCoupon()
+	{
+		return false;
+	}
+	protected boolean useCoupon()
+	{
+		return false;
+	}
 }
