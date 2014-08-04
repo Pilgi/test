@@ -12,13 +12,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import s.data;
-import s.data.data_structure;
-import s.Server2Connection;
-import s.server;
+import java.util.Date;
 
 public class server {
 	 public static void main(String args[]) {
@@ -27,10 +21,12 @@ public class server {
 			server.startServer();
 	    }
 
-	  
+
+	 	Date date = new Date();
 	    ServerSocket server = null;
 	    Socket socket = null;
-	    int numConnections = 0;
+	    //하루 누적 clinet 접속 횟수
+	    int numConnections = 0, num10 = 0;
 	    int port;
     	  	public server( int port ) {
 	    	this.port = port;
@@ -51,13 +47,19 @@ public class server {
 			System.out.println( "Server is started and is waiting for connections." );
 			while ( true ) {
 			    try {
-				socket = server.accept();
-				numConnections ++;
-			
-				Server2Connection oneconnection = new Server2Connection(socket, numConnections, this);
+			    	socket = server.accept();
+			    	if(numConnections>=Integer.MAX_VALUE)
+			    	{
+			    		numConnections = 0;
+			    		num10++;
+			    	}
+			    	numConnections ++;
+			    	
 				
-				new Thread(oneconnection).start();
-			    }   
+					Server2Connection oneconnection = new Server2Connection(socket, numConnections, this);
+					
+					new Thread(oneconnection).start();
+				    }   
 			    catch (IOException e) {
 				System.out.println(e);
 			    }
@@ -73,6 +75,7 @@ public class server {
 	    Socket socket;
 	    ObjectInputStream is = null;
 	    server_connector sc;
+	    //client id!
 		int id;
 	    server server;
 	    static int s_id = 0;
@@ -99,8 +102,6 @@ public class server {
 	  }
 
 	    public void run() {
-	    	String t = null;
-
 	        data test;
 	    	/* 이 부분 왜있는지 모르겠음.
 	   
@@ -142,8 +143,12 @@ public class server {
 			           socket.close();
 			           break;
 		    	   }
-		    	   
-	               System.out.println("server:" + s_id +   " - Received " +" "+" "+t+ " from Connection " + id + "." ); 
+		    	   // 정산 요청을 했을 경우 나올 경우
+		    	   if(test.getPurpose().equals("calculate") )
+		    	   {
+		    		   
+		    	   }
+	               System.out.println("server:" + s_id +   " - Received " +test.getPurpose()+ " from Connection " + id + "." ); 
 					
 	               sc = new server_connector(test,s_id);
 	               os.reset();
