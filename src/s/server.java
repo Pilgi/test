@@ -32,8 +32,7 @@ public class server {
 	    Socket socket = null;
 	    int numConnections = 0;
 	    int port;
-		
-	    public server( int port ) {
+    	  	public server( int port ) {
 	    	this.port = port;
 	    }
 
@@ -76,7 +75,7 @@ public class server {
 	    server_connector sc;
 		int id;
 	    server server;
-	    int i=0;
+	    static int s_id = 0;
 	   
 
 	    public Server2Connection(Socket socket, int id, server server) {
@@ -84,7 +83,7 @@ public class server {
 			this.socket = socket;
 			this.id = id;
 			this.server = server;
-			System.out.println( "Connection " + id + " established with: " + socket );
+			System.out.println("server:" + ++s_id +   " - Connection " + id + " established with: " + socket );
 			
 		try {
 			
@@ -109,8 +108,6 @@ public class server {
 	        List<data.data_structure> ab = new ArrayList<data.data_structure>();
 	  */
 		try {
-		   
-			boolean serverStop = false;
 		       while(true){
 	       //어플에서 서버로 서버에서 실행 파일 창에 보이는 것
 	        	 
@@ -137,40 +134,32 @@ public class server {
 		    		   test = (data)is.readObject();
 		    	   }
 		    	   catch (Exception e)
-		    	   {	            
-		    		   System.out.println( "Connection " + id + " closed." );
+		    	   {
+		    		   //socket으로부터이 읽어오는 data가 null일 경우 (client에서 socekt을 닫은경우) 종료한다.
+		    		   System.out.println("server:" + s_id-- + " - Connection " + id + " closed." );
 			           os.close();
 			           is.close();
 			           socket.close();
 			           break;
 		    	   }
 		    	   
-	               System.out.println( "Received " +" "+" "+t+ " from Connection " + id + "." ); 
+	               System.out.println("server:" + s_id +   " - Received " +" "+" "+t+ " from Connection " + id + "." ); 
 					
-	               sc = new server_connector(test);
-		
-	  
-	                if(test.purpose.equals("stop")){
-	                	serverStop = false;
-	                	break;
-	                	                	
-	                }
-	                os.reset();
-	                os.writeObject(sc.request());
+	               sc = new server_connector(test,s_id);
+	               os.reset();
+	               os.writeObject(sc.request());
 	             } 
 	            
-
-
-		    if ( serverStop ) server.stopServer();
-
-		}catch (IOException e) {
-		    System.out.println(e);
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+	
+			}catch (IOException e) {
+			    System.out.println(e);
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
 	    }
 }

@@ -24,17 +24,25 @@ public class server_connector {
 	private String sql_url = "localhost:3306/order_test";
 	private Connection con;
 	private data request_data = null;
+	private int s_id;
 	Statement stmt;
 	
 	
-	server_connector(data param) throws ClassNotFoundException, SQLException
+	server_connector(data param , int ser_id) throws ClassNotFoundException, SQLException
 	{
 		if(param == null)
 			return;
 		recv_data = param;
+		s_id = ser_id;
 		start_process();
 		
 	}
+	//만약에 serv_id가 없는 상태로 들어온다면 -1을 출력
+	server_connector(data param) throws ClassNotFoundException, SQLException
+	{
+		this(param,-1);
+	}
+	
 	public data request()
 	{
 		return request_data;
@@ -46,15 +54,15 @@ public class server_connector {
 	private void start_process() throws ClassNotFoundException, SQLException{
 		Class.forName("com.mysql.jdbc.Driver");
 		con = DriverManager.getConnection("jdbc:mysql://"+sql_url,"root","1234");
-		System.out.println("sql 서버와 연결되었습니다..");
+		System.out.println("server:" + s_id + " - " +"sql 서버와 연결되었습니다..");
 		
 		//querry 문을 주고 받고 하기 위한 stmt 구문.
 		stmt = con.createStatement();
-		System.out.println(recv_data.purpose);
+		System.out.println("server:" + s_id + " - 연결 목적:" +recv_data.purpose);
 		request_data = new data("request");
 		if(recv_data.purpose.equals("JOIN"))
 		{
-			System.out.println("join 확인 ㄱㄱ");
+			System.out.println("server:" + s_id + " - " +" if 문에서 join 명령 확인");
 			//joinuser가 false면 query 전달 부분에 문제가 있는것 -> 관련된 내용을 client로 보내줄 것.
 			joinUser();
 		}
@@ -70,39 +78,39 @@ public class server_connector {
 		PreparedStatement p_st = null;
 		try {
 			p_st = con.prepareStatement(sql.toString());
-
-		System.out.println("join 확인 ㄱㄱㄱ"+recv_data.content.size());
-		while(recv_data.getContent(i)!=null)
-		{
-			//gettype으로 가져온 자료가 join일 경우 실행될 부분
-			temp = recv_data.getContent(i++);
-			
-			//test로 들어오는 data 확인하는 부분
-			System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
-			switch (temp.getType()) {
-			case "id":
-				p_st.setString(1,temp.getValue());
-				break;
-			case "password":
-				p_st.setString(2,temp.getValue());
-				break;
-			case "name":
-				p_st.setString(4,temp.getValue());
-				break;
-			case "e_mail":
-				p_st.setString(6,temp.getValue());
-				break;
-				//남자일 경우 sex는 0으로 표현
-			case "sex":
-				if(temp.getValue().equals("0"))
-					p_st.setString(5,"0");
-				else
-					p_st.setString(5,"1");
-				break;
-			default:
-				break;
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"join 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 join일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "id":
+					p_st.setString(1,temp.getValue());
+					break;
+				case "password":
+					p_st.setString(2,temp.getValue());
+					break;
+				case "name":
+					p_st.setString(4,temp.getValue());
+					break;
+				case "e_mail":
+					p_st.setString(6,temp.getValue());
+					break;
+					//남자일 경우 sex는 0으로 표현
+				case "sex":
+					if(temp.getValue().equals("0"))
+						p_st.setString(5,"0");
+					else
+						p_st.setString(5,"1");
+					break;
+				default:
+					break;
+				}
 			}
-		}
 		//column 에 있는 user num중 최대값을 가져와 그위에 +1을 해준다. (user 번호의 중복을 막기 위해서)
 			ResultSet rs = stmt.executeQuery("select max(user_num) from user_info");
 			if(rs.next())
@@ -110,14 +118,14 @@ public class server_connector {
 				u_num=rs.getInt(1);
 			}
 			p_st.setString(3, u_num+"");
-			System.out.println(p_st.toString());
+			System.out.println("server:" + s_id + " - " +p_st.toString());
 			request_data.addContent("error", "duplicate key");
 			return p_st.execute();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				if(e.getErrorCode() == 1062)
 				{
-					System.out.println("중복에러!!");
+					System.out.println("server:" + s_id + " - " +"중복에러!!");
 				}
 				request_data.addContent("error", "duplicate key");
 				return false;
