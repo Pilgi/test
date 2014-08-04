@@ -2,18 +2,20 @@
  * join test를 위해 7월30일날 수정함.
  */
 package s;
-import java.io.*;
-import java.net.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 
 
 public class client {
     public static void main(String[] args) {
 	
-		String hostname = "localhost";
+		String hostname = "203.252.118.13";
 		int port = 6795;
 		int i=0;
 		ObjectOutputStream ss = null;
@@ -50,11 +52,11 @@ public class client {
 	try {
 		data k = new data("JOIN");
 		System.out.println("JOIN 정보 입력");
-		k.addContent("id", "root");
+		k.addContent("id", "r44444r4r");
 		k.addContent("password", "1234");
 		k.addContent("sex", "0");
-		k.addContent("e_mail", "pil13@naver.com");
-		k.addContent("name", "김필기");
+		k.addContent("e_mail", "abcdef");
+		k.addContent("name", "hihirs");
 		
 		ss.reset();
 		ss.writeObject(k);
@@ -63,10 +65,10 @@ public class client {
 		System.out.println("소켓 전송 완료");
 				
 				
-			Object o = ois.readObject();
-
-	   
-		    
+			data o = (data)ois.readObject();
+			
+			System.out.println(o.purpose);	   
+			System.out.println(o.getContent(0).toString());
 		    ois.close();
 		    ss.close();
 		    socket.close();    
