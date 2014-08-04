@@ -71,14 +71,14 @@ public class server_connector {
 		try {
 			p_st = con.prepareStatement(sql.toString());
 
-		System.out.println("join 확인 ㄱㄱㄱ");
+		System.out.println("join 확인 ㄱㄱㄱ"+recv_data.content.size());
 		while(recv_data.getContent(i)!=null)
 		{
 			//gettype으로 가져온 자료가 join일 경우 실행될 부분
 			temp = recv_data.getContent(i++);
 			
 			//test로 들어오는 data 확인하는 부분
-			//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+			System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 			switch (temp.getType()) {
 			case "id":
 				p_st.setString(1,temp.getValue());

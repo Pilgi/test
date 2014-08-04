@@ -132,31 +132,34 @@ public class server {
 	                
 		  //실행파일 주문목록을 add했을 때 받는 부분          
 		    	   
-		            test = (data)is.readObject();
+		    	   try
+		    	   {
+		    		   test = (data)is.readObject();
+		    	   }
+		    	   catch (Exception e)
+		    	   {	            
+		    		   System.out.println( "Connection " + id + " closed." );
+			           os.close();
+			           is.close();
+			           socket.close();
+			           break;
+		    	   }
+		    	   
 	               System.out.println( "Received " +" "+" "+t+ " from Connection " + id + "." ); 
-	               try {
-					sc = new server_connector(test);
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+					
+	               sc = new server_connector(test);
+		
 	  
 	                if(test.purpose.equals("stop")){
 	                	serverStop = false;
 	                	break;
 	                	                	
 	                }
-	                
 	                os.reset();
 	                os.writeObject(sc.request());
-	                os.flush();
 	             } 
 	            
-	            System.out.println( "Connection " + id + " closed." );
-	        
-	            os.close();
-	            is.close();
-	            socket.close();
+
 
 		    if ( serverStop ) server.stopServer();
 
@@ -165,6 +168,9 @@ public class server {
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 	    }
 }
