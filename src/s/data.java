@@ -16,13 +16,20 @@ public class data implements Serializable{
 	{
 		purpose = p;
 	}
-	public boolean addContent(String t, String c) {
-		data_structure temp = new data_structure(t,c);
+	public boolean addContent(String type, String value) {
+		data_structure temp = new data_structure(type,value);
 		return content.add(temp);
 		}
+	public boolean deleteContent(int index)
+	{
+		if(index>=content.size() && index <=0)
+			return false;
+		content.remove(index);
+		return true;
+	}
 	public data_structure getContent(int index)
 	{
-		if(index>=content.size())
+		if(index>=content.size() && index <=0)
 			return null;
 		return content.get(index);
 	}

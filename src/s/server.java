@@ -73,6 +73,7 @@ public class server {
 		ObjectOutputStream os = null;	
 	    Socket socket;
 	    ObjectInputStream is = null;
+	    server_connector sc;
 		int id;
 	    server server;
 	    int i=0;
@@ -134,7 +135,7 @@ public class server {
 		            test = (data)is.readObject();
 	               System.out.println( "Received " +" "+" "+t+ " from Connection " + id + "." ); 
 	               try {
-					new server_connector(test);
+					sc = new server_connector(test);
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -143,7 +144,12 @@ public class server {
 	                if(test.purpose.equals("stop")){
 	                	serverStop = false;
 	                	break;
+	                	                	
 	                }
+	                
+	                os.reset();
+	                os.writeObject(sc.request());
+	                os.flush();
 	             } 
 	            
 	            System.out.println( "Connection " + id + " closed." );

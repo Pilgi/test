@@ -23,6 +23,7 @@ public class server_connector {
 	private data recv_data;
 	private String sql_url = "localhost:3306/order_test";
 	private Connection con;
+	private data request_data = null;
 	Statement stmt;
 	
 	
@@ -34,20 +35,23 @@ public class server_connector {
 		start_process();
 		
 	}
+	public data request()
+	{
+		return request_data;
+	}
 	public void seturl(String temp)
 	{
 		sql_url = temp;
 	}
 	private void start_process() throws ClassNotFoundException, SQLException{
 		Class.forName("com.mysql.jdbc.Driver");
-		con = DriverManager.getConnection("jdbc:mysql://"+sql_url,"root","gkqpfla");
+		con = DriverManager.getConnection("jdbc:mysql://"+sql_url,"root","1234");
 		System.out.println("sql 서버와 연결되었습니다..");
+		
 		//querry 문을 주고 받고 하기 위한 stmt 구문.
 		stmt = con.createStatement();
-		// TODO Auto-generated method stub
-
 		System.out.println(recv_data.purpose);
-		
+		request_data = new data("request");
 		if(recv_data.purpose.equals("JOIN"))
 		{
 			System.out.println("join 확인 ㄱㄱ");
@@ -57,14 +61,16 @@ public class server_connector {
 
 	}
 	//JOIN 일 경우 동작하는 부분.
-	protected boolean joinUser() throws SQLException
+	protected boolean joinUser()
 	{
 		int i=0;
 		data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("insert into user_info(user_id,password,user_num,name,sex,e_mail) values (?,?,?,?,?,?)");
 		//parameter 순서 1-id / 2-password / 3-user_number / 4-name / 5-sex / 6-e-mail
 		PreparedStatement p_st = null;
-		p_st = con.prepareStatement(sql.toString());
+		try {
+			p_st = con.prepareStatement(sql.toString());
+
 		System.out.println("join 확인 ㄱㄱㄱ");
 		while(recv_data.getContent(i)!=null)
 		{
@@ -105,7 +111,17 @@ public class server_connector {
 			}
 			p_st.setString(3, u_num+"");
 			System.out.println(p_st.toString());
+			request_data.addContent("error", "duplicate key");
 			return p_st.execute();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				if(e.getErrorCode() == 1062)
+				{
+					System.out.println("중복에러!!");
+				}
+				request_data.addContent("error", "duplicate key");
+				return false;
+			}
 	}
 	
 	//Login일 경우 동작하는 부분
