@@ -22,14 +22,14 @@ public class data implements Serializable{
 		}
 	public boolean deleteContent(int index)
 	{
-		if(index>=content.size() && index <=0)
+		if(index>=content.size() || index <=0)
 			return false;
 		content.remove(index);
 		return true;
 	}
 	public data_structure getContent(int index)
 	{
-		if(index>=content.size() && index <=0)
+		if(index>=content.size() || index <=0)
 			return null;
 		return content.get(index);
 	}
