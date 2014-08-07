@@ -15,7 +15,7 @@ import java.net.UnknownHostException;
 public class client {
     public static void main(String[] args) {
 	
-		String hostname = "203.252.118.13";
+		String hostname = "54.92.16.107";
 		int port = 6795;
 		int i=0;
 		ObjectOutputStream ss = null;
@@ -47,28 +47,50 @@ public class client {
 /*
  * 소켓 연결 완료
  */
-	
-	
+	data k;
+	data o;
 	try {
-		data k = new data("JOIN");
-		System.out.println("JOIN 정보 입력");
-		k.addContent("id", "r44444r4r");
-		k.addContent("password", "1234");
-		k.addContent("sex", "0");
-		k.addContent("e_mail", "abcdef");
-		k.addContent("name", "hihirs");
-		
-		ss.reset();
-		ss.writeObject(k);
-		ss.flush();
-
-		System.out.println("소켓 전송 완료");
+		/*
+			k = new data("JOIN");
+			System.out.println("JOIN 정보 입력");
+			k.addContent("id", "pilgi");
+			k.addContent("password", "1234");
+			k.addContent("sex", "0");
+			k.addContent("e_mail", "abcdef");
+			k.addContent("name", "hihirs");
+			
+			ss.reset();
+			ss.writeObject(k);
+			ss.flush();
+	
+			System.out.println("소켓 전송 완료");
 				
 				
-			data o = (data)ois.readObject();
+			o = (data)ois.readObject();
 			
 			System.out.println(o.purpose);	   
 			System.out.println(o.getContent(0).toString());
+			*/
+			k = new data("LOGIN");
+			System.out.println("LOGIN 정보 입력");
+			k.addContent("id", "pilgi");
+			k.addContent("password", "1234");
+			
+			ss.reset();
+			ss.writeObject(k);
+			ss.flush();
+	
+			System.out.println("소켓 전송 완료");
+				
+				
+			o = (data)ois.readObject();
+			
+			System.out.println(o.purpose);	   
+			for(i=0;o.getContent(i)!=null;i++)
+			{
+				System.out.println(o.getContent(i).toString());
+				
+			}
 		    ois.close();
 		    ss.close();
 		    socket.close();    
