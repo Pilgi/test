@@ -46,30 +46,51 @@ public class client {
 /*
  * 소켓 연결 완료
  */
-	
-	
+	data k;
+	data o;
 	try {
-			data k = new data("JOIN");
+<<<<<<< HEAD
+		/*
+			k = new data("JOIN");
 			System.out.println("JOIN 정보 입력");
 			k.addContent("id", "pilgi");
+=======
+			data k = new data("JOIN");
+			System.out.println("JOIN 정보 입력");
+<<<<<<< HEAD
+			k.addContent("id", "pilgi");
+=======
+			k.addContent("id", "r44444r4r");
+>>>>>>> FETCH_HEAD
+>>>>>>> origin/serv_connector
 			k.addContent("password", "1234");
 			k.addContent("sex", "0");
 			k.addContent("e_mail", "abcdef");
 			k.addContent("name", "hihirs");
 			
+<<<<<<< HEAD
+=======
 			//objectstream 을 통해 data class를 전송
+>>>>>>> FETCH_HEAD
 			ss.reset();
 			ss.writeObject(k);
 			ss.flush();
 	
 			System.out.println("소켓 전송 완료");
+<<<<<<< HEAD
+				
+				
+			o = (data)ois.readObject();
+=======
 				
 
 			//objectstream 을 통해 data class를 수신	
 			data o = (data)ois.readObject();
+>>>>>>> FETCH_HEAD
 			
 			System.out.println(o.purpose);	   
 			System.out.println(o.getContent(0).toString());
+<<<<<<< HEAD
 			while(1+1==2)
 			{
 				
@@ -78,6 +99,32 @@ public class client {
 //		    ois.close();
 //		    ss.close();
 	//	    socket.close();    
+=======
+			*/
+			k = new data("LOGIN");
+			System.out.println("LOGIN 정보 입력");
+			k.addContent("id", "pilgi");
+			k.addContent("password", "1234");
+			
+			ss.reset();
+			ss.writeObject(k);
+			ss.flush();
+	
+			System.out.println("소켓 전송 완료");
+				
+				
+			o = (data)ois.readObject();
+			
+			System.out.println(o.purpose);	   
+			for(i=0;o.getContent(i)!=null;i++)
+			{
+				System.out.println(o.getContent(i).toString());
+				
+			}
+		    ois.close();
+		    ss.close();
+		    socket.close();    
+>>>>>>> origin/serv_connector
 		    
 		    
 		} catch (UnknownHostException e) {
