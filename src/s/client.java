@@ -7,13 +7,16 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Scanner;
+
+import javax.swing.plaf.SliderUI;
 
 
 
 public class client {
     public static void main(String[] args) {
 	
-		String hostname = "203.252.118.13";
+		String hostname = "54.92.16.107";
 		int port = 6795;
 		int i=0;
 		ObjectOutputStream ss = null;
@@ -48,7 +51,7 @@ public class client {
 	try {
 			data k = new data("JOIN");
 			System.out.println("JOIN 정보 입력");
-			k.addContent("id", "r44444r4r");
+			k.addContent("id", "pilgi");
 			k.addContent("password", "1234");
 			k.addContent("sex", "0");
 			k.addContent("e_mail", "abcdef");
@@ -67,9 +70,14 @@ public class client {
 			
 			System.out.println(o.purpose);	   
 			System.out.println(o.getContent(0).toString());
-		    ois.close();
-		    ss.close();
-		    socket.close();    
+			while(1+1==2)
+			{
+				
+			}
+			
+//		    ois.close();
+//		    ss.close();
+	//	    socket.close();    
 		    
 		    
 		} catch (UnknownHostException e) {
