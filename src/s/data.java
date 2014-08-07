@@ -9,12 +9,16 @@ public class data implements Serializable{
 	 */
 	private static final long serialVersionUID = 225217573093265697L;
 	
-	String purpose;
-	ArrayList<data_structure> content = new ArrayList<data_structure>();
+	protected String purpose;
+	protected ArrayList<data_structure> content = new ArrayList<data_structure>();
 	
 	data(String p)
 	{
 		purpose = p;
+	}
+	public String getPurpose()
+	{
+		return purpose;
 	}
 	public boolean addContent(String type, String value) {
 		data_structure temp = new data_structure(type,value);

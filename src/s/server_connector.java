@@ -117,17 +117,32 @@ public class server_connector {
 			{
 				u_num=rs.getInt(1);
 			}
+<<<<<<< HEAD
 			p_st.setString(3, u_num+"");
 			System.out.println("server:" + s_id + " - " +p_st.toString());
 			request_data.addContent("error", "duplicate key");
 			return p_st.execute();
+=======
+			p_st.setString(3, ++u_num +"");
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			request_data.addContent("JOIN", "OK");
+			return p_st.execute();
+			
+>>>>>>> FETCH_HEAD
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				if(e.getErrorCode() == 1062)
 				{
 					System.out.println("server:" + s_id + " - " +"중복에러!!");
+<<<<<<< HEAD
 				}
 				request_data.addContent("error", "duplicate key");
+=======
+					//join의 경우 0일 경우만 있음
+					request_data.deleteContent(0);
+					request_data.addContent("error", "duplicate key");
+				}
+>>>>>>> FETCH_HEAD
 				return false;
 			}
 	}

@@ -2,9 +2,7 @@
  * join test를 위해 7월30일날 수정함.
  */
 package s;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -23,7 +21,6 @@ public class client {
         Socket socket = null;  
         
         ObjectInputStream ois = null;
-        BufferedReader read = null;
      
     	
      try {
@@ -31,14 +28,13 @@ public class client {
            
             ss=new ObjectOutputStream(socket.getOutputStream());
             ois = new ObjectInputStream(socket.getInputStream());
-            read = new BufferedReader(new InputStreamReader(System.in));
         
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host: " + hostname);
         } catch (IOException e) {
             System.err.println("Couldn't get I/O for the connection to: " + hostname);
         }
-	
+	 
 	
 	if (socket == null ) {
 	    System.err.println( "error" );
@@ -50,23 +46,40 @@ public class client {
 	data k;
 	data o;
 	try {
+<<<<<<< HEAD
 		/*
 			k = new data("JOIN");
 			System.out.println("JOIN 정보 입력");
 			k.addContent("id", "pilgi");
+=======
+			data k = new data("JOIN");
+			System.out.println("JOIN 정보 입력");
+			k.addContent("id", "r44444r4r");
+>>>>>>> FETCH_HEAD
 			k.addContent("password", "1234");
 			k.addContent("sex", "0");
 			k.addContent("e_mail", "abcdef");
 			k.addContent("name", "hihirs");
 			
+<<<<<<< HEAD
+=======
+			//objectstream 을 통해 data class를 전송
+>>>>>>> FETCH_HEAD
 			ss.reset();
 			ss.writeObject(k);
 			ss.flush();
 	
 			System.out.println("소켓 전송 완료");
+<<<<<<< HEAD
 				
 				
 			o = (data)ois.readObject();
+=======
+				
+
+			//objectstream 을 통해 data class를 수신	
+			data o = (data)ois.readObject();
+>>>>>>> FETCH_HEAD
 			
 			System.out.println(o.purpose);	   
 			System.out.println(o.getContent(0).toString());
