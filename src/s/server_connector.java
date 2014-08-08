@@ -160,7 +160,12 @@ public class server_connector {
 			}
 	}
 
-	//Login일 경우 동작하는 부분
+	
+	/*
+	 * Login일 경우 동작하는 부분
+	 * 개발일 : 14.08.07
+	 * 개발자 : 김필기 
+	 */
 	protected boolean loginUser(){
 		int i=0;
 		data.data_structure temp ;
@@ -221,6 +226,7 @@ public class server_connector {
 			}
 
 	}
+
 	//menu를 불러올때 사용되는 부분
 	protected boolean showMenu()
 	{
@@ -231,9 +237,73 @@ public class server_connector {
 	{
 		return false;
 	}
+	/*
+	 * 메뉴를 추가할 때 실행되는 부분
+	 * 개발일 : 14.08.07
+	 * 개발자 : 김필기 
+	 */
 	protected boolean addMenu()
 	{
-		return false;
+		int i=0;
+		int 	u_num = 0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("insert into user_info(user_id,password,user_num,name,sex,e_mail) values (?,?,?,?,?,?)");
+		//parameter 순서 1-id / 2-password / 3-user_number / 4-name / 5-sex / 6-e-mail
+		PreparedStatement p_st = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"join 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 join일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "id":
+					p_st.setString(1,temp.getValue());
+					break;
+				case "password":
+					p_st.setString(2,temp.getValue());
+					break;
+				case "name":
+					p_st.setString(4,temp.getValue());
+						break;
+					case "e_mail":
+					p_st.setString(6,temp.getValue());
+					break;
+					//남자일 경우 sex는 0으로 표현
+				case "sex":
+					if(temp.getValue().equals("0"))
+						p_st.setString(5,"0");
+					else
+						p_st.setString(5,"1");
+					break;
+				default:
+					break;
+				}
+			}
+		//column 에 있는 user num중 최대값을 가져와 그위에 +1을 해준다. (user 번호의 중복을 막기 위해서)
+			ResultSet rs = stmt.executeQuery("select max(user_num) from user_info");
+			if(rs.next())
+			{
+				u_num=rs.getInt(1);
+			}
+			p_st.setString(3, ++u_num +"");
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			request_data.addContent("LGOIN", "OK");				
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
 	}
 	protected boolean modifyMenu()
 	{
