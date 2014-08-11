@@ -80,20 +80,28 @@ public class server_connector {
 			System.out.println("server:" + s_id + " - " +"중복에러!!");
 			//join의 경우 0일 경우만 있음
 			request_data.deleteContent(0);
+			request_data.addContent("ERROR CODE", e.getErrorCode()+"");
 			request_data.addContent("error", "duplicate key");
 			return true;
 		}
 		else
+		{
+			request_data.deleteContent(0);
+			request_data.addContent("ERROR CODE", e.getErrorCode()+"");
+			request_data.addContent("error", e.toString());
+			System.out.println(e.toString());
 			return false;
+		}
 		
 	}
 	//JOIN 일 경우 동작하는 부분.
+	//0811 수정(생년월일추가)
 	protected boolean joinUser()
 	{
 		int i=0;
 		int u_num = 0;
 		data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("insert into user_info(user_id,password,user_num,name,sex,e_mail) values (?,?,?,?,?,?)");
+		StringBuffer sql = new StringBuffer("insert into user_info(user_id,password,user_num,name,sex,e_mail,birthday) values (?,?,?,?,?,?,?)");
 		//parameter 순서 1-id / 2-password / 3-user_number / 4-name / 5-sex / 6-e-mail
 		PreparedStatement p_st = null;
 		try {
@@ -107,7 +115,7 @@ public class server_connector {
 				
 				//test로 들어오는 data 확인하는 부분
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
-				switch (temp.getType()) {
+				switch (temp.getType()) { 
 				case "id":
 					p_st.setString(1,temp.getValue());
 					break;
@@ -127,6 +135,8 @@ public class server_connector {
 					else
 						p_st.setString(5,"1");
 					break;
+				case "birthday":
+					p_st.setString(7, temp.getValue());
 				default:
 					break;
 				}
@@ -139,7 +149,7 @@ public class server_connector {
 			}
 			p_st.setString(3, ++u_num +"");
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			request_data.addContent("LGOIN", "OK");				
+			request_data.addContent("JOIN", "OK");				
 			return p_st.execute();
 			
 			} catch (SQLException e) {
@@ -245,10 +255,11 @@ public class server_connector {
 	protected boolean addMenu()
 	{
 		int i=0;
-		int 	u_num = 0;
+		int 	menu_num = 0;
+		String img_dir = "\\image";
 		data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("insert into menu(menu_name, category, price, menu_num, thumnail, detail, image) values (?,?,?,?,?,?,?)");
-		//parameter 순서 1-menuname / 2-category / 3-price / 4-menu_num / 5-thumnail / 6-detail / 7-image
+		StringBuffer sql = new StringBuffer("insert into menu(menu_name, category, price, menu_num, detail, thumnail,  image) values (?,?,?,?,?,?,?)");
+		//parameter 순서 1-menuname / 2-category / 3-price / 4-menu_num / 5-detail / 6-thumnail / 7-image
 		PreparedStatement p_st = null;
 		try {
 			p_st = con.prepareStatement(sql.toString());
@@ -263,38 +274,34 @@ public class server_connector {
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 
 				switch (temp.getType()) {
-				case "id":
+				case "menu_name":
 					p_st.setString(1,temp.getValue());
 					break;
-				case "password":
+				case "category":
 					p_st.setString(2,temp.getValue());
 					break;
-				case "name":
+				case "price":
 					p_st.setString(4,temp.getValue());
-						break;
-					case "e_mail":
-					p_st.setString(6,temp.getValue());
 					break;
-					//남자일 경우 sex는 0으로 표현
-				case "sex":
-					if(temp.getValue().equals("0"))
-						p_st.setString(5,"0");
-					else
-						p_st.setString(5,"1");
+				case "detail":
+					p_st.setString(5,temp.getValue());
 					break;
+					
 				default:
 					break;
 				}
 			}
-		//column 에 있는 user num중 최대값을 가져와 그위에 +1을 해준다. (user 번호의 중복을 막기 위해서)
-			ResultSet rs = stmt.executeQuery("select max(user_num) from user_info");
+		//column 에 있는 menu num중 최대값을 가져와 그위에 +1을 해준다. (menu 번호의 중복을 막기 위해서)
+			ResultSet rs = stmt.executeQuery("select max(menu_num) from menu");
 			if(rs.next())
 			{
-				u_num=rs.getInt(1);
+				menu_num=rs.getInt(1);
 			}
-			p_st.setString(3, ++u_num +"");
+			p_st.setString(4, ++menu_num +"");
+			p_st.setString(6,img_dir+"thum_"+menu_num);
+			p_st.setString(7,img_dir+menu_num);
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			request_data.addContent("LGOIN", "OK");				
+			request_data.addContent("ADDMENU", "OK");				
 			return p_st.execute();
 			
 			} catch (SQLException e) {
