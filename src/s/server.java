@@ -4,6 +4,10 @@
 package s;
 
 //실행파일에서 보내고 받는 중간 부분
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -69,11 +73,14 @@ public class server {
 
 	class Server2Connection implements Runnable {
 
+	    Socket socket;
 		OutputStream sos = null;
 		InputStream sis = null;
-		ObjectOutputStream os = null;	
-	    Socket socket;
-	    ObjectInputStream is = null;
+		ObjectOutputStream oos = null;	
+	    ObjectInputStream ois = null;
+	    DataInputStream dis = null;
+	    FileOutputStream fos = null;
+	    BufferedOutputStream bos = null;
 	    server_connector sc;
 	    //client id!
 		int id;
@@ -93,8 +100,9 @@ public class server {
 			
 			sos =socket.getOutputStream();
 			sis =socket.getInputStream();
-		    is=new ObjectInputStream(sis);
-		    os = new ObjectOutputStream(sos);
+		    ois=new ObjectInputStream(sis);
+		    oos = new ObjectOutputStream(sos);
+		    dis = new DataInputStream(sis);
 
 		} catch (IOException e) {
 		    System.out.println(e);
@@ -102,57 +110,69 @@ public class server {
 	  }
 
 	    public void run() {
-	        data test;
-	    	/* 이 부분 왜있는지 모르겠음.
-	   
-	    //    String line[]=new String[10];
-	        List<data.data_structure> ab = new ArrayList<data.data_structure>();
-	  */
+	    	//client에서 보낸 data
+	        data recv_data;
 		try {
 		       while(true){
-	       //어플에서 서버로 서버에서 실행 파일 창에 보이는 것
-	        	 
-	            /*	String d = "name";
-	            	String s = "americano";
-	            	
-	            	data.data_structure u = test.new data_structure(d,s);
-	            	data.data_structure u2 = test.new data_structure("price","2000");
-	            	*/
-	            	/* ab.add(u);
-	            	ab.add(u2);
-	            
-	            	test.content = ab;
-	            	os.reset();
-	            	
-			        os.writeObject(test);
-		            os.flush();
-		        	*/
-	                
-		  //실행파일 주문목록을 add했을 때 받는 부분          
 		    	   
 		    	   try
 		    	   {
-		    		   test = (data)is.readObject();
+		    		   recv_data = (data)ois.readObject();
 		    	   }
 		    	   catch (Exception e)
 		    	   {
 		    		   //socket으로부터이 읽어오는 data가 null일 경우 (client에서 socekt을 닫은경우) 종료한다.
 		    		   System.out.println("server:" + s_id-- + " - Connection " + id + " closed." );
-			           os.close();
-			           is.close();
+			           oos.close();
+			           ois.close();
 			           socket.close();
 			           break;
 		    	   }
 		    	   // 정산 요청을 했을 경우 나올 경우
-		    	   if(test.getPurpose().equals("calculate") )
+		    	   if(recv_data.getPurpose().equals("calculate") )
 		    	   {
 		    		   
 		    	   }
-	               System.out.println("server:" + s_id +   " - Received " +test.getPurpose()+ " from Connection " + id + "." ); 
+	               System.out.println("server:" + s_id +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
 					
-	               sc = new server_connector(test,s_id);
-	               os.reset();
-	               os.writeObject(sc.request());
+	               sc = new server_connector(recv_data,s_id);
+	               if(recv_data.purpose.equals("ADD MENU"))
+	               {
+	            	   // code 참고 http://warmz.tistory.com/601
+	            	   
+	            	   // 파일명을 전송 받고 파일명 수정.
+	                   String fName = dis.readUTF();
+	                   System.out.println("그림파일 " + fName + "을 전송받았습니다.");
+	                   
+	                   //파일 이름은 request data의 첫번째 content에 있는 menu 번호로 수정한다.
+	                   fName = sc.request().getContent(0).getValue();
+	        
+	                   // 파일을 생성하고 파일에 대한 출력 스트림 생성
+	                   File f = new File(fName);
+	                   //현재경로안의 iamge 폴더에 사진을 저장한다.
+	                   
+	                   String path =ClassLoader.getSystemResource("").getPath();
+	                   fos = new FileOutputStream(path+"\\image"+f);
+	                   bos = new BufferedOutputStream(fos);
+	                   System.out.println(fName + "파일을 생성하였습니다.");
+	        
+	                   // 바이트 데이터를 전송받으면서 기록
+	                   int len;
+	                   int size = 4096;
+	                   byte[] data = new byte[size];
+	                   while ((len = dis.read(data)) != -1) {
+	                       bos.write(data, 0, len);
+	                   }
+	        
+	                   bos.flush();
+	                   bos.close();
+	                   fos.close();
+	                   dis.close();
+	                   System.out.println("파일 수신 작업을 완료하였습니다.");
+	                   System.out.println("받은 파일의 사이즈 : " + f.length());
+	               }
+	               oos.reset();
+	               oos.writeObject(sc.request());
 	             } 
 	            
 	

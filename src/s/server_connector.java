@@ -20,7 +20,7 @@ import java.sql.Statement;
 public class server_connector {
 	
 	private data recv_data;
-	private String sql_url = "localhost:3306/order_test";
+	private String sql_url = "localhost:3306/cafe";
 	private Connection con;
 	private data request_data = null;
 	private int s_id;
@@ -239,7 +239,7 @@ public class server_connector {
 	}
 	/*
 	 * 메뉴를 추가할 때 실행되는 부분
-	 * 개발일 : 14.08.07
+	 * 개발일 : 14.08.07 ~
 	 * 개발자 : 김필기 
 	 */
 	protected boolean addMenu()
@@ -247,20 +247,21 @@ public class server_connector {
 		int i=0;
 		int 	u_num = 0;
 		data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("insert into user_info(user_id,password,user_num,name,sex,e_mail) values (?,?,?,?,?,?)");
-		//parameter 순서 1-id / 2-password / 3-user_number / 4-name / 5-sex / 6-e-mail
+		StringBuffer sql = new StringBuffer("insert into menu(menu_name, category, price, menu_num, thumnail, detail, image) values (?,?,?,?,?,?,?)");
+		//parameter 순서 1-menuname / 2-category / 3-price / 4-menu_num / 5-thumnail / 6-detail / 7-image
 		PreparedStatement p_st = null;
 		try {
 			p_st = con.prepareStatement(sql.toString());
 			//정상독작인지 test 하는 부분
-			System.out.println("server:" + s_id + " - " +"join 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			System.out.println("server:" + s_id + " - " +"add Menu 확인 ㄱㄱㄱ size:"+recv_data.content.size());
 			while(recv_data.getContent(i)!=null)
 			{
-				//gettype으로 가져온 자료가 join일 경우 실행될 부분
+				//gettype으로 가져온 자료가 add menu 일 경우 실행될 부분
 				temp = recv_data.getContent(i++);
 				
 				//test로 들어오는 data 확인하는 부분
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
 				switch (temp.getType()) {
 				case "id":
 					p_st.setString(1,temp.getValue());
