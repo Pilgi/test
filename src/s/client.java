@@ -15,7 +15,7 @@ import java.net.UnknownHostException;
 public class client {
     public static void main(String[] args) {
 	
-		String hostname = "54.92.16.107";
+		String hostname = "203.252.118.13";
 		int port = 6795;
 		int i=0;
 		ObjectOutputStream ss = null;
@@ -50,14 +50,15 @@ public class client {
 	data k;
 	data o;
 	try {
-		/*
+		
 			k = new data("JOIN");
 			System.out.println("JOIN 정보 입력");
-			k.addContent("id", "pilgi");
+			k.addContent("id", "pijjlgi");
 			k.addContent("password", "1234");
 			k.addContent("sex", "0");
 			k.addContent("e_mail", "abcdef");
-			k.addContent("name", "hihirs");
+			k.addContent("name", "hihhhirs");
+			k.addContent("birthday", "19920113");
 			
 			ss.reset();
 			ss.writeObject(k);
@@ -70,7 +71,7 @@ public class client {
 			
 			System.out.println(o.purpose);	   
 			System.out.println(o.getContent(0).toString());
-			*/
+			
 			k = new data("LOGIN");
 			System.out.println("LOGIN 정보 입력");
 			k.addContent("id", "pilgi");
@@ -81,8 +82,12 @@ public class client {
 			ss.flush();
 	
 			System.out.println("소켓 전송 완료");
-				
-				
+		/*
+			k = new data("ADDMENU");
+			System.out.println("MENU 추가");
+			k.addContent("menu_name","아메리카노");
+			k.addContent("category", value)
+			*/	
 			o = (data)ois.readObject();
 			
 			System.out.println(o.purpose);	   
