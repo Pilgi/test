@@ -136,6 +136,7 @@ public class server {
 	               System.out.println("server:" + s_id +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
 					
 	               sc = new server_connector(recv_data,s_id);
+	               //메뉴추가를 했을 경우 data 클래스를 받아온 후에 이미지파일도 받아온다.
 	               if(recv_data.purpose.equals("ADD MENU"))
 	               {
 	            	   // code 참고 http://warmz.tistory.com/601

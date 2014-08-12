@@ -258,8 +258,8 @@ public class server_connector {
 		int 	menu_num = 0;
 		String img_dir = "\\image";
 		data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("insert into menu(menu_name, category, price, menu_num, detail, thumnail,  image) values (?,?,?,?,?,?,?)");
-		//parameter 순서 1-menuname / 2-category / 3-price / 4-menu_num / 5-detail / 6-thumnail / 7-image
+		StringBuffer sql = new StringBuffer("insert into menu(menu_name, category, price, menu_num, detail, thumnail,  image , category_order) values (?,?,?,?,?,?,?)");
+		//parameter 순서 1-menuname / 2-category / 3-price / 4-menu_num / 5-detail / 6-thumnail / 7-image / 8-category_odrer
 		PreparedStatement p_st = null;
 		try {
 			p_st = con.prepareStatement(sql.toString());
@@ -278,7 +278,15 @@ public class server_connector {
 					p_st.setString(1,temp.getValue());
 					break;
 				case "category":
+					//category 내에서 순서를 조정할때 menu_num과 상관없이 정렬하기 위해서 category_order를 사용한다.
 					p_st.setString(2,temp.getValue());
+					ResultSet rs = stmt.executeQuery("select max(category_num) from menu where category="+temp.getValue());
+					int cat_num=0;
+					if(rs.next())
+					{
+						cat_num=rs.getInt(1);
+						p_st.setString(8,cat_num+"");
+					}
 					break;
 				case "price":
 					p_st.setString(4,temp.getValue());
@@ -300,6 +308,7 @@ public class server_connector {
 			p_st.setString(4, ++menu_num +"");
 			p_st.setString(6,img_dir+"thum_"+menu_num);
 			p_st.setString(7,img_dir+menu_num);
+			
 			System.out.println("server:" + s_id + " - " +p_st.toString());
 			request_data.addContent("ADDMENU", "OK");				
 			return p_st.execute();
