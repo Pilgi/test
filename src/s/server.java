@@ -112,15 +112,14 @@ public class server {
 	    public void run() {
 	    	//client에서 보낸 data
 	        data recv_data;
-		try {
-		       while(true){
-		    	   
-		    	   try
-		    	   {
-		    		   recv_data = (data)ois.readObject();
-		    	   }
-		    	   catch (Exception e)
-		    	   {
+	        try {
+	        	while(true){
+	        		try
+	        		{
+	        			recv_data = (data)ois.readObject();
+	        		}
+	        		catch (Exception e)
+	        		{
 		    		   //socket으로부터이 읽어오는 data가 null일 경우 (client에서 socekt을 닫은경우) 종료한다.
 		    		   System.out.println("server:" + s_id-- + " - Connection " + id + " closed." );
 			           oos.close();
@@ -136,56 +135,79 @@ public class server {
 	               System.out.println("server:" + s_id +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
 					
 	               sc = new server_connector(recv_data,s_id);
+	               oos.reset();
+	               oos.writeObject(sc.request());
 	               //메뉴추가를 했을 경우 data 클래스를 받아온 후에 이미지파일도 받아온다.
 	               if(recv_data.purpose.equals("ADD MENU"))
 	               {
-	            	   // code 참고 http://warmz.tistory.com/601
+		             addPhoto();             
 	            	   
-	            	   // 파일명을 전송 받고 파일명 수정.
-	                   String fName = dis.readUTF();
-	                   System.out.println("그림파일 " + fName + "을 전송받았습니다.");
-	                   
-	                   //파일 이름은 request data의 첫번째 content에 있는 menu 번호로 수정한다.
-	                   fName = sc.request().getContent(0).getValue();
-	        
-	                   // 파일을 생성하고 파일에 대한 출력 스트림 생성
-	                   File f = new File(fName);
-	                   //현재경로안의 iamge 폴더에 사진을 저장한다.
-	                   
-	                   String path =ClassLoader.getSystemResource("").getPath();
-	                   fos = new FileOutputStream(path+"\\image"+f);
-	                   bos = new BufferedOutputStream(fos);
-	                   System.out.println(fName + "파일을 생성하였습니다.");
-	        
-	                   // 바이트 데이터를 전송받으면서 기록
-	                   int len;
-	                   int size = 4096;
-	                   byte[] data = new byte[size];
-	                   while ((len = dis.read(data)) != -1) {
-	                       bos.write(data, 0, len);
-	                   }
-	        
-	                   bos.flush();
-	                   bos.close();
-	                   fos.close();
-	                   dis.close();
-	                   System.out.println("파일 수신 작업을 완료하였습니다.");
-	                   System.out.println("받은 파일의 사이즈 : " + f.length());
 	               }
-	               oos.reset();
-	               oos.writeObject(sc.request());
+	               System.out.println("출력");
 	             } 
 	            
 	
 			}catch (IOException e) {
 			    System.out.println(e);
+			    System.out.println("거기?");
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			    System.out.println(e);
+			    System.out.println("여기?");
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			    System.out.println(e);
+			    System.out.println("조기?");
 			}
 		
 	    }
-}
+
+	    
+		public boolean addPhoto ()
+		{
+			try {
+	     	   // code 참고 http://warmz.tistory.com/601 	   
+	     	   // 파일명을 전송 받고 파일명 수정.
+	            String fName = dis.readUTF();
+	            System.out.println("그림파일 " + fName + "을 전송받았습니다.");
+	            
+	            //파일 이름은 request data의 첫번째 content에 있는 menu 번호로 수정한다.
+	            if(sc.request().getContent(0).getValue().equals("OK"))
+	            {
+		            fName = sc.request().getContent(1).getValue();
+		            String path =ClassLoader.getSystemResource("").getPath();
+	
+		            // 파일을 생성하고 파일에 대한 출력 스트림 생성
+		            File f = new File(path +"image/"+fName+".jpg");
+		            System.out.println("그림파일 " + path +"image/"+fName+".jpg" + "에 저장하겠습니다.");
+		            //현재경로안의 iamge 폴더에 사진을 저장한다.
+		            
+		            fos = new FileOutputStream(f);
+		            bos = new BufferedOutputStream(fos);
+		            System.out.println(fName + "파일을 생성하였습니다.");
+		 
+		            // 바이트 데이터를 전송받으면서 기록
+		            int len;
+		            int size = 4096;
+		            byte[] data = new byte[size];
+		            while ((len = dis.read(data)) != -1) {
+		                bos.write(data, 0, len);
+		            }
+		            System.out.println("파일 수신 작업을 완료하였습니다.");
+		            System.out.println("받은 파일의 사이즈 : " + f.length());
+	            }
+	            bos.flush();
+	            bos.close();
+	            fos.close();
+	            dis.close();
+			}
+			catch(Exception e){
+				e.printStackTrace();
+			}
+			return false;
+			
+		}
+	}
+	

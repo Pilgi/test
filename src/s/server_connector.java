@@ -70,6 +70,11 @@ public class server_connector {
 			System.out.println("server:"+ s_id + " - login 명령 확인");
 			loginUser();
 		}
+		else if (recv_data.purpose.equals("ADD MENU"))
+		{
+			System.out.println("server:" + s_id + " - add menu 명령 확인");
+			addMenu();
+		}
 
 	}
 	// SQL ERROR 가 뭔지를 확인하는 세션
@@ -256,10 +261,10 @@ public class server_connector {
 	{
 		int i=0;
 		int 	menu_num = 0;
-		String img_dir = "\\image";
+		String img_dir = "/image/";
 		data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("insert into menu(menu_name, category, price, menu_num, detail, thumnail,  image , category_order) values (?,?,?,?,?,?,?)");
-		//parameter 순서 1-menuname / 2-category / 3-price / 4-menu_num / 5-detail / 6-thumnail / 7-image / 8-category_odrer
+		StringBuffer sql = new StringBuffer("insert into menu(menu_name, category, price, menu_num, detail, thumbnail,  image , category_order,size) values (?,?,?,?,?,?,?,?,?)");
+		//parameter 순서 1-menuname / 2-category / 3-price / 4-menu_num / 5-detail / 6-thumbnail / 7-image / 8-category_odrer
 		PreparedStatement p_st = null;
 		try {
 			p_st = con.prepareStatement(sql.toString());
@@ -280,21 +285,23 @@ public class server_connector {
 				case "category":
 					//category 내에서 순서를 조정할때 menu_num과 상관없이 정렬하기 위해서 category_order를 사용한다.
 					p_st.setString(2,temp.getValue());
-					ResultSet rs = stmt.executeQuery("select max(category_num) from menu where category="+temp.getValue());
+					ResultSet rs = stmt.executeQuery("select max(category_order) from menu where category = '"+temp.getValue()+"'");
 					int cat_num=0;
 					if(rs.next())
 					{
 						cat_num=rs.getInt(1);
-						p_st.setString(8,cat_num+"");
+						p_st.setString(8,++cat_num+"");
 					}
 					break;
 				case "price":
-					p_st.setString(4,temp.getValue());
+					p_st.setString(3,temp.getValue());
 					break;
 				case "detail":
 					p_st.setString(5,temp.getValue());
 					break;
-					
+				case "size":
+					p_st.setString(9,temp.getValue());
+					break;
 				default:
 					break;
 				}
@@ -306,11 +313,12 @@ public class server_connector {
 				menu_num=rs.getInt(1);
 			}
 			p_st.setString(4, ++menu_num +"");
-			p_st.setString(6,img_dir+"thum_"+menu_num);
-			p_st.setString(7,img_dir+menu_num);
+			p_st.setString(6,img_dir+"thum_"+menu_num + ".jpg");
+			p_st.setString(7,img_dir+menu_num+ ".jpg");
 			
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			request_data.addContent("ADDMENU", "OK");				
+			request_data.addContent("ADD MENU", "OK");
+			request_data.addContent("MENU NUM", menu_num+"");								
 			return p_st.execute();
 			
 			} catch (SQLException e) {
