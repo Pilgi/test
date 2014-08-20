@@ -37,7 +37,13 @@ public class data implements Serializable{
 			return null;
 		return content.get(index);
 	}
-	
+	public boolean modifyContent(int index,String type, String value)
+	{
+		if(index>=content.size() || index <0)
+			return false;
+		content.set(index, new data_structure(type,value));
+		return true;
+	}
 
 	
 	protected class data_structure implements Serializable {

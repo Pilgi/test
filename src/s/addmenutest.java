@@ -14,7 +14,7 @@ public class addmenutest {
  
         try {
             // 서버 연결
-            socket = new Socket(serverIp, 7777);
+            socket = new Socket(serverIp, 6795);
             System.out.println("서버에 연결되었습니다.");
  
             FileSender fs = new FileSender(socket);

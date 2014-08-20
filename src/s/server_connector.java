@@ -75,7 +75,18 @@ public class server_connector {
 			System.out.println("server:" + s_id + " - add menu 명령 확인");
 			addMenu();
 		}
+		else if (recv_data.purpose.equals("SHOW DETAIL"))
+		{
+			System.out.println("server:" + s_id + " - show detail 명령 확인");
+			showDetailMenu();
 
+		}
+		else if (recv_data.purpose.equals("SHOW MENU"))
+		{
+			System.out.println("server:" + s_id + " - show menu 명령 확인");
+			showMenu();
+
+		}
 	}
 	// SQL ERROR 가 뭔지를 확인하는 세션
 	protected boolean sqlErrorCheck (SQLException e)
@@ -242,10 +253,128 @@ public class server_connector {
 
 	}
 
-	//menu를 불러올때 사용되는 부분
+	/*
+	 * menu를 불러올때 사용되는 부분
+	 * 개발일 : 14.08.14 
+	 * 개발자 : 김필기
+	 */
 	protected boolean showMenu()
+	{	
+		int i=0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("SELECT menu_num,menu_name,size,price FROM menu WHERE category = ?");
+		//parameter 순서 1 - category 이름
+		String category = null;
+		PreparedStatement p_st = null;
+	
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"menu 보여주기 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 LOGIN 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "category":
+					category = temp.getValue();
+					p_st.setString(1,category);
+					break;
+				default:
+					break;
+				}
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st.executeQuery();
+			int count=0;
+			request_data.addContent(category, "OK");
+			while(rs.next())
+			{
+				count++;
+				request_data.addContent(count +"_menu_name", rs.getString("menu_name"));
+				request_data.addContent(count +"_size", rs.getString("size"));
+				request_data.addContent(count +"_price", rs.getString("price"));
+				request_data.addContent(count +"_menu_num", rs.getString("menu_num"));
+
+			}
+			request_data.modifyContent(0, category, count+"");
+			} catch (SQLException e) {
+				request_data.addContent("DETAIL MENU","FAIL");
+				request_data.addContent("ERROR CODE", e.toString());
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+			}
+			return true;
+	
+
+	}
+	
+	/*
+	 * 메뉴 상세정보 확인하기
+	 * 개발일 : 14.08.14 ~ 14.08.14
+	 * 개발자 : 김필기
+	 */
+	protected boolean showDetailMenu()
 	{
-		return false;
+		int i=0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("SELECT menu_name,category,size,price,detail,image FROM menu WHERE menu_num = ?");
+		String menu_num = null;
+		//parameter 순서 1-id / 2-password / 3-user_number / 4-name / 5-sex / 6-e-mail
+		PreparedStatement p_st = null;
+
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"menu 자세히 확인하기 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 LOGIN 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "menu_num":
+					menu_num = temp.getValue();
+					p_st.setString(1,menu_num);
+					break;
+				default:
+					break;
+				}
+			}
+			//Query 구문을 날려 result가 도착한다면 존재하는 아이디/패스워드 이다.
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st.executeQuery();
+			if(rs.next())
+			{
+				request_data.addContent("DETAIL", "OK");
+				request_data.addContent("menu_name", rs.getString("menu_name"));
+				request_data.addContent("category", rs.getString("category"));
+				request_data.addContent("size", rs.getString("size"));
+				request_data.addContent("price", rs.getString("price"));
+				request_data.addContent("detail", rs.getString("detail"));
+				request_data.addContent("image", rs.getString("image"));
+				return true;
+			}
+			else
+			{
+				request_data.addContent("DETAIL MENU","FAIL");
+				request_data.addContent("ERROR CODE", "menu num does not exist");
+				return false;
+			}
+			} catch (SQLException e) {
+				request_data.addContent("DETAIL MENU","FAIL");
+				request_data.addContent("ERROR CODE", e.toString());
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+			}
+
+		
 	}
 	//주문할 경우 실행될 부분
 	protected boolean orderMenu()
