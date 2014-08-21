@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -25,7 +24,11 @@ import java.util.Date;
 
 public class server extends Thread{
 	
-	
+	/*
+	 * 서버쪽이 2개일 필요가 없을듯? 1개에서 포트번호 2개 받아서 java용 C용 커넥션을 만들 수 있으면
+	 * 그렇게 하자
+	 * 08-21
+	 */
 	 public static void main(String args[]) {
 			int port = 6795;
 			server server = new server( port );
@@ -33,7 +36,8 @@ public class server extends Thread{
 			server.start();
 			server2.start();
 	    }
-
+	public static Server2Connection connection_java;
+	public static Server2Connection2 connection_c;
 
 	 	Date date = new Date();
 	    ServerSocket server = null;
@@ -81,15 +85,15 @@ public class server extends Thread{
 				if(s_num==0)
 				{
 					System.out.println("서버1 start!!");
-					Server2Connection oneconnection = new Server2Connection(socket, numConnections, this);
-					new Thread(oneconnection).start();
+					connection_java = new Server2Connection(socket, numConnections, this);
+					new Thread(connection_java).start();
 					
 				}
 				else
 				{	        		
 					System.out.println("서버2 start!!");
-					Server2Connection2 oneconnection1 = new Server2Connection2(socket, numConnections, this);				
-					new Thread(oneconnection1).start();
+					connection_c = new Server2Connection2(socket, numConnections, this);				
+					new Thread(connection_c).start();
 				}
 				
 				    }   
@@ -116,6 +120,7 @@ public class server extends Thread{
 	    FileOutputStream fos = null;
 	    BufferedOutputStream bos = null;
 	    server_connector sc;
+	    CallBackSender cbs;
 	    //client id!
 		int id;
 	    server server;
@@ -135,6 +140,7 @@ public class server extends Thread{
 			sos =socket.getOutputStream();
 			sis =socket.getInputStream();
 		    dis = new DataInputStream(sis);
+		    cbs=s.server.connection_c;
 
 		} catch (IOException e) {
 		    System.out.println(e);
@@ -165,14 +171,15 @@ public class server extends Thread{
 		    	   // 정산 요청을 했을 경우 나올 경우
 		    	   if(recv_data.getPurpose().equals("calculate") )
 		    	   {
-		    		   
 		    	   }
 	               System.out.println("server:" + s_id +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
-					
+	         //************************************************************
+	               cbs.send(recv_data); //인터페이스 callback 부분 제대로 추가해야함
 	               sc = new server_connector(recv_data,s_id);
 	               oos.reset();
 	               oos.writeObject(sc.request());
 	               //메뉴추가를 했을 경우 data 클래스를 받아온 후에 이미지파일도 받아온다.
+	               
 	               if(recv_data.purpose.equals("ADD MENU"))
 	               {
 		             addPhoto();             
@@ -244,7 +251,10 @@ public class server extends Thread{
 
 
 }
-	class Server2Connection2 extends Server2Connection{
+	interface CallBackSender{
+		public void send(data d);
+	}
+	class Server2Connection2 extends Server2Connection implements CallBackSender{
 
 		protected BufferedInputStream bis;
 	    protected BufferedOutputStream bos = null;
@@ -265,7 +275,7 @@ public class server extends Thread{
 	        		System.out.println("서버2222222!!");
 	        		try
 	        		{ 
-	        			recv_data = covertData();
+	        			recv_data = CtoJAVA();
 	        			if(recv_data==null)
 	        				throw new Exception();
 	        		}
@@ -287,6 +297,16 @@ public class server extends Thread{
 	            	   System.out.println("server:" + s_id +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
 					
 	               sc = new server_connector(recv_data,s_id);
+	               /*
+	                * recv_data를 C로 보내줘야하는 부분
+	                * 08-21
+	                */
+	               
+	               
+	               
+	               
+	               
+	               
 	            //   oos.reset();
 	            //   oos.writeObject(sc.request());
 	               //메뉴추가를 했을 경우 data 클래스를 받아온 후에 이미지파일도 받아온다.
@@ -313,21 +333,12 @@ public class server extends Thread{
 		
 	    }
 
-		private data covertData(){
+
+		//BUffer에서 받아온 data를 data 클래스로 변경해줘야 함	    
+		private data CtoJAVA(){
 			// TODO Auto-generated method stub
-			//BUffer에서 받아온 data를 data 클래스로 변경해줘야 함	    
 			data recvdata = null;
 			try{
-				
-				
-				/*
-        	byte[] b = new byte[256];
-        	b = "abc".getBytes();
-        	bos.write(b);
-        	bos.flush();	        		
-        	System.out.println("서버2!! 전송완료");
-						*/
-				
 				byte[] b = new byte [256];
 				int size = bis.read(b);
 				String protocol_id = new String(b,0,1);
@@ -335,6 +346,7 @@ public class server extends Thread{
 				int data_length = 0 , data_type = 0;
 				String recv_type = null , recv_value;
 				boolean while_stop = true;
+
 				while(while_stop)
 				{
 					buffer_point = 0;
@@ -441,6 +453,13 @@ public class server extends Thread{
 			buff = ByteBuffer.wrap(newBytes);
 			buff.order(ByteOrder.BIG_ENDIAN); // Endian에 맞게 세팅
 			return buff.getInt();
+		}
+
+		@Override
+		public void send(data d) {
+			// TODO Auto-generated method stub
+			// bytestream을 통해 전송할 부분을 구현하면 된다.
+			System.out.println("전송합시다");
 		}
 		
 		
