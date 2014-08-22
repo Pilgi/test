@@ -16,6 +16,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.sql.SQLException;
@@ -301,8 +302,8 @@ public class server extends Thread{
 	                * recv_data를 C로 보내줘야하는 부분
 	                * 08-21
 	                */
-	               
-	               
+	               	JAVAtoC(sc.request());
+	               System.out.println("데잍어 전송!");
 	               
 	               
 	               
@@ -339,7 +340,7 @@ public class server extends Thread{
 			// TODO Auto-generated method stub
 			data recvdata = null;
 			try{
-				byte[] b = new byte [256];
+				byte[] b = new byte [1024];
 				int size = bis.read(b);
 				String protocol_id = new String(b,0,1);
 				int buffer_point = 0;
@@ -425,7 +426,45 @@ public class server extends Thread{
 			return recvdata;
         	
 		}
-		
+
+		//data클래스를 buffer 형태로 보내줌
+		private boolean JAVAtoC(data recv_data)
+		{
+			try{
+				ByteBuffer buffer = ByteBuffer.allocate(1024);
+				
+				int num_of_node;
+				num_of_node = recv_data.getContentSize();
+				buffer.put((byte) 'S');
+				buffer.put(intToByteArray(1));
+				buffer.put(intToByteArray(recv_data.purpose.length()));
+				buffer.put(CharConversion.K2E(recv_data.purpose).getBytes("8859_1"));
+				for(int i = 0; i < num_of_node ; i++)
+				{
+					buffer.put(intToByteArray(2));
+					buffer.put(intToByteArray(num_of_node));
+					
+					//Type 전송
+					buffer.put(intToByteArray(3));
+					byte[] temp = CharConversion.K2E(recv_data.getContent(i).getType()).getBytes("8859_1");
+					buffer.put(intToByteArray(temp.length));
+					buffer.put(temp);
+					
+					//Value 전송
+					buffer.put(intToByteArray(4));
+					temp = CharConversion.K2E(recv_data.getContent(i).getValue()).getBytes("8859_1");
+					buffer.put(intToByteArray(temp.length));
+					buffer.put(temp);	
+				}
+				bos.write(buffer.array());
+				bos.flush();
+
+			}
+			catch (Exception e){
+				e.printStackTrace();				
+			}
+			return false;
+		}
 		/*
 		 * 코드 출저 http://aldehyde7.tistory.com/159
 		 * 				Dynamic life 블로그

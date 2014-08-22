@@ -44,7 +44,10 @@ public class data implements Serializable{
 		content.set(index, new data_structure(type,value));
 		return true;
 	}
-
+	public int getContentSize()
+	{
+		return content.size();
+	}
 	
 	protected class data_structure implements Serializable {
 		/**
