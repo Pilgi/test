@@ -15,7 +15,7 @@ import java.net.UnknownHostException;
 public class client {
     public static void main(String[] args) {
 	
-		String hostname = "203.252.118.13";
+		String hostname = "203.252.118.17";
 		int port = 6795;
 		int i=0;
 		ObjectOutputStream ss = null;
