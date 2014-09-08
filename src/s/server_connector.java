@@ -95,14 +95,14 @@ public class server_connector {
 		{	
 			System.out.println("server:" + s_id + " - " +"중복에러!!");
 			//join의 경우 0일 경우만 있음
-			request_data.deleteContent(0);
+			request_data.content.clear();
 			request_data.addContent("ERROR CODE", e.getErrorCode()+"");
 			request_data.addContent("error", "duplicate key");
 			return true;
 		}
 		else
 		{
-			request_data.deleteContent(0);
+			request_data.content.clear();
 			request_data.addContent("ERROR CODE", e.getErrorCode()+"");
 			request_data.addContent("error", e.toString());
 			System.out.println(e.toString());
@@ -459,9 +459,89 @@ public class server_connector {
 					return false;
 			}
 	}
+	/*
+	 * 메뉴를 수정할때 실행되는 부분
+	 * 개발일 : 14.09.07~
+	 * 개발자 : 김필기
+	 */
 	protected boolean modifyMenu()
 	{
-		return false;
+		int i=0;
+		int 	menu_num = 0, category_num = 0;
+		String img_dir = "/image/";
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("update menu set menu_name = ? , category = ? , price = ? ,"
+				+ "detail = ?, category_order = ?, size = ? where menu_num = ?");
+		//parameter 순서 1-menuname / 2-category / 3-price /  4-detail / 5-category_odrer / 6-size / 7-menu_num
+		PreparedStatement p_st = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"modfiy Menu ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 mdofiy menu 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
+				switch (temp.getType()) {
+				case "menu_name":
+					p_st.setString(1,temp.getValue());
+					break;
+				case "category":
+					//category 내에서 순서를 조정할때 menu_num과 상관없이 정렬하기 위해서 category_order를 사용한다.
+					p_st.setString(2,temp.getValue());
+					category_num = Integer.getInteger(temp.getValue());
+					break;
+				case "price":
+					p_st.setString(3,temp.getValue());
+					break;
+				case "detail":
+					p_st.setString(4,temp.getValue());
+					break;
+				case "size":
+					p_st.setString(6,temp.getValue());
+					break;
+				case "menu_num":
+					menu_num = Integer.getInteger(temp.getValue());
+					p_st.setString(7, temp.getValue());
+					break;
+				//category order가 0인 경우는 카테고리를 바꾸면서 새로운 카테고리로 들어갈 경우
+				case "category_odrer":
+					if(temp.getValue().equals("0") && category_num != 0)
+					{
+						ResultSet rs = stmt.executeQuery("select max(category_order) from menu where category = '"+temp.getValue()+"'");
+						int cat_num=0;
+						if(rs.next())
+						{
+							cat_num=rs.getInt(1);
+							p_st.setString(5,++cat_num+"");
+						}
+					}
+				//0이 아닌 경우는 사용자가 category order를 정해줬을 경우
+					else
+						p_st.setString(5, temp.getValue());
+					break;
+				default:
+					break;
+				}
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			request_data.addContent("MODIFY MENU", "OK");						
+			request_data.addContent("menu_num" , menu_num +"");
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
 	}
 	protected boolean deleteMenu()
 	{
