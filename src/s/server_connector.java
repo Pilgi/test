@@ -152,6 +152,7 @@ public class server_connector {
 						p_st.setString(5,"1");
 					break;
 				case "birthday":
+					//2014-02-01 같은 형태로 전송해야함!
 					p_st.setString(7, temp.getValue());
 				default:
 					break;
@@ -545,6 +546,7 @@ public class server_connector {
 	}
 	protected boolean deleteMenu()
 	{
+		//메뉸 내용을 지울 수 있게-> 그러나 통계에는 어떻게 보여야 하지? 고민해볼것
 		return false;
 	}
 	protected boolean addStamp()
@@ -554,6 +556,7 @@ public class server_connector {
 
 	protected boolean addBalance()
 	{
+		//balnace log 확인
 		return false;
 	}
 
@@ -573,4 +576,201 @@ public class server_connector {
 	{
 		return false;
 	}
+
+	/*
+	 * 알바생을 추가 할때 실행되는 부분 (test 미완료)
+	 * 개발일 : 14.09.27 ~ 14.09.27
+	 * 개발자 : 김필기
+	 */
+	protected boolean addEmployee()
+	{
+
+		int i=0;
+		int u_num = 0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("insert into employee(employee_id,employee_password,employee_num,name,phone) values (?,?,?,?,?)");
+		//parameter 순서 1-id / 2-password / 3-employee_number / 4-name / 5-phone
+		PreparedStatement p_st = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"addEmployee 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 join일 경우 실행될 부분
+				temp = recv_data.getContent(i++);				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) { 
+				case "id":
+					p_st.setString(1,temp.getValue());
+					break;
+				case "password":
+					p_st.setString(2,temp.getValue());
+					break;
+				case "name":
+					p_st.setString(4,temp.getValue());
+					break;
+				case "phone":
+					p_st.setString(6,temp.getValue());
+					break;
+				default:
+					break;
+				}
+			}
+		//column 에 있는 employee num중 최대값을 가져와 그위에 +1을 해준다. (user 번호의 중복을 막기 위해서)
+			ResultSet rs = stmt.executeQuery("select max(employee_num) from employee");
+			if(rs.next())
+			{
+				u_num=rs.getInt(1);
+			}
+			p_st.setString(3, ++u_num +"");
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			request_data.addContent("addEmployee", "OK");				
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
+	}
+	/*
+	 * 알바생을 수정 할때 실행되는 부분 (test 미완료)
+	 * 개발일 : 14.09.27 ~ 14.09.27
+	 * 개발자 : 김필기
+	 */
+	protected boolean modfiyEmployee()
+	{
+		int i=0;
+		int u_num = 0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("update employee set employee_id = ? , employee_password = ? ,"
+				+ "name = ?, phone = ? where employee_num = ?");
+		
+		//parameter 순서 1-id / 2-password / 3-name / 4-phone / 5-employee_num
+		PreparedStatement p_st = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"modifyEmployee 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			ResultSet rs;
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 join일 경우 실행될 부분
+				temp = recv_data.getContent(i++);				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) { 
+				case "id":
+					p_st.setString(1,temp.getValue());
+					break;
+				case "password":
+					p_st.setString(2,temp.getValue());
+					break;
+				case "name":
+					p_st.setString(3,temp.getValue());
+					break;
+				case "phone":
+					p_st.setString(4,temp.getValue());
+					break;
+				//수정 안하는 부분은 기본 data로 채운다.
+				case "num":
+				rs = stmt.executeQuery("select employee_id,employee_paswword,name,phone where employee_num = " + temp.getValue());
+				if(rs.next())
+				{
+					p_st.setString(1,rs.getString("employee_id"));
+					p_st.setString(2,rs.getString("employee_password"));
+					p_st.setString(3,rs.getString("name"));
+					p_st.setString(4,rs.getString("phone"));
+					break;
+				}
+				else
+					throw new SQLException("not exist employee number!");
+				default:
+					break;
+				}
+			}
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			request_data.addContent("modifyEmployee", "OK");				
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}	
+	}
+	protected boolean deleteEmployee()
+	{
+		return false;
+	}
+	/*
+	 * employee_Login일 경우 동작하는 부분  (test 미완료)
+	 * 개발일 : 14.09.27
+	 * 개발자 : 김필기 
+	 */
+	protected boolean loginEmployee(){
+		int i=0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("SELECT employee_id, employee_password FROM employee WHERE employee_id = ? and employee_password = ?");
+		String id = null;
+		//parameter 순서 1-id / 2-password 
+		PreparedStatement p_st = null;
+
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"employee_login 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 LOGIN 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "id":
+					id = temp.getValue();
+					p_st.setString(1,id);
+					break;
+				case "password":
+					p_st.setString(2,temp.getValue());
+					break;
+				default:
+					break;
+				}
+			}
+			//Query 구문을 날려 result가 도착한다면 존재하는 아이디/패스워드 이다.
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st.executeQuery();
+			if(rs.next())
+			{
+				request_data.addContent("employee_LOGIN", "OK");
+				return true;
+			}
+			else
+			{
+				request_data.addContent("LOGIN","FAIL");
+				sql = new StringBuffer("SELECT * FROM employee WHERE employee_id = ?");
+				p_st = con.prepareStatement(sql.toString());
+				p_st.setString(1,id);
+				rs = p_st.executeQuery();
+				if(rs.next())
+				{
+					request_data.addContent("ERROR CODE", "WORNG PASSWORD");
+				}
+				else
+					request_data.addContent("ERROR CODE", "ID does not exist");
+				return false;
+			}
+			} catch (SQLException e) {
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+			}
+
+	}
+
 }
