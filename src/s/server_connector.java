@@ -461,7 +461,7 @@ public class server_connector {
 			}
 	}
 	/*
-	 * 메뉴를 수정할때 실행되는 부분
+	 * 메뉴를 수정할때 실행되는 부분 ( 사진 수정은 다른 부분에서 )
 	 * 개발일 : 14.09.07~
 	 * 개발자 : 김필기
 	 */
@@ -469,7 +469,6 @@ public class server_connector {
 	{
 		int i=0;
 		int 	menu_num = 0, category_num = 0;
-		String img_dir = "/image/";
 		data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("update menu set menu_name = ? , category = ? , price = ? ,"
 				+ "detail = ?, category_order = ?, size = ? where menu_num = ?");
@@ -544,10 +543,62 @@ public class server_connector {
 					return false;
 			}
 	}
+	/*
+	 * 메뉴 넘버를 받으면 그 넘버를 카테고리 0으로 이동 (휴지통 같은 개념)
+	 * 개발일 : 14.10.03
+	 * 개발자 : 김필기
+	 * 
+	 */
 	protected boolean deleteMenu()
 	{
-		//메뉸 내용을 지울 수 있게-> 그러나 통계에는 어떻게 보여야 하지? 고민해볼것
-		return false;
+		int i=0;
+		int 	menu_num = 0,category_order = 0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("update menu set category = ? category_order = ? where menu_num = ?");
+		//parameter 순서 1- category / 2 - category_order / 3 - munu_num
+		PreparedStatement p_st = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"deleteMenu size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				temp = recv_data.getContent(i++);
+				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
+				switch (temp.getType()) {
+				case "menu_num":
+					menu_num = Integer.getInteger(temp.getValue());
+					p_st.setString(3, temp.getValue());
+					p_st.setString(1, "0");
+					break;
+				default:
+					break;
+				}
+			}
+			//column 에 있는 menu num중 최대값을 가져와 그위에 +1을 해준다. (menu 번호의 중복을 막기 위해서)
+			ResultSet rs = stmt.executeQuery("select max(category_order) from menu where menu_num =" + menu_num);
+			if(rs.next())
+			{
+				category_order=rs.getInt(1);
+			}
+			p_st.setString(4, ++category_order +"");
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			request_data.addContent("DELETE MENU", "OK");						
+			request_data.addContent("menu_num" , menu_num +"");
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
 	}
 	protected boolean addStamp()
 	{
@@ -644,7 +695,6 @@ public class server_connector {
 	protected boolean modfiyEmployee()
 	{
 		int i=0;
-		int u_num = 0;
 		data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("update employee set employee_id = ? , employee_password = ? ,"
 				+ "name = ?, phone = ? where employee_num = ?");
@@ -677,17 +727,18 @@ public class server_connector {
 					break;
 				//수정 안하는 부분은 기본 data로 채운다.
 				case "num":
-				rs = stmt.executeQuery("select employee_id,employee_paswword,name,phone where employee_num = " + temp.getValue());
-				if(rs.next())
-				{
-					p_st.setString(1,rs.getString("employee_id"));
-					p_st.setString(2,rs.getString("employee_password"));
-					p_st.setString(3,rs.getString("name"));
-					p_st.setString(4,rs.getString("phone"));
-					break;
-				}
-				else
-					throw new SQLException("not exist employee number!");
+					p_st.setString(5,temp.getValue());
+					rs = stmt.executeQuery("select employee_id,employee_paswword,name,phone where employee_num = " + temp.getValue());
+					if(rs.next())
+					{
+						p_st.setString(1,rs.getString("employee_id"));
+						p_st.setString(2,rs.getString("employee_password"));
+						p_st.setString(3,rs.getString("name"));
+						p_st.setString(4,rs.getString("phone"));
+						break;
+					}
+					else
+						throw new SQLException("not exist employee number!");
 				default:
 					break;
 				}
