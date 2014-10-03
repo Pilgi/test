@@ -754,6 +754,10 @@ public class server_connector {
 					return false;
 			}	
 	}
+    /*
+     * 삭제보다 숨기기 정도가 좋지 않을까?
+     * 
+     */
 	protected boolean deleteEmployee()
 	{
 		return false;
