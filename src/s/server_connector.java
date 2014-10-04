@@ -543,20 +543,22 @@ public class server_connector {
 					return false;
 			}
 	}
+	//메뉴를 지우면 이전 기록은 어떻게 해야 하지? 모든 기록은 메뉴 넘버로 기록이 되어 있는데..?!
 	protected boolean deleteMenu()
 	{
 		return false;
 	}
+	//스탬프는 유저 번호를 통해 추가 가능하도록 하기
 	protected boolean addStamp()
 	{
 		return false;
 	}
-
+	//직원 번호가 추가되야 발란스 추가 가능
 	protected boolean addBalance()
 	{
 		return false;
 	}
-
+	//쿠폰 만들기
 	protected boolean makeCoupon()
 	{
 		return false;
