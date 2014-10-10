@@ -610,6 +610,49 @@ public class server_connector {
 		//balnace log 확인
 		return false;
 	}
+	protected boolean showBalance()
+	{
+		int i=0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("SELECT balance WHERE usre_num = ?");
+		String id = null;
+		//parameter 순서 1-user_num
+		PreparedStatement p_st = null;
+
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"show Balance size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "user_num":
+					p_st.setString(1,temp.getValue());
+					break;
+				default:
+					break;
+				}
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st.executeQuery();
+			if(rs.next())
+			{
+				request_data.addContent("balance", rs.getString("balance"));
+				return true;
+
+			}
+			else
+				return false;
+			} catch (SQLException e) {
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+			}
+	}
 
 	protected boolean makeCoupon()
 	{
