@@ -87,7 +87,7 @@ public class client {
 			oos.writeObject(k);
 			oos.flush();
 	
-			System.out.println("소켓 전송 완료");
+			System.out.println("소켓 전송 완료");  
 			o = (data)ois.readObject();
 
 			System.out.println(o.purpose);	   

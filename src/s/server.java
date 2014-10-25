@@ -16,6 +16,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -38,7 +39,7 @@ public class server extends Thread{
 			server2.start();
 	    }
 	public static Server2Connection connection_java;
-	public static Server2Connection2 connection_c;
+	public Server2Connection2 connection_c;
 
 	 	Date date = new Date();
 	    ServerSocket server = null;
@@ -93,7 +94,8 @@ public class server extends Thread{
 				else
 				{	        		
 					System.out.println("서버2 start!!");
-					connection_c = new Server2Connection2(socket, numConnections, this);				
+					connection_c = new Server2Connection2(socket, numConnections, this);
+					Server2Connection.cbs = connection_c;
 					new Thread(connection_c).start();
 				}
 				
@@ -121,7 +123,7 @@ public class server extends Thread{
 	    FileOutputStream fos = null;
 	    BufferedOutputStream bos = null;
 	    server_connector sc;
-	    CallBackSender cbs;
+	    static CallBackSender cbs;
 	    //client id!
 		int id;
 	    server server;
@@ -141,7 +143,6 @@ public class server extends Thread{
 			sos =socket.getOutputStream();
 			sis =socket.getInputStream();
 		    dis = new DataInputStream(sis);
-		    cbs=s.server.connection_c;
 
 		} catch (IOException e) {
 		    System.out.println(e);
@@ -175,7 +176,14 @@ public class server extends Thread{
 		    	   }
 	               System.out.println("server:" + s_id +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
 	         //************************************************************
-	               cbs.send(recv_data); //인터페이스 callback 부분 제대로 추가해야함
+	               try{
+	            	   cbs.send(recv_data); //인터페이스 callback 부분 제대로 추가해야함
+	               }
+	               catch(Exception e)
+	               {
+	            	   //e.printStackTrace();
+	            	   System.out.println("CallBackSender error :" + e);
+	               }
 	               sc = new server_connector(recv_data,s_id);
 	               oos.reset();
 	               oos.writeObject(sc.request());
@@ -296,8 +304,9 @@ public class server extends Thread{
 		    	   }
 	               if(recv_data !=null)
 	            	   System.out.println("server:" + s_id +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
-					
 	               sc = new server_connector(recv_data,s_id);
+
+		             
 	               /*
 	                * recv_data를 C로 보내줘야하는 부분
 	                * 08-21
@@ -313,7 +322,9 @@ public class server extends Thread{
 	               //메뉴추가를 했을 경우 data 클래스를 받아온 후에 이미지파일도 받아온다.
 	               if(recv_data.purpose.equals("ADD MENU"))
 	               {
-		             addPhoto();             
+// 꼭 고칠것
+	            	   //<당분간 중지>
+		             //addPhoto();             
 	            	   
 	               }
 	             } 
@@ -498,7 +509,65 @@ public class server extends Thread{
 		public void send(data d) {
 			// TODO Auto-generated method stub
 			// bytestream을 통해 전송할 부분을 구현하면 된다.
-			System.out.println("전송합시다");
+			String hostname = "127.0.0.1";
+		    BufferedOutputStream send_bos = null;
+		    Socket send_socket = null;
+			int port = 4545;
+			System.out.println("접속합니다아아아아ㅏ아");
+	        try {
+	        	send_socket = new Socket(hostname, port);           
+	            send_bos = new BufferedOutputStream(send_socket.getOutputStream());
+
+	            }
+	        catch (UnknownHostException e) {
+	            System.err.println("Don't know about host: " + hostname);
+	        }
+	        catch (IOException e) {
+	            System.err.println("Couldn't get I/O for the connection to: " + hostname);
+	        }
+		
+		
+	        if (socket == null ) {
+	        	System.err.println( "error" );
+	        	return;
+	        }
+	        /*
+	         * 소켓 연결 완료
+	         */
+			try{
+				ByteBuffer buffer = ByteBuffer.allocate(1024);
+				System.out.println("접속합니다아아아아ㅏ아222222");
+				int num_of_node;
+				num_of_node = d.getContentSize();
+				buffer.put((byte) 'S');
+				buffer.put(intToByteArray(1));
+				buffer.put(intToByteArray(d.purpose.length()));
+				buffer.put(CharConversion.K2E(d.purpose).getBytes("8859_1"));
+				for(int i = 0; i < num_of_node ; i++)
+				{
+					buffer.put(intToByteArray(2));
+					buffer.put(intToByteArray(num_of_node));
+					
+					//Type 전송
+					buffer.put(intToByteArray(3));
+					byte[] temp = CharConversion.K2E(d.getContent(i).getType()).getBytes("8859_1");
+					buffer.put(intToByteArray(temp.length));
+					buffer.put(temp);
+					
+					//Value 전송
+					buffer.put(intToByteArray(4));
+					temp = CharConversion.K2E(d.getContent(i).getValue()).getBytes("8859_1");
+					buffer.put(intToByteArray(temp.length));
+					buffer.put(temp);	
+				}
+				send_bos.write(buffer.array());
+				send_bos.flush();
+			    send_bos.close();
+			    send_socket.close();  
+			}
+			catch (Exception e){
+				e.printStackTrace();				
+			}
 		}
 		
 		
