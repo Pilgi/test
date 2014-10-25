@@ -378,9 +378,119 @@ public class server_connector {
 		
 	}
 	//주문할 경우 실행될 부분
+	@SuppressWarnings("null")
 	protected boolean orderMenu()
 	{
-		return false;
+		int i = 0 , order_num = 0, total_count = 0 , item_count=0 , total_price = 0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("insert into order_info(order_num, num_total_item, user_num, total_price, payment, table_name, etc) values (?,?,?,?,?,?,?,?)");
+		//parameter 순서 1 - order_num / 2 - num_totatl_item / 3 - user_num / 4 - total_price
+		// 5 - payment /  6 - table_name / 7 - etc
+		StringBuffer sql2 = new StringBuffer("insert into order_list(order_num,item_num,menu_num,payment,payment_option,coupon_num,menu_name,size,price) values (?,?,?,?,?,?,?,?,?,?)");
+		String item_num = "1" , menu_num = null;;
+		PreparedStatement p_st = null , p_st2 = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"order_Menu 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			
+			//column 에 있는 menu num중 최대값을 가져와 그위에 +1을 해준다. (menu 번호의 중복을 막기 위해서)
+			ResultSet rs = stmt.executeQuery("select max(order_num) from order_info");
+			if(rs.next())
+			{
+				order_num=rs.getInt(1);
+			}
+			p_st.setString(1, ++order_num +"");
+			
+			while(recv_data.getContent(i)!=null)
+			{
+				temp = recv_data.getContent(i++);
+				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
+				switch (temp.getType()) {
+				case "user_num":
+					p_st.setString(3,temp.getValue());
+					break;
+				case "table_name":
+					p_st.setString(6,temp.getValue());
+					break;
+				case "etc":
+					p_st.setString(7,temp.getValue());
+					break;
+				case "total_count":
+					total_count = Integer.valueOf(temp.getValue());
+					p_st.setString(2,temp.getValue());
+					break;
+				default:
+					//parameter 순서 1 - order_num / 2 - item_num / 3 - menu_num / 4 - payment / 5 - payment_option  / 6 - coupon_num / 7 - menu_name / 8 - size / 9 - price
+					if(temp.getValue().startsWith(item_num))
+					{
+						item_count++;
+						if(temp.getValue().contains("menu_num"))
+						{
+							String tempString;
+							tempString = temp.getValue().substring(item_num.length()+1);
+							menu_num = tempString;
+							p_st2.setString(3,tempString);
+						}
+						else if(temp.getValue().contains("payment"))
+						{
+							String tempString;
+							tempString = temp.getValue().substring(item_num.length()+1);
+							p_st2.setString(4,tempString);
+						}
+						else if(temp.getValue().contains("payment_option"))
+						{
+							String tempString;
+							tempString = temp.getValue().substring(item_num.length()+1);
+							p_st2.setString(5,tempString);
+						}
+						else if(temp.getValue().contains("coupon_num"))
+						{
+							String tempString;
+							tempString = temp.getValue().substring(item_num.length()+1);
+							p_st2.setString(6,tempString);
+						}
+						
+					}
+					if(item_count>4)
+					{
+						if(Integer.getInteger(item_num)>total_count)
+							throw new SQLException("error: item num is larger than total item number!!");
+						item_count = 0;
+						p_st2.setString(1,order_num+"");
+						p_st2.setString(2,item_num);
+						ResultSet rs1 = stmt.executeQuery("select menu_name, size , price from menu where menu_num = '"+ menu_num +"'");
+						if(rs1.next())
+						{
+							p_st2.setString(7,rs.getString("menu_name"));
+							p_st2.setString(8,rs.getString("size"));
+							p_st2.setString(9,rs.getString("price"));
+							total_price = total_price + Integer.getInteger(rs.getString("price"));
+						}
+						
+						item_num = (Integer.getInteger(item_num) + 1) + "";
+					}
+					break;
+				}
+			}
+
+			p_st.setString(4, total_price+"");
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			request_data.addContent("ORDER MENU", "OK");
+			request_data.addContent("ORDER NUM", order_num+"");								
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
 	}
 	/*
 	 * 메뉴를 추가할 때 실행되는 부분
@@ -501,7 +611,7 @@ public class server_connector {
 				case "detail":
 					p_st.setString(4,temp.getValue());
 					break;
-				case "size":
+				case "size":				
 					p_st.setString(6,temp.getValue());
 					break;
 				case "menu_num":
@@ -609,6 +719,8 @@ public class server_connector {
 	{
 		//balnace log 확인
 		return false;
+		//249-1110
+		//281-2223
 	}
 	protected boolean showBalance()
 	{
