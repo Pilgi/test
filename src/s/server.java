@@ -1,7 +1,7 @@
 /*
  멀티쓰레드서버
   */
-package com.example.cafeapp;
+package s;
 
 //실행파일에서 보내고 받는 중간 부분
 import java.io.BufferedInputStream;
@@ -267,7 +267,7 @@ public class server extends Thread{
 
 		protected BufferedInputStream bis;
 	    protected BufferedOutputStream bos = null;
-		public Server2Connection2(Socket socket, int id, com.example.cafeapp.server server) {
+		public Server2Connection2(Socket socket, int id, s.server server) {
 			super(socket, id, server);
 			// TODO Auto-generated constructor stub
     		System.out.println("서버223232!!");

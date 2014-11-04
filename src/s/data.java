@@ -1,4 +1,4 @@
-package com.example.cafeapp;
+package s;
 
 import java.io.Serializable;
 import java.util.ArrayList;

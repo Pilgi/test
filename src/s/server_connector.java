@@ -1,4 +1,4 @@
-package com.example.cafeapp;
+package s;
 
 /*
  * sql injection 해킹에 대비해 모든 statement를 preparestatement 로 수정할 것!!!

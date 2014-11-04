@@ -1,4 +1,4 @@
-package com.example.cafeapp;
+package s;
 /*
  * 참고 사이트 : javaservice.net
  * http://www.javaservice.com/~java/bbs/read.cgi?m=&b=javatip&c=r_p&n=956208406&p=15&s=t
