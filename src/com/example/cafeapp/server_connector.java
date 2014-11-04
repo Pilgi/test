@@ -1,4 +1,4 @@
-package s;
+package com.example.cafeapp;
 
 /*
  * sql injection 해킹에 대비해 모든 statement를 preparestatement 로 수정할 것!!!
@@ -22,7 +22,7 @@ public class server_connector {
 	private data recv_data;
 	private String sql_url = "localhost:3306/cafe";
 	private Connection con;
-	private data request_data = null;
+	private data reply_data = null;
 	private int s_id;
 	Statement stmt;
 	
@@ -42,9 +42,9 @@ public class server_connector {
 		this(param,-1);
 	}
 	
-	public data request()
+	public data reply()
 	{
-		return request_data;
+		return reply_data;
 	}
 	public void seturl(String temp)
 	{
@@ -58,7 +58,7 @@ public class server_connector {
 		//querry 문을 주고 받고 하기 위한 stmt 구문.
 		stmt = con.createStatement();
 		System.out.println("server:" + s_id + " - 연결 목적:" +recv_data.purpose);
-		request_data = new data("request");
+		reply_data = new data("reply");
 		if(recv_data.purpose.equals("JOIN"))
 		{
 			System.out.println("server:" + s_id + " - " +" if 문에서 join 명령 확인");
@@ -95,16 +95,16 @@ public class server_connector {
 		{	
 			System.out.println("server:" + s_id + " - " +"중복에러!!");
 			//join의 경우 0일 경우만 있음
-			request_data.content.clear();
-			request_data.addContent("ERROR CODE", e.getErrorCode()+"");
-			request_data.addContent("error", "duplicate key");
+			reply_data.content.clear();
+			reply_data.addContent("ERROR CODE", e.getErrorCode()+"");
+			reply_data.addContent("error", "duplicate key");
 			return true;
 		}
 		else
 		{
-			request_data.content.clear();
-			request_data.addContent("ERROR CODE", e.getErrorCode()+"");
-			request_data.addContent("error", e.toString());
+			reply_data.content.clear();
+			reply_data.addContent("ERROR CODE", e.getErrorCode()+"");
+			reply_data.addContent("error", e.toString());
 			System.out.println(e.toString());
 			return false;
 		}
@@ -166,7 +166,7 @@ public class server_connector {
 			}
 			p_st.setString(3, ++u_num +"");
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			request_data.addContent("JOIN", "OK");				
+			reply_data.addContent("JOIN", "OK");				
 			return p_st.execute();
 			
 			} catch (SQLException e) {
@@ -176,8 +176,8 @@ public class server_connector {
 				{
 					System.out.println("server:" + s_id + " - " +"중복에러!!");
 					//join의 경우 0일 경우만 있음
-					request_data.deleteContent(0);
-					request_data.addContent("error", "duplicate key");
+					reply_data.deleteContent(0);
+					reply_data.addContent("error", "duplicate key");
 				}
 				*/
 				if(sqlErrorCheck(e))
@@ -228,22 +228,22 @@ public class server_connector {
 			ResultSet rs = p_st.executeQuery();
 			if(rs.next())
 			{
-				request_data.addContent("LOGIN", "OK");
+				reply_data.addContent("LOGIN", "OK");
 				return true;
 			}
 			else
 			{
-				request_data.addContent("LOGIN","FAIL");
+				reply_data.addContent("LOGIN","FAIL");
 				sql = new StringBuffer("SELECT * FROM user_info WHERE user_id = ?");
 				p_st = con.prepareStatement(sql.toString());
 				p_st.setString(1,id);
 				rs = p_st.executeQuery();
 				if(rs.next())
 				{
-					request_data.addContent("ERROR CODE", "WORNG PASSWORD");
+					reply_data.addContent("ERROR CODE", "WORNG PASSWORD");
 				}
 				else
-					request_data.addContent("ERROR CODE", "ID does not exist");
+					reply_data.addContent("ERROR CODE", "ID does not exist");
 				return false;
 			}
 			} catch (SQLException e) {
@@ -291,20 +291,20 @@ public class server_connector {
 			System.out.println("server:" + s_id + " - " +p_st.toString());
 			ResultSet rs = p_st.executeQuery();
 			int count=0;
-			request_data.addContent(category, "OK");
+			reply_data.addContent(category, "OK");
 			while(rs.next())
 			{
 				count++;
-				request_data.addContent(count +"_menu_name", rs.getString("menu_name"));
-				request_data.addContent(count +"_size", rs.getString("size"));
-				request_data.addContent(count +"_price", rs.getString("price"));
-				request_data.addContent(count +"_menu_num", rs.getString("menu_num"));
+				reply_data.addContent(count +"_menu_name", rs.getString("menu_name"));
+				reply_data.addContent(count +"_size", rs.getString("size"));
+				reply_data.addContent(count +"_price", rs.getString("price"));
+				reply_data.addContent(count +"_menu_num", rs.getString("menu_num"));
 
 			}
-			request_data.modifyContent(0, category, count+"");
+			reply_data.modifyContent(0, category, count+"");
 			} catch (SQLException e) {
-				request_data.addContent("DETAIL MENU","FAIL");
-				request_data.addContent("ERROR CODE", e.toString());
+				reply_data.addContent("DETAIL MENU","FAIL");
+				reply_data.addContent("ERROR CODE", e.toString());
 				e.printStackTrace();
 				sqlErrorCheck(e);
 				return false;
@@ -352,24 +352,24 @@ public class server_connector {
 			ResultSet rs = p_st.executeQuery();
 			if(rs.next())
 			{
-				request_data.addContent("DETAIL", "OK");
-				request_data.addContent("menu_name", rs.getString("menu_name"));
-				request_data.addContent("category", rs.getString("category"));
-				request_data.addContent("size", rs.getString("size"));
-				request_data.addContent("price", rs.getString("price"));
-				request_data.addContent("detail", rs.getString("detail"));
-				request_data.addContent("image", rs.getString("image"));
+				reply_data.addContent("DETAIL", "OK");
+				reply_data.addContent("menu_name", rs.getString("menu_name"));
+				reply_data.addContent("category", rs.getString("category"));
+				reply_data.addContent("size", rs.getString("size"));
+				reply_data.addContent("price", rs.getString("price"));
+				reply_data.addContent("detail", rs.getString("detail"));
+				reply_data.addContent("image", rs.getString("image"));
 				return true;
 			}
 			else
 			{
-				request_data.addContent("DETAIL MENU","FAIL");
-				request_data.addContent("ERROR CODE", "menu num does not exist");
+				reply_data.addContent("DETAIL MENU","FAIL");
+				reply_data.addContent("ERROR CODE", "menu num does not exist");
 				return false;
 			}
 			} catch (SQLException e) {
-				request_data.addContent("DETAIL MENU","FAIL");
-				request_data.addContent("ERROR CODE", e.toString());
+				reply_data.addContent("DETAIL MENU","FAIL");
+				reply_data.addContent("ERROR CODE", e.toString());
 				e.printStackTrace();
 				sqlErrorCheck(e);
 				return false;
@@ -479,8 +479,8 @@ public class server_connector {
 
 			p_st.setString(4, total_price+"");
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			request_data.addContent("ORDER MENU", "OK");
-			request_data.addContent("ORDER NUM", order_num+"");								
+			reply_data.addContent("ORDER MENU", "OK");
+			reply_data.addContent("ORDER NUM", order_num+"");								
 			return p_st.execute();
 			
 			} catch (SQLException e) {
@@ -557,8 +557,8 @@ public class server_connector {
 			p_st.setString(7,img_dir+menu_num+ ".jpg");
 			
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			request_data.addContent("ADD MENU", "OK");
-			request_data.addContent("MENU NUM", menu_num+"");								
+			reply_data.addContent("ADD MENU", "OK");
+			reply_data.addContent("MENU NUM", menu_num+"");								
 			return p_st.execute();
 			
 			} catch (SQLException e) {
@@ -640,8 +640,8 @@ public class server_connector {
 			}
 			
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			request_data.addContent("MODIFY MENU", "OK");						
-			request_data.addContent("menu_num" , menu_num +"");
+			reply_data.addContent("MODIFY MENU", "OK");						
+			reply_data.addContent("menu_num" , menu_num +"");
 			return p_st.execute();
 			
 			} catch (SQLException e) {
@@ -697,8 +697,8 @@ public class server_connector {
 			p_st.setString(4, ++category_order +"");
 			
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			request_data.addContent("DELETE MENU", "OK");						
-			request_data.addContent("menu_num" , menu_num +"");
+			reply_data.addContent("DELETE MENU", "OK");						
+			reply_data.addContent("menu_num" , menu_num +"");
 			return p_st.execute();
 			
 			} catch (SQLException e) {
@@ -753,7 +753,7 @@ public class server_connector {
 			ResultSet rs = p_st.executeQuery();
 			if(rs.next())
 			{
-				request_data.addContent("balance", rs.getString("balance"));
+				reply_data.addContent("balance", rs.getString("balance"));
 				return true;
 
 			}
@@ -832,7 +832,7 @@ public class server_connector {
 			}
 			p_st.setString(3, ++u_num +"");
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			request_data.addContent("addEmployee", "OK");				
+			reply_data.addContent("addEmployee", "OK");				
 			return p_st.execute();
 			
 			} catch (SQLException e) {
@@ -899,7 +899,7 @@ public class server_connector {
 				}
 			}
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			request_data.addContent("modifyEmployee", "OK");				
+			reply_data.addContent("modifyEmployee", "OK");				
 			return p_st.execute();
 			
 			} catch (SQLException e) {
@@ -957,22 +957,22 @@ public class server_connector {
 			ResultSet rs = p_st.executeQuery();
 			if(rs.next())
 			{
-				request_data.addContent("employee_LOGIN", "OK");
+				reply_data.addContent("employee_LOGIN", "OK");
 				return true;
 			}
 			else
 			{
-				request_data.addContent("LOGIN","FAIL");
+				reply_data.addContent("LOGIN","FAIL");
 				sql = new StringBuffer("SELECT * FROM employee WHERE employee_id = ?");
 				p_st = con.prepareStatement(sql.toString());
 				p_st.setString(1,id);
 				rs = p_st.executeQuery();
 				if(rs.next())
 				{
-					request_data.addContent("ERROR CODE", "WORNG PASSWORD");
+					reply_data.addContent("ERROR CODE", "WORNG PASSWORD");
 				}
 				else
-					request_data.addContent("ERROR CODE", "ID does not exist");
+					reply_data.addContent("ERROR CODE", "ID does not exist");
 				return false;
 			}
 			} catch (SQLException e) {

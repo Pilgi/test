@@ -1,4 +1,4 @@
-package s;
+package com.example.cafeapp;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -74,7 +74,7 @@ public class data implements Serializable{
 			return value;
 		}
 		public String toString(){
-			return "Type : " + getType() + ", value: " + getValue();
+			return "Type : " + getType() + ", \t value: " + getValue();
 		}
 		
 	}

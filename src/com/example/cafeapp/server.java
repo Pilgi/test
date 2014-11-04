@@ -1,7 +1,7 @@
 /*
  멀티쓰레드서버
   */
-package s;
+package com.example.cafeapp;
 
 //실행파일에서 보내고 받는 중간 부분
 import java.io.BufferedInputStream;
@@ -186,7 +186,7 @@ public class server extends Thread{
 	               }
 	               sc = new server_connector(recv_data,s_id);
 	               oos.reset();
-	               oos.writeObject(sc.request());
+	               oos.writeObject(sc.reply());
 	               //메뉴추가를 했을 경우 data 클래스를 받아온 후에 이미지파일도 받아온다.
 	               
 	               if(recv_data.purpose.equals("ADD MENU"))
@@ -221,10 +221,10 @@ public class server extends Thread{
 	            String fName = dis.readUTF();
 	            System.out.println("그림파일 " + fName + "을 전송받았습니다.");
 	            
-	            //파일 이름은 request data의 첫번째 content에 있는 menu 번호로 수정한다.
-	            if(sc.request().getContent(0).getValue().equals("OK"))
+	            //파일 이름은 reply data의 첫번째 content에 있는 menu 번호로 수정한다.
+	            if(sc.reply().getContent(0).getValue().equals("OK"))
 	            {
-		            fName = sc.request().getContent(1).getValue();
+		            fName = sc.reply().getContent(1).getValue();
 		            String path =ClassLoader.getSystemResource("").getPath();
 		            //String path = "/var/www/html/";
 		            // 파일을 생성하고 파일에 대한 출력 스트림 생성
@@ -267,7 +267,7 @@ public class server extends Thread{
 
 		protected BufferedInputStream bis;
 	    protected BufferedOutputStream bos = null;
-		public Server2Connection2(Socket socket, int id, s.server server) {
+		public Server2Connection2(Socket socket, int id, com.example.cafeapp.server server) {
 			super(socket, id, server);
 			// TODO Auto-generated constructor stub
     		System.out.println("서버223232!!");
@@ -311,14 +311,14 @@ public class server extends Thread{
 	                * recv_data를 C로 보내줘야하는 부분
 	                * 08-21
 	                */
-	               	JAVAtoC(sc.request());
+	               	JAVAtoC(sc.reply());
 	               System.out.println("데잍어 전송!");
 	               
 	               
 	               
 	               
 	            //   oos.reset();
-	            //   oos.writeObject(sc.request());
+	            //   oos.writeObject(sc.reply());
 	               //메뉴추가를 했을 경우 data 클래스를 받아온 후에 이미지파일도 받아온다.
 	               if(recv_data.purpose.equals("ADD MENU"))
 	               {

@@ -1,4 +1,4 @@
-package kisti.server;
+package com.example.cafeapp;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

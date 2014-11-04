@@ -1,4 +1,4 @@
-package s;
+package com.example.cafeapp;
 
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
