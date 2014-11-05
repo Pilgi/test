@@ -87,6 +87,18 @@ public class server_connector {
 			showMenu();
 
 		}
+		else if (recv_data.purpose.equals("ADD ORDER"))
+		{
+			System.out.println("server:" + s_id + " - add order 명령 확인");
+			orderMenu();
+
+		}
+		else if (recv_data.purpose.equals("SHOW CATEOGRY"))
+		{
+			System.out.println("server:" + s_id + " - show category 명령 확인");
+			showCateogory();
+
+		}
 	}
 	// SQL ERROR 가 뭔지를 확인하는 세션
 	protected boolean sqlErrorCheck (SQLException e)
@@ -255,6 +267,42 @@ public class server_connector {
 	}
 
 	/*
+	 * category를 불러올때 사용되는 부분
+	 * 개발일 : 14.08.14 
+	 * 개발자 : 김필기
+	 */
+	protected boolean showCateogory()
+	{	
+		int count=0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("SELECT DISTINCT category FROM menu");
+		PreparedStatement p_st = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"category 보여주기 ㄱㄱㄱ size:"+recv_data.content.size());			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st.executeQuery();
+			reply_data.addContent("category", "");
+			while(rs.next())
+			{
+				count++;
+				reply_data.addContent(count +"_category", rs.getString("category"));
+			
+			}
+			reply_data.modifyContent(0, "category", count+"");
+			} catch (SQLException e) {
+				if(reply_data.getContentSize() > 1)
+					reply_data.modifyContent(0,"ERROR CODE", e.toString());
+				else
+					reply_data.addContent("ERROR CODE", e.toString());
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+			}
+			return true;
+	}
+	/*
 	 * menu를 불러올때 사용되는 부분
 	 * 개발일 : 14.08.14 
 	 * 개발자 : 김필기
@@ -382,12 +430,13 @@ public class server_connector {
 	protected boolean orderMenu()
 	{
 		int i = 0 , order_num = 0, total_count = 0 , item_count=0 , total_price = 0;
+		int same_menu = 0;
 		data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("insert into order_info(order_num, num_total_item, user_num, total_price, payment, table_name, etc) values (?,?,?,?,?,?,?,?)");
 		//parameter 순서 1 - order_num / 2 - num_totatl_item / 3 - user_num / 4 - total_price
 		// 5 - payment /  6 - table_name / 7 - etc
 		StringBuffer sql2 = new StringBuffer("insert into order_list(order_num,item_num,menu_num,payment,payment_option,coupon_num,menu_name,size,price) values (?,?,?,?,?,?,?,?,?,?)");
-		String item_num = "1" , menu_num = null;;
+		String item_num = "1" , menu_num = null, table_name = null, user_num = null , temp_menu_name = null;
 		PreparedStatement p_st = null , p_st2 = null;
 		try {
 			p_st = con.prepareStatement(sql.toString());
@@ -411,10 +460,12 @@ public class server_connector {
 
 				switch (temp.getType()) {
 				case "user_num":
-					p_st.setString(3,temp.getValue());
+					user_num = temp.getValue();
+					p_st.setString(3,user_num);
 					break;
 				case "table_name":
-					p_st.setString(6,temp.getValue());
+					table_name = temp.getValue();
+					p_st.setString(6,table_name);
 					break;
 				case "etc":
 					p_st.setString(7,temp.getValue());
@@ -479,8 +530,36 @@ public class server_connector {
 
 			p_st.setString(4, total_price+"");
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			reply_data.addContent("ORDER MENU", "OK");
-			reply_data.addContent("ORDER NUM", order_num+"");								
+			reply_data.addContent("ORDER COUNT", total_count+"");
+			reply_data.addContent("table name", table_name);
+			ResultSet rs2 = stmt.executeQuery("select name from user_num where user_num ='"+ user_num +"'");
+			if(rs2.next())
+				reply_data.addContent("name", rs2.getString("name"));
+			//시간 받아오기
+			rs2 = stmt.executeQuery("select order_time from order_info whrer order_num ='"+ order_num +"'");
+			if(rs2.next())
+				reply_data.addContent("order_time", rs2.getString("order_time"));
+			/*
+			 * while 문으로 주문받은 것들 reply에 넣을것.
+			 */
+			//메뉴번호로 오더해서 받아올 것.
+			rs2 = stmt.executeQuery("select menu_name from order_list where order_num = '"+ order_num +"'");
+			while(rs2.next())
+			{
+				if(temp_menu_name.equals(rs2.getString("menu_name")))
+				{
+					reply_data.deleteContent(reply_data.getContentSize());
+					reply_data.addContent("menu_name",rs2.getString("menu_name"));
+					reply_data.addContent("menu_count",++same_menu+"");
+				}
+				else
+				{
+					same_menu = 1;
+					reply_data.addContent("menu_name",rs2.getString("menu_name"));
+					reply_data.addContent("menu_count",same_menu+"");
+				}
+				
+			}
 			return p_st.execute();
 			
 			} catch (SQLException e) {

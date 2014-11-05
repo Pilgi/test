@@ -177,7 +177,9 @@ public class server extends Thread{
 	               System.out.println("server:" + s_id +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
 	         //************************************************************
 	               try{
-	            	   cbs.send(recv_data); //인터페이스 callback 부분 제대로 추가해야함
+	            	   System.out.println("핼로로로로로");
+	            	   if(recv_data.equals("ADD ORDER"))
+	            		   cbs.send(recv_data); //인터페이스 callback 부분 제대로 추가해야함
 	               }
 	               catch(Exception e)
 	               {
@@ -514,6 +516,7 @@ public class server extends Thread{
 		    Socket send_socket = null;
 			int port = 4545;
 			System.out.println("접속합니다아아아아ㅏ아");
+			
 	        try {
 	        	send_socket = new Socket(hostname, port);           
 	            send_bos = new BufferedOutputStream(send_socket.getOutputStream());
@@ -542,7 +545,7 @@ public class server extends Thread{
 				buffer.put((byte) 'S');
 				buffer.put(intToByteArray(1));
 				buffer.put(intToByteArray(d.purpose.length()));
-				buffer.put(CharConversion.K2E(d.purpose).getBytes("8859_1"));
+				buffer.put(CharConversion.K2E("ADD ORDER").getBytes("8859_1"));
 				for(int i = 0; i < num_of_node ; i++)
 				{
 					buffer.put(intToByteArray(2));
