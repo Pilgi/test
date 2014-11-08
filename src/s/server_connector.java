@@ -70,6 +70,12 @@ public class server_connector {
 			System.out.println("server:"+ s_id + " - login 명령 확인");
 			loginUser();
 		}
+		else if (recv_data.purpose.equals("SHOW USER"))
+		{
+
+			System.out.println("server:"+ s_id + " - show user 명령 확인");
+			showUser();
+		}
 		else if (recv_data.purpose.equals("ADD MENU"))
 		{
 			System.out.println("server:" + s_id + " - add menu 명령 확인");
@@ -266,6 +272,83 @@ public class server_connector {
 
 	}
 
+	/*
+	 * member 목록를 불러올때 사용되는 부분
+	 * 개발일 : 14.11.08 
+	 * 개발자 : 김필기
+	 */
+	protected boolean showUser()
+	{
+		int i=0;
+		data.data_structure temp = null ;
+		StringBuffer sql = new StringBuffer("SELECT * from user_info  WHERE ?");
+		String category = null;
+		PreparedStatement p_st = null;
+	
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"show member 보여주기 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "all":
+					p_st.setString(1,"user_num >=0");
+					break;
+				case "number":
+					p_st.setString(1,"user_num =" + temp.getValue());
+					break;
+					//휴대폰 번호 추가되면 추가할부눈
+				case "phone":
+					break;
+				case "id":
+					p_st.setString(1,"user_id =" + temp.getValue());
+					break;
+				case "name":
+					p_st.setString(1, "name =" + temp.getValue());
+					break;
+				default:
+					break;
+				}
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st.executeQuery();
+			int count=0;
+			reply_data.addContent(temp.getType(), "OK");
+			while(rs.next())
+			{
+				count++;
+				reply_data.addContent(count +"_user_num", rs.getString("user_num"));
+				reply_data.addContent(count +"_name", rs.getString("name"));
+				reply_data.addContent(count +"_sex", rs.getString("sex"));
+				reply_data.addContent(count +"_balance", rs.getString("balance"));
+				reply_data.addContent(count +"_e_mail", rs.getString("e_mail"));
+				reply_data.addContent(count +"_register_date", rs.getString("_register_date"));
+				if(temp.getType().equals("all"))
+					continue;
+				reply_data.addContent(count +"_user_id", rs.getString("user_id"));
+				reply_data.addContent(count +"_stamp_total", rs.getString("_stamp_total"));
+				reply_data.addContent(count +"_stamp_available", rs.getString("_stamp_available"));
+				reply_data.addContent(count +"_stamp_month", rs.getString("_stamp_month"));
+				reply_data.addContent(count +"_latest_login", rs.getString("_latest_login"));
+				reply_data.addContent(count +"_birthday", rs.getString("_birthday"));					
+			}
+			reply_data.modifyContent(0, temp.getType(), count+"");
+			} 
+		catch (SQLException e) {
+				reply_data.addContent("SHOW USER","FAIL");
+				//reply_data.addContent("ERROR CODE", e.toString());
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+		}
+		return true;
+		
+	}
 	/*
 	 * category를 불러올때 사용되는 부분
 	 * 개발일 : 14.08.14 
