@@ -355,6 +355,7 @@ public class server extends Thread{
 			try{
 				byte[] b = new byte [1024];
 				int size = bis.read(b);
+				int count = 0;
 				String protocol_id = new String(b,0,1);
 				int buffer_point = 0;
 				int data_length = 0 , data_type = 0;
@@ -368,19 +369,30 @@ public class server extends Thread{
 					//protocol 이 제대로 된 data가 들어 오는지 확인 
 					if(protocol_id.equals("S"))
 						System.out.println("c와 통신 _ 수신 시작");
-					else if(protocol_id.equals("C"))
-					{
-						
-					}
 					//null이 올때 (close socket을 받았을때)
 					else if(protocol_id.charAt(0)==0)
 						return null;
 					else
-					{
-							throw new Exception("Socket protocol is incorrect");
-					}
+						throw new Exception("Socket protocol is incorrect");
 					
-					while(buffer_point<=size)
+					data_type = byteArrayToInt(b, buffer_point);
+					buffer_point += 4;
+					data_length = byteArrayToInt(b, buffer_point);
+					buffer_point += 4;
+					if(data_type!=1)
+						throw new Exception("1이 안왔음;" + data_type);
+					recvdata = new data(CharConversion.E2K(new String(b,buffer_point,data_length,"8859_1")));
+					buffer_point += data_length;
+							
+					data_type = byteArrayToInt(b, buffer_point);
+					buffer_point += 4;
+					if(data_type != 2)				
+						throw new Exception("node 개수인 2가 안왔음 ㅠㅠ __ "+data_type);
+					count = byteArrayToInt(b, buffer_point);
+					buffer_point += 4;
+					//while(buffer_point<=size)
+					
+					for( int i = 0 ; i < count ;)
 					{
 						//받은data가 최소단위인 8를 넘지 않으면 새로 받는다. (type,size)
 						if(buffer_point + 8 >= size )
@@ -389,26 +401,31 @@ public class server extends Thread{
 						buffer_point += 4;
 						data_length = byteArrayToInt(b, buffer_point);
 						buffer_point += 4;
-						//data type 1:purpose 2:content 3:type 4:value
+						//data type 1:purpose 2:node 갯수 3:node정보 4:type 5:value
 						switch(data_type)
 						{
-						case 1:
-							recvdata = new data(CharConversion.E2K(new String(b,buffer_point,data_length,"8859_1")));
-							buffer_point += data_length;
-							break;
-						case 2:
-							continue;
 						case 3:
+							continue;
+						case 4:
 							recv_type = CharConversion.E2K(new String(b,buffer_point,data_length,"8859_1"));
 							System.out.println("recv_type : " + recv_type);
 							buffer_point += data_length;
 							break;
-						case 4:
+						case 5:
 							recv_value = CharConversion.E2K(new String(b,buffer_point,data_length,"8859_1"));
 							buffer_point += data_length;
 							System.out.println("recv_value : " + recv_value);
 							recvdata.addContent(recv_type, recv_value);
+							i++;
 							break;
+						case 99:
+							size = bis.read(b);
+							buffer_point = 0;
+							protocol_id = new String(b,buffer_point++,1);
+							if(protocol_id.equals('C'))
+								break;
+							else
+								throw new Exception("잘라서 받는 부분에서 에러 발생");											
 						default:
 							throw new Exception("socket protocol error!!!__ type"+data_type+"isn't existence");
 						}
@@ -421,7 +438,7 @@ public class server extends Thread{
 							break;
 						}
 					}
-			
+						while_stop = false;
 				}
 				//char a = (char)bis.read();
 				//for (int i=0; i<3; i++) bis.read();
@@ -450,24 +467,46 @@ public class server extends Thread{
 				num_of_node = recv_data.getContentSize();
 				buffer.put((byte) 'S');
 				buffer.put(intToByteArray(1));
+				
 				buffer.put(intToByteArray(recv_data.purpose.length()));
 				buffer.put(CharConversion.K2E(recv_data.purpose).getBytes("8859_1"));
+
+				buffer.put(intToByteArray(2));
+				buffer.put(intToByteArray(num_of_node));
+
+							
 				for(int i = 0; i < num_of_node ; i++)
 				{
+
+					//node 인것을 표시
+
+					pushStream(buffer,3,
+							intToByteArray(i),
+							bos);
+					/*
 					buffer.put(intToByteArray(2));
 					buffer.put(intToByteArray(num_of_node));
-					
+					*/
 					//Type 전송
+					pushStream(buffer,4,
+							CharConversion.K2E(recv_data.getContent(i).getType()).getBytes("8859_1"),
+							bos);
+					/*
 					buffer.put(intToByteArray(3));
 					byte[] temp = CharConversion.K2E(recv_data.getContent(i).getType()).getBytes("8859_1");
 					buffer.put(intToByteArray(temp.length));
 					buffer.put(temp);
-					
+					*/
 					//Value 전송
+					pushStream(buffer, 5,
+							CharConversion.K2E(recv_data.getContent(i).getValue()).getBytes("8859_1"),
+							bos);
+					/*
 					buffer.put(intToByteArray(4));
 					temp = CharConversion.K2E(recv_data.getContent(i).getValue()).getBytes("8859_1");
 					buffer.put(intToByteArray(temp.length));
-					buffer.put(temp);	
+					buffer.put(temp);
+					*/	
 				}
 				bos.write(buffer.array());
 				bos.flush();
@@ -477,6 +516,38 @@ public class server extends Thread{
 				e.printStackTrace();				
 			}
 			return false;
+		}
+		private boolean pushStream(ByteBuffer buffer,int protocol, byte[] temp, BufferedOutputStream _bos)
+		{
+			try{
+				if(buffer.position() + 4 + 4 +temp.length >= buffer.capacity())
+				{
+					//99는 continue를 뜻함!
+					buffer.put(intToByteArray(99));
+					bos.write(buffer.array());
+					bos.flush();
+					buffer.clear();
+					buffer.put((byte) 'C');
+				}
+				if(protocol == 3)
+				{
+					buffer.put(intToByteArray(3));
+					buffer.put(temp);
+					return true;
+					
+				}
+				buffer.put(intToByteArray(protocol));
+				buffer.put(intToByteArray(temp.length));
+				buffer.put(temp);
+				
+				return true;
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				return false;
+			}
+			
 		}
 		/*
 		 * 코드 출저 http://aldehyde7.tistory.com/159
@@ -545,7 +616,8 @@ public class server extends Thread{
 				buffer.put((byte) 'S');
 				buffer.put(intToByteArray(1));
 				buffer.put(intToByteArray(d.purpose.length()));
-				buffer.put(CharConversion.K2E("ADD ORDER").getBytes("8859_1"));
+				buffer.put(CharConversion.K2E(d.purpose).getBytes("8859_1"));
+				
 				for(int i = 0; i < num_of_node ; i++)
 				{
 					buffer.put(intToByteArray(2));

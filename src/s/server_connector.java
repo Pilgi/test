@@ -93,7 +93,7 @@ public class server_connector {
 			orderMenu();
 
 		}
-		else if (recv_data.purpose.equals("SHOW CATEOGRY"))
+		else if (recv_data.purpose.equals("SHOW CATEGORY"))
 		{
 			System.out.println("server:" + s_id + " - show category 명령 확인");
 			showCateogory();
@@ -352,7 +352,7 @@ public class server_connector {
 			reply_data.modifyContent(0, category, count+"");
 			} catch (SQLException e) {
 				reply_data.addContent("DETAIL MENU","FAIL");
-				reply_data.addContent("ERROR CODE", e.toString());
+				//reply_data.addContent("ERROR CODE", e.toString());
 				e.printStackTrace();
 				sqlErrorCheck(e);
 				return false;
@@ -385,7 +385,7 @@ public class server_connector {
 				//gettype으로 가져온 자료가 LOGIN 일 경우 실행될 부분
 				temp = recv_data.getContent(i++);
 				//test로 들어오는 data 확인하는 부분
-				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				//System.out.println("type = " + temp.getType() + ",  value =" + temp.getValue());
 				switch (temp.getType()) {
 				case "menu_num":
 					menu_num = temp.getValue();
