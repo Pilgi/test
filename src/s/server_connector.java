@@ -460,7 +460,6 @@ public class server_connector {
 			
 			System.out.println("server:" + s_id + " - " +p_st.toString());
 			ResultSet rs = p_st.executeQuery();
-			int count=0;
 			reply_data.addContent(temp.getType(), "OK");
 
 			if(temp.getType().equals("id") || temp.getType().equals("user_num") && rs.next())
@@ -468,18 +467,9 @@ public class server_connector {
 				reply_data.addContent("stamp_total", rs.getString("statmp_total"));
 				reply_data.addContent("stamp_available", rs.getString("statmp_available"));
 				reply_data.addContent("stamp_month", rs.getString("statmp_month"));
+				return true;
 			}
-			//ranking 목록 불러올때 사용할 부분
-			else
-			{
-				while(rs.next())
-				{
-					count++;
-	
-				}
-				reply_data.modifyContent(0, temp.getType(), count+"");
-				
-			}
+
 			} 
 		catch (SQLException e) {
 				reply_data.addContent("SHOW STAMP","FAIL");
@@ -488,8 +478,60 @@ public class server_connector {
 				sqlErrorCheck(e);
 				return false;
 		}
-		return true;
+		return false;
 		
+	}
+	protected boolean showStampRanking()
+	{
+		int i=0;
+		data.data_structure temp = null ;
+		StringBuffer sql = null;
+		PreparedStatement p_st = null;
+	
+		try {
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"show stamp 보여주기 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "user_num":
+					sql = new StringBuffer("SELECT stamp_total,stamp_available,stamp_month from user_info where user_num = ?");
+					p_st = con.prepareStatement(sql.toString());
+					break;
+				case "id":
+					sql = new StringBuffer("SELECT stamp_total,stamp_available,stamp_month from user_info where user_id = ?");
+					p_st = con.prepareStatement(sql.toString());
+					p_st.setString(1,temp.getValue());
+					break;
+				default:
+					break;
+				}
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st.executeQuery();
+			reply_data.addContent(temp.getType(), "OK");
+
+			if(temp.getType().equals("id") || temp.getType().equals("user_num") && rs.next())
+			{
+				reply_data.addContent("stamp_total", rs.getString("statmp_total"));
+				reply_data.addContent("stamp_available", rs.getString("statmp_available"));
+				reply_data.addContent("stamp_month", rs.getString("statmp_month"));
+				return true;
+			}
+
+			} 
+		catch (SQLException e) {
+				reply_data.addContent("SHOW STAMP","FAIL");
+				//reply_data.addContent("ERROR CODE", e.toString());
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+		}
+		return false;
 	}
 	/*
 	 * category를 불러올때 사용되는 부분
@@ -1019,9 +1061,79 @@ public class server_connector {
 					return false;
 			}
 	}
+
+	/*
+	 * user_id 나 user_num을 주면 stamp 1개 추가!
+	 * 개발일 : 14.11.10
+	 * 개발자 : 김필기
+	 */
 	protected boolean addStamp()
 	{
+		int i=0;
+		String total = null,available = null,month = null,user_num = null;
+		data.data_structure temp ;
+		StringBuffer sql = null;
+		//parameter 순서 1-menu_num
+		PreparedStatement p_st = null;
+		try {
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"add Stamp 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 add menu 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "id":
+					sql = new StringBuffer("select user_num,stamp_total, stamp_available, stamp_month from user_info where user_id = ?");
+					p_st = con.prepareStatement(sql.toString());
+					p_st.setString(1,temp.getValue());
+					break;
+				case "user_num":
+					sql = new StringBuffer("select user_num,stamp_total, stamp_available, stamp_month from user_info where user_num = ?");
+					p_st = con.prepareStatement(sql.toString());
+					p_st.setString(1,temp.getValue());
+					break;
+				default:
+					throw new Exception("content type error!");
+				}
+			}
+			//id로 찾은 user의 stamp 갯수를 1개씩 올려준다.
+			ResultSet rs = p_st.executeQuery();
+			
+			if(rs.next())
+			{
+				total = (Integer.getInteger(rs.getString("stamp_total")) + 1)+"";
+				available = (Integer.getInteger(rs.getString("stamp_available")) + 1)+"";
+				month = (Integer.getInteger(rs.getString("stamp_month")) + 1)+"";
+				user_num = rs.getString("user_num");
+			}
+			else
+				throw new Exception("존재하지 않는 사용자입니다.");
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			reply_data.addContent("ADD STAMP", "OK");
+			sql = new StringBuffer("update user_info SET stamp_total = ? , stamp_available = ? , stamp_month = ? where user_num = ?");
+			p_st = con.prepareStatement(sql.toString());
+			p_st.setString(1, total);
+			p_st.setString(2, available);
+			p_st.setString(3, month);
+			p_st.setString(4, user_num);
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 		return false;
+			
 	}
 
 	protected boolean addBalance()
