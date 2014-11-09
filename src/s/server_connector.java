@@ -661,10 +661,12 @@ public class server_connector {
 		//parameter 순서 1 - order_num / 2 - num_totatl_item / 3 - user_num / 4 - total_price
 		// 5 - payment /  6 - table_name / 7 - etc
 		StringBuffer sql2 = new StringBuffer("insert into order_list(order_num,item_num,menu_num,payment,payment_option,coupon_num,menu_name,size,price) values (?,?,?,?,?,?,?,?,?,?)");
+		//parameter 순서 1 - order_num / 2 - item_num / 3 - menu_num / 4 - payment / 5 - payment_option  / 6 - coupon_num / 7 - menu_name / 8 - size / 9 - price
 		String item_num = "1" , menu_num = null, table_name = null, user_num = null , temp_menu_name = null;
 		PreparedStatement p_st = null , p_st2 = null;
 		try {
 			p_st = con.prepareStatement(sql.toString());
+			p_st = con.prepareStatement(sql2.toString());
 			//정상독작인지 test 하는 부분
 			System.out.println("server:" + s_id + " - " +"order_Menu 확인 ㄱㄱㄱ size:"+recv_data.content.size());
 			
@@ -700,7 +702,7 @@ public class server_connector {
 					p_st.setString(2,temp.getValue());
 					break;
 				default:
-					//parameter 순서 1 - order_num / 2 - item_num / 3 - menu_num / 4 - payment / 5 - payment_option  / 6 - coupon_num / 7 - menu_name / 8 - size / 9 - price
+					//order_list 를 추가하기위해
 					if(temp.getValue().startsWith(item_num))
 					{
 						item_count++;
@@ -731,6 +733,7 @@ public class server_connector {
 						}
 						
 					}
+					//주문 정보 4개가 다 들어왔을 경우에
 					if(item_count>4)
 					{
 						if(Integer.getInteger(item_num)>total_count)
@@ -746,8 +749,9 @@ public class server_connector {
 							p_st2.setString(9,rs.getString("price"));
 							total_price = total_price + Integer.getInteger(rs.getString("price"));
 						}
-						
 						item_num = (Integer.getInteger(item_num) + 1) + "";
+						//order list에 추가
+						p_st2.executeQuery();
 					}
 					break;
 				}
@@ -774,13 +778,14 @@ public class server_connector {
 				if(temp_menu_name.equals(rs2.getString("menu_name")))
 				{
 					reply_data.deleteContent(reply_data.getContentSize());
-					reply_data.addContent("menu_name",rs2.getString("menu_name"));
+					reply_data.addContent("menu_name",temp_menu_name);
 					reply_data.addContent("menu_count",++same_menu+"");
 				}
 				else
 				{
 					same_menu = 1;
-					reply_data.addContent("menu_name",rs2.getString("menu_name"));
+					temp_menu_name = rs2.getString("menu_name");
+					reply_data.addContent("menu_name",temp_menu_name);
 					reply_data.addContent("menu_count",same_menu+"");
 				}
 				
