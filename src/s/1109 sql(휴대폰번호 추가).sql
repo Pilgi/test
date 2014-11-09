@@ -108,6 +108,7 @@ CREATE TABLE user_info
 	password  varchar(18) NOT NULL,
 	user_num  integer NOT NULL,
 	name  varchar(18) NOT NULL,
+	phone varchar(14) NOT NULL,
 	stamp_total  varchar(20) NULL DEFAULT 0,
 	stamp_available  integer NULL DEFAULT 0,
 	stamp_month integer NULL default 0,

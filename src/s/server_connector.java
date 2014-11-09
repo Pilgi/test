@@ -93,6 +93,12 @@ public class server_connector {
 			showMenu();
 
 		}
+		else if (recv_data.purpose.equals("ID CHECK"))
+		{
+			System.out.println("server:" + s_id + " - id check 명령 확인");
+			idCheck();
+
+		}
 		else if (recv_data.purpose.equals("ADD ORDER"))
 		{
 			System.out.println("server:" + s_id + " - add order 명령 확인");
@@ -135,7 +141,7 @@ public class server_connector {
 		int i=0;
 		int u_num = 0;
 		data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("insert into user_info(user_id,password,user_num,name,sex,e_mail,birthday) values (?,?,?,?,?,?,?)");
+		StringBuffer sql = new StringBuffer("insert into user_info(user_id,password,user_num,name,sex,e_mail,birthday,phone) values (?,?,?,?,?,?,?,?)");
 		//parameter 순서 1-id / 2-password / 3-user_number / 4-name / 5-sex / 6-e-mail
 		PreparedStatement p_st = null;
 		try {
@@ -172,6 +178,9 @@ public class server_connector {
 				case "birthday":
 					//2014-02-01 같은 형태로 전송해야함!
 					p_st.setString(7, temp.getValue());
+				case "phone":
+					//010-0000-0000 같은 형태로 전송해야함!
+					p_st.setString(8, temp.getValue());
 				default:
 					break;
 				}
@@ -273,20 +282,73 @@ public class server_connector {
 	}
 
 	/*
+	 * id 중복확인
+	 * 개발일 : 14.11.09
+	 * 개발자 : 김필기
+	 */
+	protected boolean idCheck(){
+		int i = 0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("SELECT user_id,FROM user_info WHERE user_id = ?");
+		String id = null;
+		//parameter 순서 1-id
+		PreparedStatement p_st = null;
+
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"중복 id 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "id":
+					id = temp.getValue();
+					p_st.setString(1,id);
+					break;
+				default:
+					throw new Exception("content error");
+				}
+			}
+			//Query 구문을 날려 result가 도착한다면 존재하는 아이디/패스워드 이다.
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st.executeQuery();
+			if(rs.next())
+			{
+				reply_data.addContent("ID CHECK", "DUPLICATE");
+				return true;
+			}
+			else
+			{
+				reply_data.addContent("ID CHECK","OK");
+				return true;
+			}
+			} catch (SQLException e) {
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+			} catch (Exception e)
+			{
+					e.printStackTrace();
+					return false;
+			}
+
+	}
+	/*
 	 * member 목록를 불러올때 사용되는 부분
-	 * 개발일 : 14.11.08 
+	 * 개발일 : 14.11.08 ~ 14.11.09
 	 * 개발자 : 김필기
 	 */
 	protected boolean showUser()
 	{
 		int i=0;
 		data.data_structure temp = null ;
-		StringBuffer sql = new StringBuffer("SELECT * from user_info  WHERE ?");
-		String category = null;
+		StringBuffer sql = null;
 		PreparedStatement p_st = null;
 	
 		try {
-			p_st = con.prepareStatement(sql.toString());
 			//정상독작인지 test 하는 부분
 			System.out.println("server:" + s_id + " - " +"show member 보여주기 ㄱㄱㄱ size:"+recv_data.content.size());
 			while(recv_data.getContent(i)!=null)
@@ -296,19 +358,29 @@ public class server_connector {
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 				switch (temp.getType()) {
 				case "all":
-					p_st.setString(1,"user_num >=0");
+					sql = new StringBuffer("SELECT * from user_info");
+					p_st = con.prepareStatement(sql.toString());
 					break;
 				case "number":
-					p_st.setString(1,"user_num =" + temp.getValue());
+					sql = new StringBuffer("SELECT * from user_info where user_num = ?");
+					p_st = con.prepareStatement(sql.toString());
+					p_st.setString(1,temp.getValue());
 					break;
 					//휴대폰 번호 추가되면 추가할부눈
 				case "phone":
+					sql = new StringBuffer("SELECT * from user_info where phone like ?");
+					p_st = con.prepareStatement(sql.toString());
+					p_st.setString(1, '%'+ temp.getValue() );
 					break;
 				case "id":
-					p_st.setString(1,"user_id =" + temp.getValue());
+					sql = new StringBuffer("SELECT * from user_info where id = ?");
+					p_st = con.prepareStatement(sql.toString());
+					p_st.setString(1,temp.getValue());
 					break;
 				case "name":
-					p_st.setString(1, "name =" + temp.getValue());
+					sql = new StringBuffer("SELECT * from user_info where name = ?");
+					p_st = con.prepareStatement(sql.toString());
+					p_st.setString(1,temp.getValue());
 					break;
 				default:
 					break;
@@ -325,22 +397,92 @@ public class server_connector {
 				reply_data.addContent(count +"_user_num", rs.getString("user_num"));
 				reply_data.addContent(count +"_name", rs.getString("name"));
 				reply_data.addContent(count +"_sex", rs.getString("sex"));
-				reply_data.addContent(count +"_balance", rs.getString("balance"));
+				reply_data.addContent(count +"_birthday", rs.getString("birthday"));					
 				reply_data.addContent(count +"_e_mail", rs.getString("e_mail"));
-				reply_data.addContent(count +"_register_date", rs.getString("_register_date"));
+				reply_data.addContent(count + "_phone",rs.getString("phone"));
+				reply_data.addContent(count +"_balance", rs.getString("balance"));
+				reply_data.addContent(count +"_register_date", rs.getString("register_date"));
 				if(temp.getType().equals("all"))
 					continue;
 				reply_data.addContent(count +"_user_id", rs.getString("user_id"));
-				reply_data.addContent(count +"_stamp_total", rs.getString("_stamp_total"));
-				reply_data.addContent(count +"_stamp_available", rs.getString("_stamp_available"));
-				reply_data.addContent(count +"_stamp_month", rs.getString("_stamp_month"));
-				reply_data.addContent(count +"_latest_login", rs.getString("_latest_login"));
-				reply_data.addContent(count +"_birthday", rs.getString("_birthday"));					
+				reply_data.addContent(count +"_stamp_total", rs.getString("stamp_total"));
+				reply_data.addContent(count +"_stamp_available", rs.getString("stamp_available"));
+				reply_data.addContent(count +"_stamp_month", rs.getString("stamp_month"));
+				reply_data.addContent(count +"_latest_login", rs.getString("latest_login"));
 			}
 			reply_data.modifyContent(0, temp.getType(), count+"");
 			} 
 		catch (SQLException e) {
 				reply_data.addContent("SHOW USER","FAIL");
+				//reply_data.addContent("ERROR CODE", e.toString());
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+		}
+		return true;
+		
+	}
+
+	/*
+	 * member 목록를 불러올때 사용되는 부분
+	 * 개발일 : 14.11.08 ~ 14.11.09
+	 * 개발자 : 김필기
+	 */
+	protected boolean showStamp()
+	{
+		int i=0;
+		data.data_structure temp = null ;
+		StringBuffer sql = null;
+		PreparedStatement p_st = null;
+	
+		try {
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"show stamp 보여주기 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "user_num":
+					sql = new StringBuffer("SELECT stamp_total,stamp_available,stamp_month from user_info where user_num = ?");
+					p_st = con.prepareStatement(sql.toString());
+					break;
+				case "id":
+					sql = new StringBuffer("SELECT stamp_total,stamp_available,stamp_month from user_info where user_id = ?");
+					p_st = con.prepareStatement(sql.toString());
+					p_st.setString(1,temp.getValue());
+					break;
+				default:
+					break;
+				}
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st.executeQuery();
+			int count=0;
+			reply_data.addContent(temp.getType(), "OK");
+
+			if(temp.getType().equals("id") || temp.getType().equals("user_num") && rs.next())
+			{
+				reply_data.addContent("stamp_total", rs.getString("statmp_total"));
+				reply_data.addContent("stamp_available", rs.getString("statmp_available"));
+				reply_data.addContent("stamp_month", rs.getString("statmp_month"));
+			}
+			//ranking 목록 불러올때 사용할 부분
+			else
+			{
+				while(rs.next())
+				{
+					count++;
+	
+				}
+				reply_data.modifyContent(0, temp.getType(), count+"");
+				
+			}
+			} 
+		catch (SQLException e) {
+				reply_data.addContent("SHOW STAMP","FAIL");
 				//reply_data.addContent("ERROR CODE", e.toString());
 				e.printStackTrace();
 				sqlErrorCheck(e);
