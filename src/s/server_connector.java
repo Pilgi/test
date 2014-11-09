@@ -141,7 +141,7 @@ public class server_connector {
 		int i=0;
 		int u_num = 0;
 		data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("insert into user_info(user_id,password,user_num,name,sex,e_mail,birthday,phone) values (?,?,?,?,?,?,?,?)");
+		StringBuffer sql = new StringBuffer("	");
 		//parameter 순서 1-id / 2-password / 3-user_number / 4-name / 5-sex / 6-e-mail
 		PreparedStatement p_st = null;
 		try {
