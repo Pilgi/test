@@ -127,7 +127,7 @@ public class server_connector {
 		else if (recv_data.purpose.equals("ADD NOTICE"))
 		{
 			System.out.println("server:" + s_id + " - add notice 명령 확인");
-			addnNotice();
+			addNotice();
 		}
 		else if (recv_data.purpose.equals("MODIFY NOTICE"))
 		{
@@ -1476,7 +1476,7 @@ public class server_connector {
 	 * 개발일 : 14.11.10
 	 * 개발자 : 김필기 
 	 */
-	protected boolean addnNotice()
+	protected boolean addNotice()
 	{
 		int i=0;
 		int 	notice_num = 0;
