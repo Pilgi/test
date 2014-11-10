@@ -13,6 +13,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
+
 
 /*
  * 서버와 mysql을 연결해주는 커넥터
@@ -111,6 +113,43 @@ public class server_connector {
 			showCateogory();
 
 		}
+		else if (recv_data.purpose.equals("SHOW STAMP"))
+		{
+			System.out.println("server:" + s_id + " - show stamp 명령 확인");
+			showStamp();
+
+		}
+		else if (recv_data.purpose.equals("SHOW STAMPRANKING"))
+		{
+			System.out.println("server:" + s_id + " - show stamp ranking 명령 확인");
+			showStampRanking();
+		}
+		else if (recv_data.purpose.equals("ADD NOTICE"))
+		{
+			System.out.println("server:" + s_id + " - add notice 명령 확인");
+			addnNotice();
+		}
+		else if (recv_data.purpose.equals("MODIFY NOTICE"))
+		{
+			System.out.println("server:" + s_id + " - modify notice 명령 확인");
+			modifyNotice();
+		}
+		else if (recv_data.purpose.equals("DELETE NOTICE"))
+		{
+			System.out.println("server:" + s_id + " - delete notice 명령 확인");
+			deleteNotice();
+		}
+		else if (recv_data.purpose.equals("REQUEST MUSIC"))
+		{
+			System.out.println("server:" + s_id + " - request music 명령 확인");
+			requestMusic();
+		}
+		else
+		{
+			System.out.println("purpose error");
+			reply_data = new data("ERROR");
+			reply_data.addContent("error_code", "not exist purpose");
+		}
 	}
 	// SQL ERROR 가 뭔지를 확인하는 세션
 	protected boolean sqlErrorCheck (SQLException e)
@@ -141,7 +180,7 @@ public class server_connector {
 		int i=0;
 		int u_num = 0;
 		data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("	");
+		StringBuffer sql = new StringBuffer("insert into user_info(user_id,password,user_num,name,sex,e_mail,birthday,phone) values (?,?,?,?,?,?,?,?)");
 		//parameter 순서 1-id / 2-password / 3-user_number / 4-name / 5-sex / 6-e-mail
 		PreparedStatement p_st = null;
 		try {
@@ -424,8 +463,8 @@ public class server_connector {
 	}
 
 	/*
-	 * member 목록를 불러올때 사용되는 부분
-	 * 개발일 : 14.11.08 ~ 14.11.09
+	 * 개인의 stamp 정보를 불러올때 사용되는 부분
+	 * 개발일 : 14.11.10
 	 * 개발자 : 김필기
 	 */
 	protected boolean showStamp()
@@ -445,16 +484,17 @@ public class server_connector {
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 				switch (temp.getType()) {
 				case "user_num":
-					sql = new StringBuffer("SELECT stamp_total,stamp_available,stamp_month from user_info where user_num = ?");
+					sql = new StringBuffer("SELECT user_num, stamp_total,stamp_available,stamp_month from user_info where user_num = ?");
 					p_st = con.prepareStatement(sql.toString());
+					p_st.setString(1,temp.getValue());
 					break;
 				case "id":
-					sql = new StringBuffer("SELECT stamp_total,stamp_available,stamp_month from user_info where user_id = ?");
+					sql = new StringBuffer("SELECT user_num, stamp_total,stamp_available,stamp_month from user_info where user_id = ?");
 					p_st = con.prepareStatement(sql.toString());
 					p_st.setString(1,temp.getValue());
 					break;
 				default:
-					break;
+					throw new SQLException ("type error");
 				}
 			}
 			
@@ -464,12 +504,34 @@ public class server_connector {
 
 			if(temp.getType().equals("id") || temp.getType().equals("user_num") && rs.next())
 			{
-				reply_data.addContent("stamp_total", rs.getString("statmp_total"));
-				reply_data.addContent("stamp_available", rs.getString("statmp_available"));
-				reply_data.addContent("stamp_month", rs.getString("statmp_month"));
+				reply_data.addContent("stamp_total", rs.getString("stamp_total"));
+				reply_data.addContent("stamp_available", rs.getString("stamp_available"));
+				reply_data.addContent("stamp_month", rs.getString("stamp_month"));
+				
+				//total 순위 구하기
+				StringBuffer rank = new StringBuffer("select count(*) + 1 as rank from user_info where stamp_total > (Select stamp_total from user_info where user_num = ?)");
+				PreparedStatement rank_sql = con.prepareStatement(rank.toString());
+				rank_sql.setString(1, rs.getString("user_num"));
+				ResultSet rs2 = rank_sql.executeQuery();
+				if(rs2.next())
+					reply_data.addContent("rank_total",rs2.getString("rank"));
+				else
+					throw new SQLException("No result about rank total");
+				
+				//stamp_month 순위 구하기
+				rank = new StringBuffer("select count(*) + 1 as rank from user_info where stamp_month > (Select stamp_month from user_info where user_num = ?)");
+				rank_sql = con.prepareStatement(rank.toString());
+				rank_sql.setString(1, rs.getString("user_num"));
+				rs2 = rank_sql.executeQuery();
+				if(rs2.next())
+					reply_data.addContent("stamp_month",rs2.getString("rank"));
+				else
+					throw new SQLException("No result about rank stamp_month");
+
+				
 				return true;
 			}
-
+			//ranking 도 줘야함.
 			} 
 		catch (SQLException e) {
 				reply_data.addContent("SHOW STAMP","FAIL");
@@ -481,13 +543,19 @@ public class server_connector {
 		return false;
 		
 	}
+
+	/*
+	 * stamp ranking을 불러올때 쓰는 함수
+	 * 개발일 : 14.11.10
+	 * 개발자 : 김필기
+	 */
 	protected boolean showStampRanking()
 	{
 		int i=0;
 		data.data_structure temp = null ;
 		StringBuffer sql = null;
-		PreparedStatement p_st = null;
-	
+		Statement st = null;
+
 		try {
 			//정상독작인지 test 하는 부분
 			System.out.println("server:" + s_id + " - " +"show stamp 보여주기 ㄱㄱㄱ size:"+recv_data.content.size());
@@ -496,40 +564,40 @@ public class server_connector {
 				temp = recv_data.getContent(i++);
 				//test로 들어오는 data 확인하는 부분
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
-				switch (temp.getType()) {
-				case "user_num":
-					sql = new StringBuffer("SELECT stamp_total,stamp_available,stamp_month from user_info where user_num = ?");
-					p_st = con.prepareStatement(sql.toString());
+				switch (temp.getValue()) {
+				case "total":
+					sql = new StringBuffer("SELECT  user_num, user_id, stamp_total,IF "
+							+ "(stamp_total=@_last_stamp,@curRank:=@curRank,@curRank:=@_sequence)"
+							+ "AS rank, @_sequence:=@_sequence+1,@_last_stamp:=stamp_total FROM user_info,"
+							+ "(SELECT @curRank := 1, @_sequence:=1, @_last_stamp:=0) r ORDER BY  stamp_total DESC LIMIT 10");
 					break;
-				case "id":
-					sql = new StringBuffer("SELECT stamp_total,stamp_available,stamp_month from user_info where user_id = ?");
-					p_st = con.prepareStatement(sql.toString());
-					p_st.setString(1,temp.getValue());
+				case "month":
+					sql = new StringBuffer("SELECT  user_num, user_id, stamp_total,IF "
+							+ "(stamp_month=@_last_stamp,@curRank:=@curRank,@curRank:=@_sequence)"
+							+ "AS rank, @_sequence:=@_sequence+1,@_last_stamp:=stamp_month FROM user_info,"
+							+ "(SELECT @curRank := 1, @_sequence:=1, @_last_stamp:=0) r ORDER BY  stamp_month DESC LIMIT 10");
 					break;
 				default:
-					break;
+					throw new SQLException("invalid value_ 'total' or 'month' is valid");
 				}
 			}
-			
-			System.out.println("server:" + s_id + " - " +p_st.toString());
-			ResultSet rs = p_st.executeQuery();
-			reply_data.addContent(temp.getType(), "OK");
-
-			if(temp.getType().equals("id") || temp.getType().equals("user_num") && rs.next())
+			st = con.createStatement();
+			ResultSet rs = st.executeQuery(sql.toString());
+			reply_data.addContent(temp.getValue(), "OK");
+			int count=0;
+			while(rs.next())
 			{
-				reply_data.addContent("stamp_total", rs.getString("statmp_total"));
-				reply_data.addContent("stamp_available", rs.getString("statmp_available"));
-				reply_data.addContent("stamp_month", rs.getString("statmp_month"));
-				return true;
+				count++;
+				reply_data.addContent(count +"_user_id", rs.getString("user_id"));
 			}
-
-			} 
+			
+		} 
 		catch (SQLException e) {
-				reply_data.addContent("SHOW STAMP","FAIL");
-				//reply_data.addContent("ERROR CODE", e.toString());
-				e.printStackTrace();
-				sqlErrorCheck(e);
-				return false;
+			reply_data.addContent("SHOW STAMP","FAIL");
+			//reply_data.addContent("ERROR CODE", e.toString());
+			e.printStackTrace();
+			sqlErrorCheck(e);
+			return false;
 		}
 		return false;
 	}
@@ -1403,5 +1471,234 @@ public class server_connector {
 			}
 
 	}
+	/*
+	 * 공지사항을 추가할 때 실행되는 부분
+	 * 개발일 : 14.11.10
+	 * 개발자 : 김필기 
+	 */
+	protected boolean addnNotice()
+	{
+		int i=0;
+		int 	notice_num = 0;
+		String img_dir = "/notice/";
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("insert into notice(num, writing_type, title, image, content) values (?, ?, ?, ?, ?)");
+		//parameter 순서 1-notice_num / 2 - writing_type / 3 - title / 4 - image / 5 - content
+		PreparedStatement p_st = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"add notice 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 add notice 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 
+				switch (temp.getType()) {
+				case "writing_type":
+					p_st.setString(2,temp.getValue());
+					break;
+				case "title":
+					p_st.setString(3,temp.getValue());
+					break;
+				case "content":
+					p_st.setString(5,temp.getValue());
+					break;
+				default:
+					throw new SQLException("Error type_"+temp.getType());
+				}
+			}
+		//column 에 있는 notice num중 최대값을 가져와 그위에 +1을 해준다. (notice 번호의 중복을 막기 위해서)
+			ResultSet rs = stmt.executeQuery("select max(num) from notice");
+			if(rs.next())
+			{
+				notice_num=rs.getInt(1);
+			}
+			p_st.setString(1, ++notice_num +"");
+			p_st.setString(4,img_dir+notice_num+ ".jpg");
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			reply_data.addContent("ADD NOTICE", "OK");
+			reply_data.addContent("NOTICE NUM", notice_num+"");								
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
+	}
+	/*
+	 * 메뉴를 수정할때 실행되는 부분 ( 사진 수정은 다른 부분에서 )
+	 * 개발일 : 14.11.10
+	 * 개발자 : 김필기
+	 */
+	protected boolean modifyNotice()
+	{
+		int i=0;
+		String	notice_num = null;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("update notice set writing_type = ? , title = ? , image = ? ,"
+				+ "content = ? where _num = ?");
+		//parameter 순서 1- writing  type  / 2-title
+		PreparedStatement p_st = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"modfiy notice ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 mdofiy notice 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
+				switch (temp.getType()) {
+				case "writing_type":
+					p_st.setString(1,temp.getValue());
+					break;
+				case "title":
+					p_st.setString(2,temp.getValue());
+					break;
+				case "content":
+					p_st.setString(3,temp.getValue());
+					break;
+				case "num":
+					notice_num=temp.getValue();
+					p_st.setString(4, temp.getValue());
+					break;
+				default:
+					break;
+				}
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			reply_data.addContent("MODIFY notice", "OK");						
+			reply_data.addContent("notice_num" , notice_num +"");
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
+	}
+	/*
+	 * 공지사항 지우는 곳
+	 * 개발일 : 14.11.10
+	 * 개발자 : 김필기
+	 * 
+	 */
+	protected boolean deleteNotice()
+	{
+		int i=0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("delete from notice where num = ?");
+		//parameter 순서 1- num
+		PreparedStatement p_st = null;
+		String notice_num = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"deletenotice size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				temp = recv_data.getContent(i++);
+				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
+				switch (temp.getType()) {
+				case "notice_num":
+					notice_num = temp.getValue();
+					p_st.setString(1, temp.getValue());
+					break;
+				default:
+					throw new SQLException("wrong type_"+temp.getType());
+				}
+			}
+			//column 에 있는 notice num중 최대값을 가져와 그위에 +1을 해준다. (notice 번호의 중복을 막기 위해서)
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			reply_data.addContent("DELETE notice", "OK");						
+			reply_data.addContent("notice_num" , notice_num +"");
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
+	}
+
+
+	/*
+	 * 음악을 신청할 때 실행되는 부분
+	 * 개발일 : 14.11.10
+	 * 개발자 : 김필기 
+	 */
+	protected boolean requestMusic()
+	{
+		int i=0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("insert into music(user_num, message) values (?, ?)");
+		PreparedStatement p_st = null;
+		String user_num=null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"request music 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 add notice 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
+				switch (temp.getType()) {
+				case "user_num":
+					user_num = temp.getValue();
+					p_st.setString(1,temp.getValue());
+					break;
+				case "message":
+					p_st.setString(2,temp.getValue());
+					break;
+				default:
+					throw new SQLException("Error type_"+temp.getType());
+				}
+			}
+		//column 에 있는 notice num중 최대값을 가져와 그위에 +1을 해준다. (notice 번호의 중복을 막기 위해서)
+	
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			reply_data.addContent("REQUEST MUSIC", "OK");
+			PreparedStatement p_st2 = con.prepareStatement("select name from user_info where user_num = ?");
+			p_st2.setString(1, user_num);
+			ResultSet rs = p_st2.executeQuery();
+			if(rs.next())
+			{
+				reply_data.addContent("user_name", rs.getString("name"));
+			}
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
+	}
 }

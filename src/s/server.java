@@ -175,11 +175,13 @@ public class server extends Thread{
 		    	   {
 		    	   }
 	               System.out.println("server:" + s_id +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
-	         //************************************************************
+
 	               try{
-	            	   System.out.println("핼로로로로로");
-	            	   if(recv_data.equals("ADD ORDER"))
+	            	   //CALL BACK SENDER 부분
+	            	   if(recv_data.getPurpose().equals("ADD ORDER"))
 	            		   cbs.send(recv_data); //인터페이스 callback 부분 제대로 추가해야함
+	            	   else if(recv_data.getPurpose().equals("REQUEST MUSIC"))
+	            		   cbs.send(recv_data);
 	               }
 	               catch(Exception e)
 	               {
@@ -586,8 +588,7 @@ public class server extends Thread{
 		    BufferedOutputStream send_bos = null;
 		    Socket send_socket = null;
 			int port = 4545;
-			System.out.println("접속합니다아아아아ㅏ아");
-			
+			System.out.println("callback sender_동작");
 	        try {
 	        	send_socket = new Socket(hostname, port);           
 	            send_bos = new BufferedOutputStream(send_socket.getOutputStream());
