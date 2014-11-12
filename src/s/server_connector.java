@@ -79,6 +79,18 @@ public class server_connector {
 			System.out.println("server:"+ s_id + " - show user 명령 확인");
 			showUser();
 		}
+		else if (recv_data.purpose.equals("MODIFY USER"))
+		{
+
+			System.out.println("server:"+ s_id + " - show user 명령 확인");
+			modifyUser();
+		}
+		else if (recv_data.purpose.equals("DELETE USER"))
+		{
+
+			System.out.println("server:"+ s_id + " - show user 명령 확인");
+			deleteUser();
+		}
 		else if (recv_data.purpose.equals("ADD MENU"))
 		{
 			System.out.println("server:" + s_id + " - add menu 명령 확인");
@@ -129,6 +141,11 @@ public class server_connector {
 		{
 			System.out.println("server:" + s_id + " - add notice 명령 확인");
 			addNotice();
+		}
+		else if (recv_data.purpose.equals("SHOW NOTICE"))
+		{
+			System.out.println("server:" + s_id + " - add notice 명령 확인");
+			showNotice();
 		}
 		else if (recv_data.purpose.equals("MODIFY NOTICE"))
 		{
@@ -428,6 +445,11 @@ public class server_connector {
 					p_st = con.prepareStatement(sql.toString());
 					p_st.setString(1,temp.getValue());
 					break;
+				case "modify":
+					sql = new StringBuffer("SELECT * from user_info where user_num = ?");
+					p_st = con.prepareStatement(sql.toString());
+					p_st.setString(1,temp.getValue());
+					break;
 				default:
 					break;
 				}
@@ -448,10 +470,13 @@ public class server_connector {
 				reply_data.addContent(count + "_phone",rs.getString("phone"));
 				reply_data.addContent(count +"_balance", rs.getString("balance"));
 				reply_data.addContent(count +"_register_date", rs.getString("register_date"));
+				reply_data.addContent(count +"_user_id", rs.getString("user_id"));
 				if(temp.getType().equals("all"))
 					continue;
-				reply_data.addContent(count +"_user_id", rs.getString("user_id"));
 				reply_data.addContent(count +"_latest_login", rs.getString("latest_login"));
+				if(temp.getType().equals("modify"))
+					reply_data.addContent(count +"_password", rs.getString("password"));
+				
 			}
 			reply_data.modifyContent(0, temp.getType(), count+"");
 			} 
@@ -466,6 +491,122 @@ public class server_connector {
 		
 	}
 
+	/*
+	 * 메뉴를 수정할때 실행되는 부분 ( 사진 수정은 다른 부분에서 )
+	 * 개발일 : 14.09.07~
+	 * 개발자 : 김필기
+	 */
+	protected boolean modifyUser()
+	{
+		int i=0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("update user_info set user_id = ? , name = ? , sex = ? ,"
+				+ "birthday = ?, e_mail = ?, phone = ?, password = ? where user_num = ?");
+		//1_user_id / 2-name / 3-sex / 4-birthday / 5-e_mail / 6-phone / 7-password / 8 - user_num
+		PreparedStatement p_st = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"modfiy Menu ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 mdofiy menu 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
+				switch (temp.getType()) {
+				case "user_id":
+					p_st.setString(1,temp.getValue());
+					break;
+				case "name":
+					//category 내에서 순서를 조정할때 menu_num과 상관없이 정렬하기 위해서 category_order를 사용한다.
+					p_st.setString(2,temp.getValue());
+					break;
+				case "sex":
+					p_st.setString(3,temp.getValue());
+					break;
+				case "birthday":
+					p_st.setString(4,temp.getValue());
+					break;
+				case "e_mail":				
+					p_st.setString(5,temp.getValue());
+					break;
+				case "phone":
+					p_st.setString(6, temp.getValue());
+					break;
+				case "password":
+					p_st.setString(7, temp.getValue());
+					break;
+				case "user_num":
+					p_st.setString(8,temp.getValue());
+					break;
+				default:
+					throw new SQLException("invalid type!! in modify user__"+temp.getType());
+				}
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			reply_data.addContent("MODIFY USER", "OK");						
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
+	}
+
+	/*
+	 * 메뉴를 수정할때 실행되는 부분 ( 사진 수정은 다른 부분에서 )
+	 * 개발일 : 14.09.07~
+	 * 개발자 : 김필기
+	 */
+	protected boolean deleteUser()
+	{
+		int i=0;
+		data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("delete from user_info where user_num = ?");
+		//1_user_num 
+		PreparedStatement p_st = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"delete user ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 mdofiy menu 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
+				switch (temp.getType()) {
+				case "user_num":
+					p_st.setString(1,temp.getValue());
+					break;
+				default:
+					throw new SQLException("invalid type!! in delete user__"+temp.getType());
+				}
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			reply_data.addContent("DELETE USER", "OK");						
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
+	}
 	/*
 	 * 개인의 stamp 정보를 불러올때 사용되는 부분
 	 * 개발일 : 14.11.10
@@ -506,7 +647,7 @@ public class server_connector {
 			ResultSet rs = p_st.executeQuery();
 			reply_data.addContent(temp.getType(), "OK");
 
-			if(temp.getType().equals("id") || temp.getType().equals("user_num") && rs.next())
+			if((temp.getType().equals("id") || temp.getType().equals("user_num")) && rs.next())
 			{
 				reply_data.addContent("stamp_available", rs.getString("stamp_available"));
 				return true;
@@ -631,7 +772,6 @@ public class server_connector {
 			int count=0;
 			while(rs.next())
 			{
-				
 				count++;
 				reply_data.addContent(count +"_user_id", rs.getString("user_id"));
 				switch(temp.getValue())
@@ -1109,7 +1249,7 @@ public class server_connector {
 						p_st.setString(5, temp.getValue());
 					break;
 				default:
-					break;
+					throw new SQLException("invalid type!! in modify menu__"+temp.getType());
 				}
 			}
 			
@@ -1542,7 +1682,10 @@ public class server_connector {
 			{
 				count++;
 				reply_data.addContent(count +"_num", rs.getString("num"));
-				reply_data.addContent(count +"_writing_type", rs.getString("writing_type"));
+				if(rs.getString("writing_type").equals("0"))
+					reply_data.addContent(count +"_writing_type", "공지사항");
+				else if(rs.getString("writing_type").equals("1"))
+					reply_data.addContent(count +"_writing_type", "이벤트");
 				reply_data.addContent(count +"_title", rs.getString("title"));
 				reply_data.addContent(count +"_image", rs.getString("image"));					
 				reply_data.addContent(count +"_content", rs.getString("content"));
