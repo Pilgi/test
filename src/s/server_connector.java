@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.naming.spi.DirStateFactory.Result;
 import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
 
 
@@ -285,8 +286,14 @@ public class server_connector {
 				case "password":
 					p_st.setString(2,temp.getValue());
 					break;
-				default:
+				case "device id":
+					PreparedStatement ps_dev = con.prepareStatement("update user_info set device_id = ? where id = ?");
+					ps_dev.setString(1, temp.getValue());
+					ps_dev.setString(2, id);
+					ps_dev.executeQuery();
 					break;
+				default:
+					throw new SQLException("temp.type error in login _" + temp.getType());
 				}
 			}
 			//Query 구문을 날려 result가 도착한다면 존재하는 아이디/패스워드 이다.
@@ -444,9 +451,6 @@ public class server_connector {
 				if(temp.getType().equals("all"))
 					continue;
 				reply_data.addContent(count +"_user_id", rs.getString("user_id"));
-				reply_data.addContent(count +"_stamp_total", rs.getString("stamp_total"));
-				reply_data.addContent(count +"_stamp_available", rs.getString("stamp_available"));
-				reply_data.addContent(count +"_stamp_month", rs.getString("stamp_month"));
 				reply_data.addContent(count +"_latest_login", rs.getString("latest_login"));
 			}
 			reply_data.modifyContent(0, temp.getType(), count+"");
@@ -504,34 +508,9 @@ public class server_connector {
 
 			if(temp.getType().equals("id") || temp.getType().equals("user_num") && rs.next())
 			{
-				reply_data.addContent("stamp_total", rs.getString("stamp_total"));
 				reply_data.addContent("stamp_available", rs.getString("stamp_available"));
-				reply_data.addContent("stamp_month", rs.getString("stamp_month"));
-				
-				//total 순위 구하기
-				StringBuffer rank = new StringBuffer("select count(*) + 1 as rank from user_info where stamp_total > (Select stamp_total from user_info where user_num = ?)");
-				PreparedStatement rank_sql = con.prepareStatement(rank.toString());
-				rank_sql.setString(1, rs.getString("user_num"));
-				ResultSet rs2 = rank_sql.executeQuery();
-				if(rs2.next())
-					reply_data.addContent("rank_total",rs2.getString("rank"));
-				else
-					throw new SQLException("No result about rank total");
-				
-				//stamp_month 순위 구하기
-				rank = new StringBuffer("select count(*) + 1 as rank from user_info where stamp_month > (Select stamp_month from user_info where user_num = ?)");
-				rank_sql = con.prepareStatement(rank.toString());
-				rank_sql.setString(1, rs.getString("user_num"));
-				rs2 = rank_sql.executeQuery();
-				if(rs2.next())
-					reply_data.addContent("stamp_month",rs2.getString("rank"));
-				else
-					throw new SQLException("No result about rank stamp_month");
-
-				
 				return true;
 			}
-			//ranking 도 줘야함.
 			} 
 		catch (SQLException e) {
 				reply_data.addContent("SHOW STAMP","FAIL");
@@ -565,6 +544,71 @@ public class server_connector {
 				//test로 들어오는 data 확인하는 부분
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 				switch (temp.getValue()) {
+				case "num":
+					//total 순위 구하기
+					StringBuffer rank = new StringBuffer("select count(*) + 1 as rank from user_info where stamp_total > (Select stamp_total from user_info where user_num = ?)");
+					PreparedStatement rank_sql = con.prepareStatement(rank.toString());
+					PreparedStatement stamp_sql = con.prepareStatement("Select stamp_total from user_info where user_id = ?");
+					stamp_sql.setString(1, temp.getValue());
+					rank_sql.setString(1, temp.getValue());
+					ResultSet rs2 = rank_sql.executeQuery();
+					ResultSet rs3 = stamp_sql.executeQuery();
+					if(rs2.next()&&rs3.next())
+					{
+						reply_data.addContent("rank_total",rs2.getString("rank"));
+						reply_data.addContent("stamp_total",rs3.getString("stamp_total"));
+					}
+					else
+						throw new SQLException("No result about rank total");
+					//stamp_month 순위 구하기
+					stamp_sql = con.prepareStatement("Select stamp_total from user_info where user_num = ?");
+					stamp_sql.setString(1, temp.getValue());
+					rs3 = stamp_sql.executeQuery();
+					rank = new StringBuffer("select count(*) + 1 as rank from user_info where stamp_month > (Select stamp_month from user_info where user_num = ?)");
+					rank_sql = con.prepareStatement(rank.toString());
+					rank_sql.setString(1, temp.getValue());
+					rs2 = rank_sql.executeQuery();
+					if(rs2.next() && rs3.next())
+					{
+						reply_data.addContent("rank_month",rs2.getString("rank"));
+						reply_data.addContent("stamp_month",rs3.getString("stamp_month"));
+					}
+					else
+						throw new SQLException("No result about rank stamp_month");
+					break;
+					
+				case "id":
+					//total 순위 구하기
+					stamp_sql = con.prepareStatement("Select stamp_total from user_info where user_id = ?");
+					stamp_sql.setString(1, temp.getValue());
+					rs3 = stamp_sql.executeQuery();
+					rank = new StringBuffer("select count(*) + 1 as rank from user_info where stamp_total > (Select stamp_total from user_info where user_id = ?)");
+					rank_sql = con.prepareStatement(rank.toString());
+					rank_sql.setString(1, temp.getValue());
+					rs2 = rank_sql.executeQuery();
+					if(rs2.next()&&rs3.next())
+					{
+						reply_data.addContent("rank_total",rs2.getString("rank"));
+						reply_data.addContent("stamp_total",rs3.getString("stamp_total"));
+					}
+					else
+						throw new SQLException("No result about rank total");
+					//stamp_month 순위 구하기
+					stamp_sql = con.prepareStatement("Select stamp_total from user_info where user_id = ?");
+					stamp_sql.setString(1, temp.getValue());
+					rs3 = stamp_sql.executeQuery();
+					rank = new StringBuffer("select count(*) + 1 as rank from user_info where stamp_month > (Select stamp_month from user_info where user_num = ?)");
+					rank_sql = con.prepareStatement(rank.toString());
+					rank_sql.setString(1, temp.getValue());
+					rs2 = rank_sql.executeQuery();
+					if(rs2.next() && rs3.next())
+					{
+						reply_data.addContent("rank_month",rs2.getString("rank"));
+						reply_data.addContent("stamp_month",rs3.getString("stamp_month"));
+					}
+					else
+						throw new SQLException("No result about rank stamp_month");
+					break;
 				case "total":
 					sql = new StringBuffer("SELECT  user_num, user_id, stamp_total,IF "
 							+ "(stamp_total=@_last_stamp,@curRank:=@curRank,@curRank:=@_sequence)"
@@ -587,8 +631,18 @@ public class server_connector {
 			int count=0;
 			while(rs.next())
 			{
+				
 				count++;
 				reply_data.addContent(count +"_user_id", rs.getString("user_id"));
+				switch(temp.getValue())
+				{
+				case "total":
+					reply_data.addContent(count +"_stamp_total", rs.getString("stamp_total"));
+					break;
+				case "month":
+					reply_data.addContent(count +"_stamp_month", rs.getString("stamp_month"));
+					break;
+				}
 			}
 			
 		} 
@@ -911,6 +965,7 @@ public class server_connector {
 					return false;
 			}
 	}
+
 	/*
 	 * 메뉴를 추가할 때 실행되는 부분
 	 * 개발일 : 14.08.07 ~
@@ -1470,6 +1525,40 @@ public class server_connector {
 				return false;
 			}
 
+	}
+	protected boolean showNotice()
+	{
+		PreparedStatement p_st = null;
+	
+		try {
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"show notice 보여주기 ㄱㄱㄱ size:"+recv_data.content.size());
+			p_st = con.prepareStatement("select * from notice");
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st.executeQuery();
+			int count=0;
+			reply_data.addContent("SHOW NOTICE", "");
+			while(rs.next())
+			{
+				count++;
+				reply_data.addContent(count +"_num", rs.getString("num"));
+				reply_data.addContent(count +"_writing_type", rs.getString("writing_type"));
+				reply_data.addContent(count +"_title", rs.getString("title"));
+				reply_data.addContent(count +"_image", rs.getString("image"));					
+				reply_data.addContent(count +"_content", rs.getString("content"));
+				reply_data.addContent(count + "_write_date",rs.getString("write_date"));
+			}
+			reply_data.modifyContent(0, "SHOW NOTICE", count+"");
+			} 
+		catch (SQLException e) {
+				reply_data.addContent("SHOW NOTICE","FAIL");
+				//reply_data.addContent("ERROR CODE", e.toString());
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+		}
+		return true;
+		
 	}
 	/*
 	 * 공지사항을 추가할 때 실행되는 부분
