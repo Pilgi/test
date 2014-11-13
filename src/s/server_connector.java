@@ -106,7 +106,11 @@ public class server_connector {
 		{
 			System.out.println("server:" + s_id + " - show menu 명령 확인");
 			showMenu();
-
+		}
+		else if (recv_data.purpose.equals("DELETE MENU"))
+		{
+			System.out.println("server:" + s_id + " - delete menu 명령 확인");
+			deleteMenu();
 		}
 		else if (recv_data.purpose.equals("ID CHECK"))
 		{
@@ -1308,7 +1312,7 @@ public class server_connector {
 			{
 				category_order=rs.getInt(1);
 			}
-			p_st.setString(4, ++category_order +"");
+			p_st.setString(2, ++category_order +"");
 			
 			System.out.println("server:" + s_id + " - " +p_st.toString());
 			reply_data.addContent("DELETE MENU", "OK");						

@@ -217,7 +217,7 @@ public class server extends Thread{
 	    }
 
 	    
-		public boolean addPhoto ()
+		public data addPhoto ()
 		{
 			try {
 	     	   // code 참고 http://warmz.tistory.com/601 	   
@@ -258,7 +258,7 @@ public class server extends Thread{
 			catch(Exception e){
 				e.printStackTrace();
 			}
-			return false;
+			return null;
 			
 		}
 
@@ -291,6 +291,7 @@ public class server extends Thread{
 	        			recv_data = CtoJAVA();
 	        			if(recv_data==null)
 	        				throw new Exception();
+
 	        		}
 	        		catch (Exception e)
 	        		{
@@ -324,13 +325,7 @@ public class server extends Thread{
 	            //   oos.reset();
 	            //   oos.writeObject(sc.reply());
 	               //메뉴추가를 했을 경우 data 클래스를 받아온 후에 이미지파일도 받아온다.
-	               if(recv_data.purpose.equals("ADD MENU"))
-	               {
-// 꼭 고칠것
-	            	   //<당분간 중지>
-		             //addPhoto();             
-	            	   
-	               }
+
 	             } 
 	            
 	
@@ -371,6 +366,10 @@ public class server extends Thread{
 					//protocol 이 제대로 된 data가 들어 오는지 확인 
 					if(protocol_id.equals("S"))
 						System.out.println("c와 통신 _ 수신 시작");
+					else if(protocol_id.equals("I"))
+					{
+						return addPhoto(byteArrayToInt(b, buffer_point));
+					}
 					//null이 올때 (close socket을 받았을때)
 					else if(protocol_id.charAt(0)==0)
 						return null;
@@ -646,6 +645,42 @@ public class server extends Thread{
 			}
 		}
 		
-		
+		public data addPhoto(int f_number) {
+			// TODO Auto-generated method stub
+			try {
+		     	   // code 참고 http://warmz.tistory.com/601 	   
+		     	   // 파일명을 전송 받고 파일명 수정.
+		            //파일 이름은 reply data의 첫번째 content에 있는 menu 번호로 수정한다.
+		                String fName = String.valueOf(f_number);
+			            //String path =ClassLoader.getSystemResource("").getPath();
+			            String path = "/var/www/html/";
+			            // 파일을 생성하고 파일에 대한 출력 스트림 생성
+			            File f = new File(path +"image/"+fName+".jpg");
+			            System.out.println("그림파일 " + path +"image/"+fName+".jpg" + "에 저장하겠습니다.");
+			            //현재경로안의 iamge 폴더에 사진을 저장한다.
+			            
+			            fos = new FileOutputStream(f);
+			            System.out.println(fName + "파일을 생성하였습니다.");
+			 
+			            // 바이트 데이터를 전송받으면서 기록
+			            int len;
+			            int size = 4096;
+			            byte[] data = new byte[size];
+			            while ((len = socket.getInputStream().read(data))>0) {
+			                fos.write(data,0,len);
+			                fos.flush();
+			            }
+			            System.out.println("파일 수신 작업을 완료하였습니다.");
+			            System.out.println("받은 파일의 사이즈 : " + f.length());
+		            bos.flush();
+		            fos.close();
+		            dis.close();
+				}
+				catch(Exception e){
+					e.printStackTrace();
+				}
+				return null;
+				
+			}
 	}
 
