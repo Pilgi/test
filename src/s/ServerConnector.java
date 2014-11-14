@@ -171,6 +171,11 @@ public class ServerConnector {
 			System.out.println("server:" + s_id + " - request music 명령 확인");
 			showBalance();
 		}
+		else if (recv_data.purpose.equals("ADD BALANCE"))
+		{
+			System.out.println("server:" + s_id + " - request music 명령 확인");
+			addBalance();
+		}
 		else
 		{
 			System.out.println("purpose error");
