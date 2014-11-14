@@ -109,7 +109,7 @@ CREATE TABLE user_info
 	user_num  integer NOT NULL,
 	name  varchar(18) NOT NULL,
 	phone varchar(14) NOT NULL,
-	stamp_total  varchar(20) NULL DEFAULT 0,
+	stamp_total  integer NULL DEFAULT 0,
 	stamp_available  integer NULL DEFAULT 0,
 	stamp_month integer NULL default 0,
 	balance  integer NULL DEFAULT 0,

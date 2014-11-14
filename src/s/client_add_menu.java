@@ -48,8 +48,8 @@ public class client_add_menu {
         /*
          * 소켓 연결 완료
          */
-        data k;
-        data o;
+        Data k;
+        Data o;
         try {
         	/*
 			k = new data("JOIN");
@@ -96,7 +96,7 @@ public class client_add_menu {
 			oos.flush();
         	 */
 			System.out.println("소켓 전송 완료");
-			o = (data)ois.readObject();
+			o = (Data)ois.readObject();
 
 			//전송 테스트 (image 전송을 위해서)
 			filesender(socket,"001.JPG");

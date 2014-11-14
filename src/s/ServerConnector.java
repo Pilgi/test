@@ -20,17 +20,17 @@ import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
 /*
  * 서버와 mysql을 연결해주는 커넥터
  */
-public class server_connector {
+public class ServerConnector {
 	
-	private data recv_data;
+	private Data recv_data;
 	private String sql_url = "localhost:3306/cafe";
 	private Connection con;
-	private data reply_data = null;
+	private Data reply_data = null;
 	private int s_id;
 	Statement stmt;
 	
 	
-	server_connector(data param , int ser_id) throws ClassNotFoundException, SQLException
+	ServerConnector(Data param , int ser_id) throws ClassNotFoundException, SQLException
 	{
 		if(param == null)
 			return;
@@ -40,12 +40,12 @@ public class server_connector {
 		
 	}
 	//만약에 serv_id가 없는 상태로 들어온다면 -1을 출력
-	server_connector(data param) throws ClassNotFoundException, SQLException
+	ServerConnector(Data param) throws ClassNotFoundException, SQLException
 	{
 		this(param,-1);
 	}
 	
-	public data reply()
+	public Data reply()
 	{
 		return reply_data;
 	}
@@ -61,7 +61,7 @@ public class server_connector {
 		//querry 문을 주고 받고 하기 위한 stmt 구문.
 		stmt = con.createStatement();
 		System.out.println("server:" + s_id + " - 연결 목적:" +recv_data.purpose);
-		reply_data = new data("reply");
+		reply_data = new Data("reply");
 		if(recv_data.purpose.equals("JOIN"))
 		{
 			System.out.println("server:" + s_id + " - " +" if 문에서 join 명령 확인");
@@ -166,10 +166,15 @@ public class server_connector {
 			System.out.println("server:" + s_id + " - request music 명령 확인");
 			requestMusic();
 		}
+		else if (recv_data.purpose.equals("SHOW BALANCE"))
+		{
+			System.out.println("server:" + s_id + " - request music 명령 확인");
+			showBalance();
+		}
 		else
 		{
 			System.out.println("purpose error");
-			reply_data = new data("ERROR");
+			reply_data = new Data("ERROR");
 			reply_data.addContent("error_code", "not exist purpose");
 		}
 	}
@@ -201,7 +206,7 @@ public class server_connector {
 	{
 		int i=0;
 		int u_num = 0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("insert into user_info(user_id,password,user_num,name,sex,e_mail,birthday,phone) values (?,?,?,?,?,?,?,?)");
 		//parameter 순서 1-id / 2-password / 3-user_number / 4-name / 5-sex / 6-e-mail
 		PreparedStatement p_st = null;
@@ -283,7 +288,7 @@ public class server_connector {
 	 */
 	protected boolean loginUser(){
 		int i=0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("SELECT user_id, password FROM user_info WHERE user_id = ? and password = ?");
 		String id = null;
 		//parameter 순서 1-id / 2-password / 3-user_number / 4-name / 5-sex / 6-e-mail
@@ -355,7 +360,7 @@ public class server_connector {
 	 */
 	protected boolean idCheck(){
 		int i = 0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("SELECT user_id,FROM user_info WHERE user_id = ?");
 		String id = null;
 		//parameter 순서 1-id
@@ -411,7 +416,7 @@ public class server_connector {
 	protected boolean showUser()
 	{
 		int i=0;
-		data.data_structure temp = null ;
+		Data.data_structure temp = null ;
 		StringBuffer sql = null;
 		PreparedStatement p_st = null;
 	
@@ -503,7 +508,7 @@ public class server_connector {
 	protected boolean modifyUser()
 	{
 		int i=0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("update user_info set user_id = ? , name = ? , sex = ? ,"
 				+ "birthday = ?, e_mail = ?, phone = ?, password = ? where user_num = ?");
 		//1_user_id / 2-name / 3-sex / 4-birthday / 5-e_mail / 6-phone / 7-password / 8 - user_num
@@ -573,7 +578,7 @@ public class server_connector {
 	protected boolean deleteUser()
 	{
 		int i=0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("delete from user_info where user_num = ?");
 		//1_user_num 
 		PreparedStatement p_st = null;
@@ -619,7 +624,7 @@ public class server_connector {
 	protected boolean showStamp()
 	{
 		int i=0;
-		data.data_structure temp = null ;
+		Data.data_structure temp = null ;
 		StringBuffer sql = null;
 		PreparedStatement p_st = null;
 	
@@ -676,7 +681,7 @@ public class server_connector {
 	protected boolean showStampRanking()
 	{
 		int i=0;
-		data.data_structure temp = null ;
+		Data.data_structure temp = null ;
 		StringBuffer sql = null;
 		Statement st = null;
 
@@ -706,7 +711,7 @@ public class server_connector {
 					else
 						throw new SQLException("No result about rank total");
 					//stamp_month 순위 구하기
-					stamp_sql = con.prepareStatement("Select stamp_total from user_info where user_num = ?");
+					stamp_sql = con.prepareStatement("Select stamp_month from user_info where user_num = ?");
 					stamp_sql.setString(1, temp.getValue());
 					rs3 = stamp_sql.executeQuery();
 					rank = new StringBuffer("select count(*) + 1 as rank from user_info where stamp_month > (Select stamp_month from user_info where user_num = ?)");
@@ -739,7 +744,7 @@ public class server_connector {
 					else
 						throw new SQLException("No result about rank total");
 					//stamp_month 순위 구하기
-					stamp_sql = con.prepareStatement("Select stamp_total from user_info where user_id = ?");
+					stamp_sql = con.prepareStatement("Select stamp_month from user_info where user_id = ?");
 					stamp_sql.setString(1, temp.getValue());
 					rs3 = stamp_sql.executeQuery();
 					rank = new StringBuffer("select count(*) + 1 as rank from user_info where stamp_month > (Select stamp_month from user_info where user_num = ?)");
@@ -807,7 +812,7 @@ public class server_connector {
 	protected boolean showCateogory()
 	{	
 		int count=0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("SELECT DISTINCT category FROM menu");
 		PreparedStatement p_st = null;
 		try {
@@ -843,7 +848,7 @@ public class server_connector {
 	protected boolean showMenu()
 	{	
 		int i=0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("SELECT menu_num,menu_name,size,price FROM menu WHERE category = ?");
 		//parameter 순서 1 - category 이름
 		String category = null;
@@ -903,7 +908,7 @@ public class server_connector {
 	protected boolean showDetailMenu()
 	{
 		int i=0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("SELECT menu_name,category,size,price,detail,image FROM menu WHERE menu_num = ?");
 		String menu_num = null;
 		//parameter 순서 1-id / 2-password / 3-user_number / 4-name / 5-sex / 6-e-mail
@@ -964,7 +969,7 @@ public class server_connector {
 	{
 		int i = 0 , order_num = 0, total_count = 0 , item_count=0 , total_price = 0;
 		int same_menu = 0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("insert into order_info(order_num, num_total_item, user_num, total_price, payment, table_name, etc) values (?,?,?,?,?,?,?,?)");
 		//parameter 순서 1 - order_num / 2 - num_totatl_item / 3 - user_num / 4 - total_price
 		// 5 - payment /  6 - table_name / 7 - etc
@@ -1120,7 +1125,7 @@ public class server_connector {
 		int i=0;
 		int 	menu_num = 0;
 		String img_dir = "/image/";
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("insert into menu(menu_name, category, price, menu_num, detail, thumbnail,  image , category_order,size) values (?,?,?,?,?,?,?,?,?)");
 		//parameter 순서 1-menuname / 2-category / 3-price / 4-menu_num / 5-detail / 6-thumbnail / 7-image / 8-category_odrer
 		PreparedStatement p_st = null;
@@ -1197,7 +1202,7 @@ public class server_connector {
 	{
 		int i=0;
 		int 	menu_num = 0, category_num = 0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("update menu set menu_name = ? , category = ? , price = ? ,"
 				+ "detail = ?, category_order = ?, size = ? where menu_num = ?");
 		//parameter 순서 1-menuname / 2-category / 3-price /  4-detail / 5-category_odrer / 6-size / 7-menu_num
@@ -1281,7 +1286,7 @@ public class server_connector {
 	{
 		int i=0;
 		int 	menu_num = 0,category_order = 0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("update menu set category = ? category_order = ? where menu_num = ?");
 		//parameter 순서 1- category / 2 - category_order / 3 - munu_num
 		PreparedStatement p_st = null;
@@ -1338,7 +1343,7 @@ public class server_connector {
 	{
 		int i=0;
 		String total = null,available = null,month = null,user_num = null;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = null;
 		//parameter 순서 1-menu_num
 		PreparedStatement p_st = null;
@@ -1413,7 +1418,7 @@ public class server_connector {
 	protected boolean showBalance()
 	{
 		int i=0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("SELECT balance WHERE usre_num = ?");
 		String id = null;
 		//parameter 순서 1-user_num
@@ -1481,7 +1486,7 @@ public class server_connector {
 
 		int i=0;
 		int u_num = 0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("insert into employee(employee_id,employee_password,employee_num,name,phone) values (?,?,?,?,?)");
 		//parameter 순서 1-id / 2-password / 3-employee_number / 4-name / 5-phone
 		PreparedStatement p_st = null;
@@ -1538,7 +1543,7 @@ public class server_connector {
 	protected boolean modfiyEmployee()
 	{
 		int i=0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("update employee set employee_id = ? , employee_password = ? ,"
 				+ "name = ?, phone = ? where employee_num = ?");
 		
@@ -1612,7 +1617,7 @@ public class server_connector {
 	 */
 	protected boolean loginEmployee(){
 		int i=0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("SELECT employee_id, employee_password FROM employee WHERE employee_id = ? and employee_password = ?");
 		String id = null;
 		//parameter 순서 1-id / 2-password 
@@ -1717,7 +1722,7 @@ public class server_connector {
 		int i=0;
 		int 	notice_num = 0;
 		String img_dir = "/notice/";
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("insert into notice(num, writing_type, title, image, content) values (?, ?, ?, ?, ?)");
 		//parameter 순서 1-notice_num / 2 - writing_type / 3 - title / 4 - image / 5 - content
 		PreparedStatement p_st = null;
@@ -1779,7 +1784,7 @@ public class server_connector {
 	{
 		int i=0;
 		String	notice_num = null;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("update notice set writing_type = ? , title = ? , image = ? ,"
 				+ "content = ? where _num = ?");
 		//parameter 순서 1- writing  type  / 2-title
@@ -1838,7 +1843,7 @@ public class server_connector {
 	protected boolean deleteNotice()
 	{
 		int i=0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("delete from notice where num = ?");
 		//parameter 순서 1- num
 		PreparedStatement p_st = null;
@@ -1888,7 +1893,7 @@ public class server_connector {
 	protected boolean requestMusic()
 	{
 		int i=0;
-		data.data_structure temp ;
+		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("insert into music(user_num, message) values (?, ?)");
 		PreparedStatement p_st = null;
 		String user_num=null;

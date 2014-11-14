@@ -24,7 +24,7 @@ import java.sql.SQLException;
 import java.util.Date;
 
 
-public class server extends Thread{
+public class Server extends Thread{
 	
 	/*
 	 * 서버쪽이 2개일 필요가 없을듯? 1개에서 포트번호 2개 받아서 java용 C용 커넥션을 만들 수 있으면
@@ -33,8 +33,8 @@ public class server extends Thread{
 	 */
 	 public static void main(String args[]) {
 			int port = 6795;
-			server server = new server( port );
-			server server2 = new server( 6799 );
+			Server server = new Server( port );
+			Server server2 = new Server( 6799 );
 			server.start();
 			server2.start();
 	    }
@@ -50,7 +50,7 @@ public class server extends Thread{
 	    static int num_of_server = 0;
 	    int s_num;
 	    
-	    public server( int port ) {
+	    public Server( int port ) {
 	    	super("Thread" + num_of_server);
 	    	s_num = num_of_server++;
 	    	this.port = port;
@@ -122,15 +122,15 @@ public class server extends Thread{
 	    DataInputStream dis = null;
 	    FileOutputStream fos = null;
 	    BufferedOutputStream bos = null;
-	    server_connector sc;
+	    ServerConnector sc;
 	    static CallBackSender cbs;
 	    //client id!
 		int id;
-	    server server;
+	    Server server;
 	    static int s_id = 0;
 	   
 
-	    public Server2Connection(Socket socket, int id, server server) {
+	    public Server2Connection(Socket socket, int id, Server server) {
 	    	// socket establish 부분
 			this.socket = socket;
 			this.id = id;
@@ -152,14 +152,14 @@ public class server extends Thread{
 
 	    public void run() {
 	    	//client에서 보낸 data
-	        data recv_data;
+	        Data recv_data;
 	        try {
 			    ois=new ObjectInputStream(sis);
 			    oos = new ObjectOutputStream(sos);
 	        	while(true){
 	        		try
 	        		{
-	        			recv_data = (data)ois.readObject();
+	        			recv_data = (Data)ois.readObject();
 	        		}
 	        		catch (Exception e)
 	        		{
@@ -188,7 +188,7 @@ public class server extends Thread{
 	            	   //e.printStackTrace();
 	            	   System.out.println("CallBackSender error :" + e);
 	               }
-	               sc = new server_connector(recv_data,s_id);
+	               sc = new ServerConnector(recv_data,s_id);
 	               oos.reset();
 	               oos.writeObject(sc.reply());
 	               //메뉴추가를 했을 경우 data 클래스를 받아온 후에 이미지파일도 받아온다.
@@ -217,7 +217,7 @@ public class server extends Thread{
 	    }
 
 	    
-		public data addPhoto ()
+		public Data addPhoto ()
 		{
 			try {
 	     	   // code 참고 http://warmz.tistory.com/601 	   
@@ -265,14 +265,14 @@ public class server extends Thread{
 
 }
 	interface CallBackSender{
-		public void send(data d);
+		public void send(Data d);
 	}
 	class Server2Connection2 extends Server2Connection implements CallBackSender{
 
 		protected BufferedInputStream bis;
 	    protected BufferedOutputStream bos = null;
-		public Server2Connection2(Socket socket, int id, s.server server) {
-			super(socket, id, server);
+		public Server2Connection2(Socket socket, int id, Server serve) {
+			super(socket, id, serve);
 			// TODO Auto-generated constructor stub
     		System.out.println("서버223232!!");
             bos = new BufferedOutputStream(sos);
@@ -282,7 +282,7 @@ public class server extends Thread{
 	    @SuppressWarnings("null")
 		public void run() {
 	    	//client에서 보낸 data
-	        data recv_data = null;
+	        Data recv_data = null;
 	        try {
 	        	while(true){
 	        		System.out.println("서버2222222!!");
@@ -309,7 +309,7 @@ public class server extends Thread{
 		    	   }
 	               if(recv_data !=null)
 	            	   System.out.println("server:" + s_id +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
-	               sc = new server_connector(recv_data,s_id);
+	               sc = new ServerConnector(recv_data,s_id);
 
 		             
 	               /*
@@ -346,9 +346,9 @@ public class server extends Thread{
 
 
 		//BUffer에서 받아온 data를 data 클래스로 변경해줘야 함	    
-		private data CtoJAVA(){
+		private Data CtoJAVA(){
 			// TODO Auto-generated method stub
-			data recvdata = null;
+			Data recvdata = null;
 			try{
 				byte[] b = new byte [1024];
 				int size = bis.read(b);
@@ -382,7 +382,7 @@ public class server extends Thread{
 					buffer_point += 4;
 					if(data_type!=1)
 						throw new Exception("1이 안왔음;" + data_type);
-					recvdata = new data(CharConversion.E2K(new String(b,buffer_point,data_length,"8859_1")));
+					recvdata = new Data(CharConversion.E2K(new String(b,buffer_point,data_length,"8859_1")));
 					buffer_point += data_length;
 							
 					data_type = byteArrayToInt(b, buffer_point);
@@ -459,7 +459,7 @@ public class server extends Thread{
 		}
 
 		//data클래스를 buffer 형태로 보내줌
-		private boolean JAVAtoC(data recv_data)
+		private boolean JAVAtoC(Data recv_data)
 		{
 			try{
 				ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -580,7 +580,7 @@ public class server extends Thread{
 		}
 
 		@Override
-		public void send(data d) {
+		public void send(Data d) {
 			// TODO Auto-generated method stub
 			// bytestream을 통해 전송할 부분을 구현하면 된다.
 			String hostname = "127.0.0.1";
@@ -645,7 +645,7 @@ public class server extends Thread{
 			}
 		}
 		
-		public data addPhoto(int f_number) {
+		public Data addPhoto(int f_number) {
 			// TODO Auto-generated method stub
 			try {
 		     	   // code 참고 http://warmz.tistory.com/601 	   
