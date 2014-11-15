@@ -62,122 +62,109 @@ public class ServerConnector {
 		stmt = con.createStatement();
 		System.out.println("server:" + s_id + " - 연결 목적:" +recv_data.purpose);
 		reply_data = new Data("reply");
-		if(recv_data.purpose.equals("JOIN"))
+		System.out.println("server:"+ s_id + " - "+ recv_data.purpose +" 명령 확인");
+		switch(recv_data.purpose)
 		{
-			System.out.println("server:" + s_id + " - " +" if 문에서 join 명령 확인");
-			//joinuser가 false면 query 전달 부분에 문제가 있는것 -> 관련된 내용을 client로 보내줄 것.
+		case "JOIN":
 			joinUser();
-		}
-		else if (recv_data.purpose.equals("LOGIN"))
-		{
-			System.out.println("server:"+ s_id + " - login 명령 확인");
+			break;
+		case "LOGIN":
 			loginUser();
-		}
-		else if (recv_data.purpose.equals("SHOW USER"))
-		{
-
-			System.out.println("server:"+ s_id + " - show user 명령 확인");
-			showUser();
-		}
-		else if (recv_data.purpose.equals("MODIFY USER"))
-		{
-
-			System.out.println("server:"+ s_id + " - show user 명령 확인");
-			modifyUser();
-		}
-		else if (recv_data.purpose.equals("DELETE USER"))
-		{
-
-			System.out.println("server:"+ s_id + " - show user 명령 확인");
-			deleteUser();
-		}
-		else if (recv_data.purpose.equals("ADD MENU"))
-		{
-			System.out.println("server:" + s_id + " - add menu 명령 확인");
-			addMenu();
-		}
-		else if (recv_data.purpose.equals("SHOW DETAIL"))
-		{
-			System.out.println("server:" + s_id + " - show detail 명령 확인");
-			showDetailMenu();
-
-		}
-		else if (recv_data.purpose.equals("SHOW MENU"))
-		{
-			System.out.println("server:" + s_id + " - show menu 명령 확인");
-			showMenu();
-		}
-		else if (recv_data.purpose.equals("DELETE MENU"))
-		{
-			System.out.println("server:" + s_id + " - delete menu 명령 확인");
-			deleteMenu();
-		}
-		else if (recv_data.purpose.equals("ID CHECK"))
-		{
-			System.out.println("server:" + s_id + " - id check 명령 확인");
+			break;
+		case "ID CHECK":
 			idCheck();
-
-		}
-		else if (recv_data.purpose.equals("ADD ORDER"))
-		{
-			System.out.println("server:" + s_id + " - add order 명령 확인");
-			orderMenu();
-
-		}
-		else if (recv_data.purpose.equals("SHOW CATEGORY"))
-		{
-			System.out.println("server:" + s_id + " - show category 명령 확인");
-			showCateogory();
-
-		}
-		else if (recv_data.purpose.equals("SHOW STAMP"))
-		{
-			System.out.println("server:" + s_id + " - show stamp 명령 확인");
+			break;
+		case "SHOW USER":
+			showUser();
+			break;
+		case "MODIFY USER":
+			modifyUser();
+			break;
+		case "DELETE USER":
+			deleteUser();
+			break;
+		case "SHOW STAMP":
 			showStamp();
-
-		}
-		else if (recv_data.purpose.equals("SHOW STAMPRANKING"))
-		{
-			System.out.println("server:" + s_id + " - show stamp ranking 명령 확인");
+			break;
+		case "SHOW STAMPRANKING":
 			showStampRanking();
-		}
-		else if (recv_data.purpose.equals("ADD NOTICE"))
-		{
-			System.out.println("server:" + s_id + " - add notice 명령 확인");
-			addNotice();
-		}
-		else if (recv_data.purpose.equals("SHOW NOTICE"))
-		{
-			System.out.println("server:" + s_id + " - add notice 명령 확인");
-			showNotice();
-		}
-		else if (recv_data.purpose.equals("MODIFY NOTICE"))
-		{
-			System.out.println("server:" + s_id + " - modify notice 명령 확인");
-			modifyNotice();
-		}
-		else if (recv_data.purpose.equals("DELETE NOTICE"))
-		{
-			System.out.println("server:" + s_id + " - delete notice 명령 확인");
-			deleteNotice();
-		}
-		else if (recv_data.purpose.equals("REQUEST MUSIC"))
-		{
-			System.out.println("server:" + s_id + " - request music 명령 확인");
-			requestMusic();
-		}
-		else if (recv_data.purpose.equals("SHOW BALANCE"))
-		{
-			System.out.println("server:" + s_id + " - request music 명령 확인");
-			showBalance();
-		}
-		else if (recv_data.purpose.equals("ADD BALANCE"))
-		{
-			System.out.println("server:" + s_id + " - request music 명령 확인");
+			break;
+		case "SHOW CATEGORY":
+			showCateogory();
+			break;
+		case "SHOW MENU":
+			showMenu();
+			break;
+		case "SHOW DETAIL":
+			showDetailMenu();
+			break;
+		case "ORDER MENU":
+			orderMenu();
+			break;
+		case "SHOW PAYMENT":
+			showPayment();
+			break;
+		case "PAY ORDER":
+			payOrder();
+			break;
+		case "ADD MENU":
+			addMenu();
+			break;
+		case "MODIFY MENU":
+			modifyMenu();
+			break; 
+		case "DELETE MENU":
+			deleteMenu();
+			break;
+		case "ADD STAMP":
+			addStamp();
+			break;
+		case "ADD BALANCE":
 			addBalance();
-		}
-		else
-		{
+			break;
+		case "SHOW BALANCE":
+			showBalance();
+			break;
+		case "MAKE COUPON":
+			makeCoupon();
+			break;
+		case "GIFT STAMP":
+			giftStamp();
+			break;
+		case "GIFT COUPON":
+			giftCoupon();
+			break;
+		case "USE COUNPON":
+			useCoupon();
+			break;
+		case "ADD EMPLOYEE":
+			addEmployee();
+			break;
+		case "MODIFY EMPLOYEE":
+			modfiyEmployee();
+			break;
+		case "DELETE EMPLOYTEE":
+			deleteEmployee();
+			break;
+		case "LOGIN EMPLOYTEE":
+			loginEmployee();
+			break;
+		case "SHOW NOTICE":
+			showNotice();
+			break;
+		case "ADD NOTICE":
+			addNotice();
+			break;
+		case "MODIFY NOTICE":
+			modifyNotice();
+			break;
+		case "DELETE NOTICE":
+			deleteNotice();
+			break;
+		case "REQUEST MUSIC":
+			requestMusic();
+			break;
+		default:
 			System.out.println("purpose error");
 			reply_data = new Data("ERROR");
 			reply_data.addContent("error_code", "not exist purpose");
@@ -688,6 +675,7 @@ public class ServerConnector {
 		int i=0;
 		Data.data_structure temp = null ;
 		StringBuffer sql = null;
+		StringBuffer sql2 = null;
 		Statement st = null;
 
 		try {
@@ -771,7 +759,7 @@ public class ServerConnector {
 							+ "(SELECT @curRank := 1, @_sequence:=1, @_last_stamp:=0) r ORDER BY  stamp_total DESC LIMIT 10");
 					break;
 				case "month":
-					sql = new StringBuffer("SELECT  user_num, user_id, stamp_total,IF "
+					sql2 = new StringBuffer("SELECT  user_num, user_id, stamp_month,IF "
 							+ "(stamp_month=@_last_stamp,@curRank:=@curRank,@curRank:=@_sequence)"
 							+ "AS rank, @_sequence:=@_sequence+1,@_last_stamp:=stamp_month FROM user_info,"
 							+ "(SELECT @curRank := 1, @_sequence:=1, @_last_stamp:=0) r ORDER BY  stamp_month DESC LIMIT 10");
@@ -788,17 +776,16 @@ public class ServerConnector {
 			{
 				count++;
 				reply_data.addContent(count +"_user_id", rs.getString("user_id"));
-				switch(temp.getValue())
-				{
-				case "total":
-					reply_data.addContent(count +"_stamp_total", rs.getString("stamp_total"));
-					break;
-				case "month":
-					reply_data.addContent(count +"_stamp_month", rs.getString("stamp_month"));
-					break;
-				}
+				reply_data.addContent(count +"_stamp_total", rs.getString("stamp_total"));
 			}
-			
+			rs = st.executeQuery(sql2.toString());
+			count=0;
+			while(rs.next())
+			{
+				count++;
+				reply_data.addContent(count +"_user_id", rs.getString("user_id"));
+				reply_data.addContent(count +"_stamp_month", rs.getString("stamp_month"));
+			}
 		} 
 		catch (SQLException e) {
 			reply_data.addContent("SHOW STAMP","FAIL");
@@ -811,13 +798,12 @@ public class ServerConnector {
 	}
 	/*
 	 * category를 불러올때 사용되는 부분
-	 * 개발일 : 14.08.14 
+	 * 개발일 : 14.11.11 
 	 * 개발자 : 김필기
 	 */
 	protected boolean showCateogory()
 	{	
 		int count=0;
-		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("SELECT DISTINCT category FROM menu");
 		PreparedStatement p_st = null;
 		try {
@@ -1119,7 +1105,233 @@ public class ServerConnector {
 					return false;
 			}
 	}
+	/*
+	 * MFC 처음 켰을때 주문 정보 요청용
+	 * 개발일 : 14.11.15
+	 * 개발자 : 김필기
+	 */
+	protected boolean showOrder()
+	{
+		int i = 0 ;
+		int same_menu = 0;
+		Data.data_structure temp ;
+		PreparedStatement p_st = null;
+		try {
+			System.out.println("server:" + s_id + " - " +"show order 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			p_st = con.prepareStatement("SELECT * FROM order_info where payment = 0 and complete = ?");
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 LOGIN 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type = " + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "complete":
+					p_st.setString(1,temp.getValue());
+					break;
+				default:
+					throw new SQLException("invalid type!! in show order__"+temp.getType());
+				}
+			}
+			ResultSet rs = p_st.executeQuery();
+			while(rs.next())
+			{
+				reply_data.addContent("ORDER COUNT", rs.getString("num_total_item"));
+				reply_data.addContent("table name", rs.getString("table_name"));
+				String user_num = rs.getString("user_num");
+				String order_num = rs.getString("order_num");
+				String temp_menu_name = null;
+				ResultSet rs2 = stmt.executeQuery("select name from user_num where user_num ='"+ user_num +"'");
+				if(rs2.next())
+					reply_data.addContent("name", rs2.getString("name"));
+				//시간 받아오기
+				rs2 = stmt.executeQuery("select order_time from order_info whrer order_num ='"+ order_num +"'");
+				if(rs2.next())
+					reply_data.addContent("order_time", rs2.getString("order_time"));
+				/*
+				 * while 문으로 주문받은 것들 reply에 넣을것.
+				 */
+				//메뉴번호로 오더해서 받아올 것.
+				rs2 = stmt.executeQuery("select menu_name from order_list where order_num = '"+ order_num +"'");
+				while(rs2.next())
+				{
+					if(temp_menu_name.equals(rs2.getString("menu_name")))
+					{
+						reply_data.deleteContent(reply_data.getContentSize());
+						reply_data.addContent("menu_name",temp_menu_name);
+						reply_data.addContent("menu_count",++same_menu+"");
+					}
+					else
+					{
+						same_menu = 1;
+						temp_menu_name = rs2.getString("menu_name");
+						reply_data.addContent("menu_name",temp_menu_name);
+						reply_data.addContent("menu_count",same_menu+"");
+					}
+					
+				}
 
+				
+			}
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
+	}
+	/*
+	 * 결제 해야 하는 금액 , 결제 된 금액 표시
+	 * 개발일 : 14.11.15
+	 * 개발자 : 김필기
+	 */
+	protected boolean showPayment()
+	{
+		int i=0;
+		String order_num = "";
+		Data.data_structure temp ;
+		PreparedStatement p_st = null;
+		PreparedStatement p_st2 = null;
+		try {
+			p_st = con.prepareStatement("select sum(price) from order_list where order_num = ? and payment = '0'");
+			p_st2 = con.prepareStatement("select sum(price) from order_list where order_num = ? and payment = '1'");
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"payMenu ㄱㄱㄱ size:"+recv_data.content.size());
+			
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 mdofiy menu 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
+				switch (temp.getType()) {
+				case "order_num":
+					order_num = temp.getValue();
+					p_st.setString(1,order_num);
+					p_st2.setString(1, order_num);
+					break;
+				default :
+					throw new SQLException("invalid type!! in show payment__"+temp.getType());
+				}
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st.executeQuery();
+			ResultSet rs2 = p_st2.executeQuery();
+			if(rs.next() && rs2.next())
+			{
+				reply_data.addContent("deferred payment",rs.getString("price"));
+				reply_data.addContent("prepaid ",rs.getString("price"));
+			}
+			else
+				throw new SQLException("No ordered information!");
+			
+			return true;
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
+	}
+	/*
+	 * 결제 한 주문정보 수정하기
+	 * 개발일 : 14.11.15
+	 * 개발자 : 김필기
+	 */
+	protected boolean payOrder()
+	{
+		int i=0;
+		int price = 0, ordered_price = 0;
+		Data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("update order_list set payment = ? , payment_option = ?  where order_num = ?");
+		PreparedStatement p_st = null;
+		PreparedStatement p_st2 = null;
+		String order_num = "";
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			p_st2 = con.prepareStatement("SELECT SUM(price) FROM odre_list WHERE order_num = ?");
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"payMenu ㄱㄱㄱ size:"+recv_data.content.size());
+			
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 mdofiy menu 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
+				switch (temp.getType()) {
+				case "order_num":
+					order_num = temp.getValue();
+					p_st.setString(2,order_num);
+					p_st2.setString(1, order_num);
+					break;
+				case "price":
+					price = Integer.getInteger(temp.getValue());
+					break;
+				default :
+					throw new SQLException("invalid type!! in pay Order__"+temp.getType());
+				}
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st2.executeQuery();
+			if(rs.next())
+			{
+				ordered_price=Integer.getInteger(rs.getString("price"));
+			}
+			if(ordered_price != price)
+				throw new SQLException("No ordered information!");
+			p_st2 = con.prepareStatement("update order_info set payment = 1 where order_num = ?");
+			p_st.setString(1,"1");
+			p_st.setString(2,"직접결제");
+			if(p_st.execute())
+			{
+				p_st2.setString(1, order_num);
+				//결제 완료로 order_info 수정
+				p_st2.execute();
+				//stamp 수정
+				p_st2 = con.prepareStatement("select user_num from order_info where order_num = ?");
+				p_st2.setString(1, order_num);
+				rs = p_st2.executeQuery();
+				if(!(rs.next()))
+					throw new SQLException("user num을 못가져왔습니다");
+				p_st2 = con.prepareStatement("select user_num from order_info where order_num = ?");
+				String user_num = rs.getString("user_num");
+				
+				//가져온 user_num 으로 total count를 구하고 stamp를 total count 만큼 증가시켜준다.
+				Statement stmt = con.createStatement();
+				rs = stmt.executeQuery("select total_count from order_info where user_num = '" + user_num + "'");
+				if(!(rs.next()))
+					throw new SQLException("total_count를 못가져왔습니다");
+				int total_count = rs.getInt("total_count");
+				stmt.execute("update user_info set stamp_total=stamp_total+"+total_count
+						+ " ,stamp_available=stamp_available+"+total_count+",stamp_month=stamp_month+"+total_count
+						+" where user_num = '"+user_num+"'");
+			}
+			
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
+	}
 	/*
 	 * 메뉴를 추가할 때 실행되는 부분
 	 * 개발일 : 14.08.07 ~
@@ -1171,7 +1383,7 @@ public class ServerConnector {
 					p_st.setString(9,temp.getValue());
 					break;
 				default:
-					break;
+					throw new SQLException("invalid type!! in add menu__"+temp.getType());
 				}
 			}
 		//column 에 있는 menu num중 최대값을 가져와 그위에 +1을 해준다. (menu 번호의 중복을 막기 위해서)
