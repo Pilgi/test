@@ -175,6 +175,9 @@ public class ServerConnector {
 		case "MODIFY PASSWORD":
 			modifyPassword();
 			break;
+		case "FIND PASSWORD":
+			findPassword();
+			break;
 		default:
 			System.out.println("purpose error ___ " + recv_data.purpose);
 			reply_data = new Data("ERROR");
