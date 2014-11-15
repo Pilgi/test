@@ -111,9 +111,10 @@ public class Client {
 			k.addContent("total", "total");
 			k.addContent("month", "month");
 			*/
-			k = new Data("ADD EMPLOYEE");
-			k.addContent("name", "김필기");
-			k.addContent("phone", "010-8334-4555");
+			k = new Data("ADD BALANCE");
+			k.addContent("user_num", "2");
+			k.addContent("employe_num", "141115001");
+			k.addContent("increase", "8000");
 
 			oos.reset();
 			oos.writeObject(k);

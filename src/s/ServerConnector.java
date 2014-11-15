@@ -148,6 +148,9 @@ public class ServerConnector {
 		case "CHECK EMPLOYEE":
 			loginEmployee();
 			break;
+		case "SHOW EMPLOYEE":
+			showEmployee();
+			break;
 		case "SHOW NOTICE":
 			showNotice();
 			break;
@@ -164,7 +167,7 @@ public class ServerConnector {
 			requestMusic();
 			break;
 		default:
-			System.out.println("purpose error");
+			System.out.println("purpose error ___ " + recv_data.purpose);
 			reply_data = new Data("ERROR");
 			reply_data.addContent("error_code", "not exist purpose");
 		}
@@ -280,7 +283,7 @@ public class ServerConnector {
 	protected boolean loginUser(){
 		int i=0;
 		Data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("SELECT user_id, password FROM user_info WHERE user_id = ? and password = ?");
+		StringBuffer sql = new StringBuffer("SELECT user_id, password, user_num FROM user_info WHERE user_id = ? and password = ?");
 		String id = null;
 		//parameter 순서 1-id / 2-password / 3-user_number / 4-name / 5-sex / 6-e-mail
 		PreparedStatement p_st = null;
@@ -319,6 +322,7 @@ public class ServerConnector {
 			if(rs.next())
 			{
 				reply_data.addContent("LOGIN", "OK");
+				reply_data.addContent("user_num",rs.getString("user_num"));
 				return true;
 			}
 			else
@@ -1037,7 +1041,7 @@ public class ServerConnector {
 					//주문 정보 4개가 다 들어왔을 경우에
 					if(item_count>4)
 					{
-						if(Integer.getInteger(item_num)>total_count)
+						if(Integer.parseInt(item_num)>total_count)
 							throw new SQLException("error: item num is larger than total item number!!");
 						item_count = 0;
 						p_st2.setString(1,order_num+"");
@@ -1048,9 +1052,9 @@ public class ServerConnector {
 							p_st2.setString(7,rs.getString("menu_name"));
 							p_st2.setString(8,rs.getString("size"));
 							p_st2.setString(9,rs.getString("price"));
-							total_price = total_price + Integer.getInteger(rs.getString("price"));
+							total_price = total_price + Integer.parseInt(rs.getString("price"));
 						}
-						item_num = (Integer.getInteger(item_num) + 1) + "";
+						item_num = (Integer.parseInt(item_num) + 1) + "";
 						//order list에 추가
 						p_st2.executeQuery();
 					}
@@ -1275,7 +1279,7 @@ public class ServerConnector {
 					p_st2.setString(1, order_num);
 					break;
 				case "price":
-					price = Integer.getInteger(temp.getValue());
+					price = Integer.parseInt(temp.getValue());
 					break;
 				default :
 					throw new SQLException("invalid type!! in pay Order__"+temp.getType());
@@ -1286,7 +1290,7 @@ public class ServerConnector {
 			ResultSet rs = p_st2.executeQuery();
 			if(rs.next())
 			{
-				ordered_price=Integer.getInteger(rs.getString("price"));
+				ordered_price=Integer.parseInt(rs.getString("price"));
 			}
 			if(ordered_price != price)
 				throw new SQLException("No ordered information!");
@@ -1440,7 +1444,7 @@ public class ServerConnector {
 				case "category":
 					//category 내에서 순서를 조정할때 menu_num과 상관없이 정렬하기 위해서 category_order를 사용한다.
 					p_st.setString(2,temp.getValue());
-					category_num = Integer.getInteger(temp.getValue());
+					category_num = Integer.parseInt(temp.getValue());
 					break;
 				case "price":
 					p_st.setString(3,temp.getValue());
@@ -1452,7 +1456,7 @@ public class ServerConnector {
 					p_st.setString(6,temp.getValue());
 					break;
 				case "menu_num":
-					menu_num = Integer.getInteger(temp.getValue());
+					menu_num = Integer.parseInt(temp.getValue());
 					p_st.setString(7, temp.getValue());
 					break;
 				//category order가 0인 경우는 카테고리를 바꾸면서 새로운 카테고리로 들어갈 경우
@@ -1517,7 +1521,7 @@ public class ServerConnector {
 
 				switch (temp.getType()) {
 				case "menu_num":
-					menu_num = Integer.getInteger(temp.getValue());
+					menu_num = Integer.parseInt(temp.getValue());
 					p_st.setString(3, temp.getValue());
 					p_st.setString(1, "0");
 					break;
@@ -1590,9 +1594,9 @@ public class ServerConnector {
 			
 			if(rs.next())
 			{
-				total = (Integer.getInteger(rs.getString("stamp_total")) + 1)+"";
-				available = (Integer.getInteger(rs.getString("stamp_available")) + 1)+"";
-				month = (Integer.getInteger(rs.getString("stamp_month")) + 1)+"";
+				total = (Integer.parseInt(rs.getString("stamp_total")) + 1)+"";
+				available = (Integer.parseInt(rs.getString("stamp_available")) + 1)+"";
+				month = (Integer.parseInt(rs.getString("stamp_month")) + 1)+"";
 				user_num = rs.getString("user_num");
 			}
 			else
@@ -1648,6 +1652,7 @@ public class ServerConnector {
 					p_st.setString(2,temp.getValue());
 					p_st2.setString(1,temp.getValue());
 					PreparedStatement p_st3 = con.prepareStatement("select balance from user_info where user_num = ?");
+					p_st3.setString(1, temp.getValue());
 					ResultSet r_s = p_st3.executeQuery();
 					if(r_s.next())
 					{
@@ -1656,15 +1661,18 @@ public class ServerConnector {
 					break;
 				case "increase":
 					p_st2.setString(2,temp.getValue());
-					balance = balance + Integer.getInteger(temp.getValue());
+					System.out.println(temp.getValue());
+					balance = balance + Integer.parseInt(temp.getValue());
 					p_st2.setString(3,balance+"");
 					p_st.setString(1,balance+"");
 					break;
 				case "employee_num":
 					p_st2.setString(4,temp.getValue());
-					break;
-				case "employee_name":
-					p_st2.setString(5,temp.getValue());
+					p_st3 = con.prepareStatement("select name from employee where employee_num = ?");
+					p_st3.setString(1, temp.getValue());
+					r_s = p_st3.executeQuery();
+					if(r_s.next())
+						p_st2.setString(5,r_s.getString("name"));
 					break;
 				default:
 					break;
@@ -1932,7 +1940,7 @@ public class ServerConnector {
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 				switch (temp.getType()) {
 				case "employee_num":
-					p_st.setString(1,id);
+					p_st.setString(1,temp.getValue());
 					break;
 				default:
 					throw new SQLException("emplyee_num 만 type으로 보낼 수 있습니다.");					
