@@ -689,7 +689,7 @@ public class ServerConnector {
 				temp = recv_data.getContent(i++);
 				//test로 들어오는 data 확인하는 부분
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
-				switch (temp.getValue()) {
+				switch (temp.getType()) {
 				case "num":
 					//total 순위 구하기
 					StringBuffer rank = new StringBuffer("select count(*) + 1 as rank from user_info where stamp_total > (Select stamp_total from user_info where user_num = ?)");
@@ -1064,6 +1064,7 @@ public class ServerConnector {
 
 			p_st.setString(4, total_price+"");
 			System.out.println("server:" + s_id + " - " +p_st.toString());
+			reply_data.addContent("ORDER NUM", order_num+"");
 			reply_data.addContent("ORDER COUNT", total_count+"");
 			reply_data.addContent("table name", table_name);
 			ResultSet rs2 = stmt.executeQuery("select name from user_num where user_num ='"+ user_num +"'");
@@ -1974,7 +1975,6 @@ public class ServerConnector {
 	 */
 	protected boolean showEmployee()
 	{
-		Data.data_structure temp = null ;
 		PreparedStatement p_st = null;
 	
 		try {
@@ -2008,12 +2008,30 @@ public class ServerConnector {
 	
 	protected boolean showNotice()
 	{
+		int i = 0;
 		PreparedStatement p_st = null;
-	
+		Data.data_structure temp = null ;
 		try {
 			//정상독작인지 test 하는 부분
 			System.out.println("server:" + s_id + " - " +"show notice 보여주기 ㄱㄱㄱ size:"+recv_data.content.size());
-			p_st = con.prepareStatement("select * from notice");
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 LOGIN 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "notice_num":
+					p_st = con.prepareStatement("select * from notice where num = ?");
+					p_st.setString(1,temp.getValue());
+					break;
+				case "all":
+					p_st = con.prepareStatement("select * from notice");
+					break;
+				default:
+					throw new SQLException("notice num_만 type으로 보낼 수 있습니다.");					
+				}
+			}
 			System.out.println("server:" + s_id + " - " +p_st.toString());
 			ResultSet rs = p_st.executeQuery();
 			int count=0;
@@ -2032,6 +2050,9 @@ public class ServerConnector {
 				reply_data.addContent(count + "_write_date",rs.getString("write_date"));
 			}
 			reply_data.modifyContent(0, "SHOW NOTICE", count+"");
+			if(temp.getType().equals(("notice_num")))
+				reply_data.modifyContent(0, "SHOW NOTICE", "OK");
+				
 			} 
 		catch (SQLException e) {
 				reply_data.addContent("SHOW NOTICE","FAIL");
