@@ -136,9 +136,7 @@ public class Server extends Thread{
 			this.socket = socket;
 			this.id = id;
 			this.server = server;
-			Calendar calendar = Calendar.getInstance();
-			SimpleDateFormat dateformat = new SimpleDateFormat("yyyy.MM.dd / HH.mm.ssSSS");
-			System.out.println("server:" + ++s_id + dateformat.format(calendar.getTime())+  " - Connection " + id + " established with: " + socket );
+			System.out.println("server:" + ++s_id +  " - Connection " + id + " established with: " + socket );
 			
 		try {
 			
@@ -177,7 +175,10 @@ public class Server extends Thread{
 		    	   if(recv_data.getPurpose().equals("calculate") )
 		    	   {
 		    	   }
-	               System.out.println("server:" + s_id +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
+
+					Calendar calendar = Calendar.getInstance();
+	           	   SimpleDateFormat dateformat = new SimpleDateFormat("[yyyy.MM.dd / HH:mm:ss]");
+	               System.out.println("server:" + s_id +"  "+ dateformat.format(calendar.getTime()) +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
 
 	               try{
 	            	   //CALL BACK SENDER 부분
@@ -288,7 +289,7 @@ public class Server extends Thread{
 	        Data recv_data = null;
 	        try {
 	        	while(true){
-	        		System.out.println("C와의 통신 시작");
+//	        		System.out.println("C와의 통신 시작");
 	        		try
 	        		{ 
 	        			recv_data = CtoJAVA();
@@ -310,8 +311,13 @@ public class Server extends Thread{
 		    	   {
 		    		   
 		    	   }
+
 	               if(recv_data !=null)
-	            	   System.out.println("server:" + s_id +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
+	               {
+	            	   Calendar calendar = Calendar.getInstance();
+	            	   SimpleDateFormat dateformat = new SimpleDateFormat("[yyyy.MM.dd / HH:mm:ss]");
+	            	   System.out.println("server:" + s_id +"  "+ dateformat.format(calendar.getTime()) +   " - Received " +recv_data.getPurpose()+ " from Connection " + id + "." ); 
+	               }
 	               sc = new ServerConnector(recv_data,s_id);
 
 		             
@@ -320,7 +326,7 @@ public class Server extends Thread{
 	                * 08-21
 	                */
 	               JAVAtoC(sc.reply());
-	               System.out.println("server:" + s_id + "JAVA -> C data 전송");
+	               System.out.println("server:" + s_id + " - JAVA -> C data 전송");
 	               
 	            //   oos.reset();
 	            //   oos.writeObject(sc.reply());
@@ -365,7 +371,9 @@ public class Server extends Thread{
 					protocol_id = new String(b,buffer_point++,1);
 					//protocol 이 제대로 된 data가 들어 오는지 확인 
 					if(protocol_id.equals("S"))
-						System.out.println("c와 통신 _ 수신 시작");
+					{
+						System.out.println("프로토콜 문제 없음_ c와 통신 _ 수신 시작");
+					}
 					else if(protocol_id.equals("I"))
 					{
 						return addPhoto(byteArrayToInt(b, buffer_point));
@@ -445,7 +453,7 @@ public class Server extends Thread{
 				//for (int i=0; i<3; i++) bis.read();
 				int te = byteArrayToInt(b,1);
 				
- 				System.out.println("출력" + protocol_id);
+ 				System.out.println("프로토콜 id _" + protocol_id);
  				System.out.println("출력" + te);
 			}
 			catch(Exception e)

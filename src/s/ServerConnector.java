@@ -770,7 +770,6 @@ public class ServerConnector {
 			}
 			st = con.createStatement();
 			ResultSet rs = st.executeQuery(sql.toString());
-			reply_data.addContent(temp.getValue(), "OK");
 			int count=0;
 			while(rs.next())
 			{
