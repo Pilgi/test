@@ -169,6 +169,14 @@ CREATE TABLE music
 ALTER TABLE music
 	ADD primary key (user_num,request_time);
 
+CREATE TABLE password
+(
+	password varchar(20)
+);
+
+ALTER TABLE password
+	ADD primary key (password);
+
 ALTER TABLE coupon
 	ADD FOREIGN KEY coupon_ibfk_3 (user_id,name) REFERENCES user_info(user_id,name);
 

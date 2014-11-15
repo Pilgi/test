@@ -124,6 +124,9 @@ public class ServerConnector {
 		case "SHOW BALANCE":
 			showBalance();
 			break;
+		case "SHOW LOG":
+			showBalanceLog();
+			break;
 		case "MAKE COUPON":
 			makeCoupon();
 			break;
@@ -165,6 +168,12 @@ public class ServerConnector {
 			break;
 		case "REQUEST MUSIC":
 			requestMusic();
+			break;
+		case "CHECK PASSWORD":
+			checkPassword();
+			break;
+		case "MODIFY PASSWORD":
+			modifyPassword();
 			break;
 		default:
 			System.out.println("purpose error ___ " + recv_data.purpose);
@@ -1241,7 +1250,7 @@ public class ServerConnector {
 			}
 	}
 	/*
-	 * 결제 한 주문정보 수정하기
+	 * 주문한 메뉴가 결제 완료 되었을 때
 	 * 개발일 : 14.11.15
 	 * 개발자 : 김필기
 	 */
@@ -1317,6 +1326,54 @@ public class ServerConnector {
 						+ " ,stamp_available=stamp_available+"+total_count+",stamp_month=stamp_month+"+total_count
 						+" where user_num = '"+user_num+"'");
 			}
+			
+			return p_st.execute();
+			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
+	}
+	/*
+	 * 주문한 메뉴가 제작 완료 되었을때
+	 * 개발일 : 14.11.15
+	 * 개발자 : 김필기
+	 */
+	protected boolean completeOrder(){
+		int i=0;
+		Data.data_structure temp ;
+		String order_num = "";
+		try {
+			PreparedStatement p_st = con.prepareStatement("update order_info set complete where order_num = ?");
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"payMenu ㄱㄱㄱ size:"+recv_data.content.size());
+			
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 mdofiy menu 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
+				switch (temp.getType()) {
+				case "order_num":
+					order_num = temp.getValue();
+					p_st.setString(1, order_num);
+					break;
+				default :
+					throw new SQLException("invalid type!! in complte order__"+temp.getType());
+				}
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			
+			
+			//TODO android push 알림
 			
 			return p_st.execute();
 			
@@ -1634,7 +1691,7 @@ public class ServerConnector {
 
 		try {
 			p_st = con.prepareStatement(sql.toString());
-			p_st2 = con.prepareStatement("insert into balance_log(user_num,increase,balacne,employee_num,employee_name)"
+			p_st2 = con.prepareStatement("insert into balance_log(user_num,increase,balance,employee_num,employee_name)"
 					+ " values (?,?,?,?,?)");
 			//정상독작인지 test 하는 부분
 			System.out.println("server:" + s_id + " - " +"show Balance size:"+recv_data.content.size());
@@ -1764,7 +1821,7 @@ public class ServerConnector {
 					p_st.setString(1, temp.getValue());
 					break;
 				case "all":
-					p_st = con.prepareStatement("SELECT user_num, user_id , name, balance from user_info");
+					p_st = con.prepareStatement("SELECT * FROM balance_log");
 					break;
 				default:
 					throw new SQLException("type_error _" + temp.getType());
@@ -1776,9 +1833,17 @@ public class ServerConnector {
 				{
 					count++;
 					reply_data.addContent(count +"_user_num", rs.getString("user_num"));
-					reply_data.addContent(count +"_user_id", rs.getString("user_id"));
-					reply_data.addContent(count +"_name", rs.getString("name"));
+					Statement stmt = con.createStatement();
+					ResultSet rs2 =stmt.executeQuery("select name from user_info where user_num = '" + rs.getString("user_num") +"'");	
+					if(!(rs2.next()))
+							throw new SQLException("invalid user_num!!");
+					reply_data.addContent(count +"_user_name", rs2.getString("name"));
+					reply_data.addContent(count +"_modify_time", rs.getString("modify_time"));
+					reply_data.addContent(count +"_increase", rs.getString("increase"));
+					reply_data.addContent(count +"_decrease", rs.getString("decrease"));
 					reply_data.addContent(count +"_balance", rs.getString("balance"));
+					reply_data.addContent(count +"_employee_num", rs.getString("employee_num"));
+					reply_data.addContent(count +"_employee_name", rs.getString("employee_name"));
 				}
 				reply_data.modifyContent(0,temp.getType(),count+"" );
 			}
@@ -1881,7 +1946,6 @@ public class ServerConnector {
 			p_st = con.prepareStatement(sql.toString());
 			//정상독작인지 test 하는 부분
 			System.out.println("server:" + s_id + " - " +"modifyEmployee 확인 ㄱㄱㄱ size:"+recv_data.content.size());
-			ResultSet rs;
 			while(recv_data.getContent(i)!=null)
 			{
 				//gettype으로 가져온 자료가 join일 경우 실행될 부분
@@ -1973,7 +2037,6 @@ public class ServerConnector {
 		int i=0;
 		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("SELECT * FROM employee WHERE employee_num = ?");
-		String id = null;
 		PreparedStatement p_st = null;
 
 		try {
@@ -2332,6 +2395,106 @@ public class ServerConnector {
 			}
 			return p_st.execute();
 			
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
+	}
+	/*
+	 * 사장님 패스워드 확인
+	 * 개발일 : 14.11.16
+	 * 개발자 : 김필기 
+	 */
+	protected boolean checkPassword()
+	{
+		int i=0;
+		Data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("select * from password where password = ?");
+		PreparedStatement p_st = null;
+		String passsword = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"password 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 add notice 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
+				switch (temp.getType()) {
+				case "password":
+					p_st.setString(1,temp.getValue());
+					break;
+				default:
+					throw new SQLException("Error type_"+temp.getType());
+				}
+			}
+			ResultSet rs = p_st.executeQuery();
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			reply_data.addContent("PASSWORD", "OK");
+			if(rs.next())
+				return true;
+			else
+			{
+				Statement st = con.createStatement();
+				rs = st.executeQuery("select * from password");
+				if(rs.next())
+					passsword = rs.getString(1);
+				throw new SQLException("password error");
+			}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				Gmail g = new Gmail("yubins1012@gmail.com", "손유빈");
+				g.send("test 이메일 입니다", "암호는 " + passsword + "입니다." );
+				e.printStackTrace();
+				if(sqlErrorCheck(e))
+					return true;
+				else
+					return false;
+			}
+	}
+	/*
+	 * 사장님 패스워드 수정
+	 * 개발일 : 14.11.16
+	 * 개발자 : 김필기 
+	 */
+	protected boolean modifyPassword()
+	{
+		int i=0;
+		Data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("update password set password = ? where password = ?");
+		PreparedStatement p_st = null;
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"modify password 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 add notice 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+
+				switch (temp.getType()) {
+				case "password":
+					p_st.setString(2,temp.getValue());
+					break;
+				case "new_password":
+					p_st.setString(1,temp.getValue());
+					break;
+				default:
+					throw new SQLException("Error type_"+temp.getType());
+				}
+			}
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			reply_data.addContent("MODIFY PASSWORD", "OK");
+			return p_st.execute();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

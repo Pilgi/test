@@ -48,7 +48,6 @@ public class client_add_menu {
         /*
          * 소켓 연결 완료
          */
-        Data k;
         Data o;
         try {
         	/*

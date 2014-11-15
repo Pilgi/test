@@ -4,7 +4,6 @@
 package s;
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -23,8 +22,8 @@ public class Client {
     static BufferedInputStream bis = null;
     public static void main(String[] args) {
     	//String hostname = "54.92.16.107";
-    	String hostname = "203.252.118.17";
-    	//String hostname = "127.0.0.1";
+    	//String hostname = "203.252.118.17";
+    	String hostname = "127.0.0.1";
     	
 		
 		int port = 6795;
@@ -111,8 +110,8 @@ public class Client {
 			k.addContent("total", "total");
 			k.addContent("month", "month");
 			*/
-			k = new Data("ID CHECK");
-			k.addContent("id", "1");
+			k = new Data("CHECK PASSWORD");
+			k.addContent("password", "1111");
 
 			/*k.addContent("employe_num", "141115001");
 			k.addContent("increase", "8000");

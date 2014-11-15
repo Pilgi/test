@@ -529,7 +529,7 @@ public class Server extends Thread{
 		private boolean pushStream(ByteBuffer buffer,int protocol, byte[] temp, BufferedOutputStream _bos)
 		{
 			try{
-				if(buffer.position() + 4 + 4 +temp.length >= buffer.capacity())
+				if(buffer.position() + 12 +temp.length >= buffer.capacity())
 				{
 					//99는 continue를 뜻함!
 					buffer.put(intToByteArray(99));
