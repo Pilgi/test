@@ -451,7 +451,7 @@ public class ServerConnector {
 					p_st.setString(1,temp.getValue());
 					break;
 				default:
-					break;
+					throw new SQLException("type_error _" + temp.getType());
 				}
 			}
 			
@@ -1707,7 +1707,7 @@ public class ServerConnector {
 					}
 					break;
 				case "all":
-					p_st = con.prepareStatement("SELECT user_num, user_id , user_name, balance from user_info");
+					p_st = con.prepareStatement("SELECT user_num, user_id , name, balance from user_info");
 					rs = p_st.executeQuery();
 					int count=0;
 					reply_data.addContent(temp.getType(), "OK");
@@ -1958,6 +1958,46 @@ public class ServerConnector {
 			}
 
 	}
+
+	/*
+	 * member 목록를 불러올때 사용되는 부분
+	 * 개발일 : 14.11.08 ~ 14.11.09
+	 * 개발자 : 김필기
+	 */
+	protected boolean showEmployee()
+	{
+		Data.data_structure temp = null ;
+		PreparedStatement p_st = null;
+	
+		try {
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"show Employee 보여주기 ㄱㄱㄱ size:"+recv_data.content.size());
+			p_st = con.prepareStatement("select * from employee");
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st.executeQuery();
+			int count=0;
+			reply_data.addContent("show employee", "OK");
+			while(rs.next())
+			{
+				count++;
+				reply_data.addContent(count +"_employee_num", rs.getString("employee_num"));
+				reply_data.addContent(count +"_name", rs.getString("name"));
+				reply_data.addContent(count + "_phone",rs.getString("phone"));
+			}
+			reply_data.modifyContent(0, "show employee", count+"");
+			} 
+		catch (SQLException e) {
+				reply_data.addContent("SHOW employee","FAIL");
+				//reply_data.addContent("ERROR CODE", e.toString());
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+		}
+		return true;
+		
+	}
+	
 	protected boolean showNotice()
 	{
 		PreparedStatement p_st = null;
