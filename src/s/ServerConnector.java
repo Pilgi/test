@@ -356,7 +356,7 @@ public class ServerConnector {
 	protected boolean idCheck(){
 		int i = 0;
 		Data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("SELECT user_id,FROM user_info WHERE user_id = ?");
+		StringBuffer sql = new StringBuffer("SELECT user_id FROM user_info WHERE user_id = ?");
 		String id = null;
 		//parameter 순서 1-id
 		PreparedStatement p_st = null;
@@ -376,7 +376,7 @@ public class ServerConnector {
 					p_st.setString(1,id);
 					break;
 				default:
-					throw new Exception("content error");
+					throw new SQLException("content error");
 				}
 			}
 			//Query 구문을 날려 result가 도착한다면 존재하는 아이디/패스워드 이다.
@@ -396,12 +396,7 @@ public class ServerConnector {
 				e.printStackTrace();
 				sqlErrorCheck(e);
 				return false;
-			} catch (Exception e)
-			{
-					e.printStackTrace();
-					return false;
 			}
-
 	}
 	/*
 	 * member 목록를 불러올때 사용되는 부분
@@ -1709,6 +1704,7 @@ public class ServerConnector {
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 				switch (temp.getType()) {
 				case "user_num":
+					p_st.setString(1, temp.getValue());
 					ResultSet rs = p_st.executeQuery();
 					if(rs.next())
 					{
@@ -1743,7 +1739,58 @@ public class ServerConnector {
 			}
 		return false;
 	}
+	protected boolean showBalanceLog()
+	{
+		int i=0;
+		Data.data_structure temp ;
+		//parameter 순서 1-user_num
+		PreparedStatement p_st = null;
 
+		try {
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"show Balance size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "user_num":
+					p_st = con.prepareStatement("SELECT * FROM balance_log where user_num = ?");
+					p_st.setString(1, temp.getValue());
+					break;
+				case "employee_num":
+					p_st = con.prepareStatement("SELECT * FROM balance_log where employee_num = ?");
+					p_st.setString(1, temp.getValue());
+					break;
+				case "all":
+					p_st = con.prepareStatement("SELECT user_num, user_id , name, balance from user_info");
+					break;
+				default:
+					throw new SQLException("type_error _" + temp.getType());
+				}
+				int count=0;
+				reply_data.addContent(temp.getType(), "OK");
+				ResultSet rs = p_st.executeQuery();
+				while(rs.next())
+				{
+					count++;
+					reply_data.addContent(count +"_user_num", rs.getString("user_num"));
+					reply_data.addContent(count +"_user_id", rs.getString("user_id"));
+					reply_data.addContent(count +"_name", rs.getString("name"));
+					reply_data.addContent(count +"_balance", rs.getString("balance"));
+				}
+				reply_data.modifyContent(0,temp.getType(),count+"" );
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			} catch (SQLException e) {
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+			}
+		return false;
+	}
 	protected boolean makeCoupon()
 	{
 		return false;

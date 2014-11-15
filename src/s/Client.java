@@ -111,9 +111,8 @@ public class Client {
 			k.addContent("total", "total");
 			k.addContent("month", "month");
 			*/
-			k = new Data("REQUEST MUSIC");
-			k.addContent("user_num", "1");
-			k.addContent("message", "노래를 불러요");
+			k = new Data("ID CHECK");
+			k.addContent("id", "1");
 
 			/*k.addContent("employe_num", "141115001");
 			k.addContent("increase", "8000");
