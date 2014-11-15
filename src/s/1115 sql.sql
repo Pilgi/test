@@ -151,8 +151,6 @@ ALTER TABLE balance_log
 CREATE TABLE employee
 (
 	employee_num integer not null,
-	employee_id varchar(18),
-	employee_password varchar(18),
 	name varchar(18),
 	register_date timestamp not null default current_timestamp,
 	phone varchar(20)

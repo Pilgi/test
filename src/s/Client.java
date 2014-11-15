@@ -98,14 +98,23 @@ public class Client {
 			k.addContent("menu_num", 1+"");
 			*/
 			
-			
+			/*
 			k = new Data("ADD NOTICE");
 			k.addContent("writing_type", "1");
 			k.addContent("title", "특별~이벤트!");
 			k.addContent("content", "이벤트는 무슨 뻥입니다.");
-			
+			*/
 			//hello world
-			
+			/*
+			k = new Data("SHOW STAMPRANKING");
+			k.addContent("id", "a");
+			k.addContent("total", "total");
+			k.addContent("month", "month");
+			*/
+			k = new Data("ADD EMPLOYEE");
+			k.addContent("name", "김필기");
+			k.addContent("phone", "010-8334-4555");
+
 			oos.reset();
 			oos.writeObject(k);
 			oos.flush();

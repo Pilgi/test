@@ -12,9 +12,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import javax.naming.spi.DirStateFactory.Result;
-import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 
 /*
@@ -143,10 +142,10 @@ public class ServerConnector {
 		case "MODIFY EMPLOYEE":
 			modfiyEmployee();
 			break;
-		case "DELETE EMPLOYTEE":
+		case "DELETE EMPLOYEE":
 			deleteEmployee();
 			break;
-		case "LOGIN EMPLOYTEE":
+		case "CHECK EMPLOYEE":
 			loginEmployee();
 			break;
 		case "SHOW NOTICE":
@@ -719,7 +718,6 @@ public class ServerConnector {
 					else
 						throw new SQLException("No result about rank stamp_month");
 					break;
-					
 				case "id":
 					//total 순위 구하기
 					stamp_sql = con.prepareStatement("Select stamp_total from user_info where user_id = ?");
@@ -740,7 +738,7 @@ public class ServerConnector {
 					stamp_sql = con.prepareStatement("Select stamp_month from user_info where user_id = ?");
 					stamp_sql.setString(1, temp.getValue());
 					rs3 = stamp_sql.executeQuery();
-					rank = new StringBuffer("select count(*) + 1 as rank from user_info where stamp_month > (Select stamp_month from user_info where user_num = ?)");
+					rank = new StringBuffer("select count(*) + 1 as rank from user_info where stamp_month > (Select stamp_month from user_info where user_id = ?)");
 					rank_sql = con.prepareStatement(rank.toString());
 					rank_sql.setString(1, temp.getValue());
 					rs2 = rank_sql.executeQuery();
@@ -1626,17 +1624,68 @@ public class ServerConnector {
 
 	protected boolean addBalance()
 	{
-		//balnace log 확인
-		return false;
-		//249-1110
-		//281-2223
+		int i=0;
+		Data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("update user_info set balance = balance + ? WHERE user_num = ?");
+		int balance = 0;
+		//parameter 순서 1 -추가된 blance / 1-user_num
+		PreparedStatement p_st = null;
+		PreparedStatement p_st2 = null;
+
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			p_st2 = con.prepareStatement("insert into balance_log(user_num,increase,balacne,employee_num,employee_name)"
+					+ " values (?,?,?,?,?)");
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"show Balance size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "user_num":
+					p_st.setString(2,temp.getValue());
+					p_st2.setString(1,temp.getValue());
+					PreparedStatement p_st3 = con.prepareStatement("select balance from user_info where user_num = ?");
+					ResultSet r_s = p_st3.executeQuery();
+					if(r_s.next())
+					{
+						balance = r_s.getInt(1);
+					}
+					break;
+				case "increase":
+					p_st2.setString(2,temp.getValue());
+					balance = balance + Integer.getInteger(temp.getValue());
+					p_st2.setString(3,balance+"");
+					p_st.setString(1,balance+"");
+					break;
+				case "employee_num":
+					p_st2.setString(4,temp.getValue());
+					break;
+				case "employee_name":
+					p_st2.setString(5,temp.getValue());
+					break;
+				default:
+					break;
+				}
+			}
+			
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			p_st.execute();
+			p_st2.execute();
+			return true;
+			} catch (SQLException e) {
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+			}
 	}
 	protected boolean showBalance()
 	{
 		int i=0;
 		Data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("SELECT balance WHERE usre_num = ?");
-		String id = null;
+		StringBuffer sql = new StringBuffer("SELECT balance from user_info WHERE user_num = ?");
 		//parameter 순서 1-user_num
 		PreparedStatement p_st = null;
 
@@ -1651,28 +1700,39 @@ public class ServerConnector {
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 				switch (temp.getType()) {
 				case "user_num":
-					p_st.setString(1,temp.getValue());
+					ResultSet rs = p_st.executeQuery();
+					if(rs.next())
+					{
+						reply_data.addContent("balance", rs.getString("balance"));
+					}
+					break;
+				case "all":
+					p_st = con.prepareStatement("SELECT user_num, user_id , user_name, balance from user_info");
+					rs = p_st.executeQuery();
+					int count=0;
+					reply_data.addContent(temp.getType(), "OK");
+					while(rs.next())
+					{
+						count++;
+						reply_data.addContent(count +"_user_num", rs.getString("user_num"));
+						reply_data.addContent(count +"_user_id", rs.getString("user_id"));
+						reply_data.addContent(count +"_name", rs.getString("name"));
+						reply_data.addContent(count +"_balance", rs.getString("balance"));
+					}
+					reply_data.modifyContent(0,temp.getType(),count+"" );
 					break;
 				default:
-					break;
+					throw new SQLException("type_error _" + temp.getType());
 				}
 			}
 			
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			ResultSet rs = p_st.executeQuery();
-			if(rs.next())
-			{
-				reply_data.addContent("balance", rs.getString("balance"));
-				return true;
-
-			}
-			else
-				return false;
 			} catch (SQLException e) {
 				e.printStackTrace();
 				sqlErrorCheck(e);
 				return false;
 			}
+		return false;
 	}
 
 	protected boolean makeCoupon()
@@ -1703,7 +1763,7 @@ public class ServerConnector {
 		int i=0;
 		int u_num = 0;
 		Data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("insert into employee(employee_id,employee_password,employee_num,name,phone) values (?,?,?,?,?)");
+		StringBuffer sql = new StringBuffer("insert into employee(employee_num,name,phone) values (?,?,?)");
 		//parameter 순서 1-id / 2-password / 3-employee_number / 4-name / 5-phone
 		PreparedStatement p_st = null;
 		try {
@@ -1717,29 +1777,26 @@ public class ServerConnector {
 				//test로 들어오는 data 확인하는 부분
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 				switch (temp.getType()) { 
-				case "id":
-					p_st.setString(1,temp.getValue());
-					break;
-				case "password":
+				case "name":
 					p_st.setString(2,temp.getValue());
 					break;
-				case "name":
-					p_st.setString(4,temp.getValue());
-					break;
 				case "phone":
-					p_st.setString(6,temp.getValue());
+					p_st.setString(3,temp.getValue());
 					break;
 				default:
 					break;
 				}
 			}
+			Calendar calendar = Calendar.getInstance();
+			SimpleDateFormat dateformat = new SimpleDateFormat("yyMMdd");
 		//column 에 있는 employee num중 최대값을 가져와 그위에 +1을 해준다. (user 번호의 중복을 막기 위해서)
-			ResultSet rs = stmt.executeQuery("select max(employee_num) from employee");
+			ResultSet rs = stmt.executeQuery("select Count(*) from employee");
 			if(rs.next())
 			{
 				u_num=rs.getInt(1);
+				String employee_num = dateformat.format(calendar.getTime()).toString() + String.format("%03d", (++u_num)%1000);
+				p_st.setString(1, employee_num);
 			}
-			p_st.setString(3, ++u_num +"");
 			System.out.println("server:" + s_id + " - " +p_st.toString());
 			reply_data.addContent("addEmployee", "OK");				
 			return p_st.execute();
@@ -1760,8 +1817,7 @@ public class ServerConnector {
 	{
 		int i=0;
 		Data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("update employee set employee_id = ? , employee_password = ? ,"
-				+ "name = ?, phone = ? where employee_num = ?");
+		StringBuffer sql = new StringBuffer("update employee set name = ?, phone = ? where employee_num = ?");
 		
 		//parameter 순서 1-id / 2-password / 3-name / 4-phone / 5-employee_num
 		PreparedStatement p_st = null;
@@ -1777,32 +1833,16 @@ public class ServerConnector {
 				//test로 들어오는 data 확인하는 부분
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 				switch (temp.getType()) { 
-				case "id":
+				case "name":
 					p_st.setString(1,temp.getValue());
 					break;
-				case "password":
+				case "phone":
 					p_st.setString(2,temp.getValue());
 					break;
-				case "name":
-					p_st.setString(3,temp.getValue());
-					break;
-				case "phone":
-					p_st.setString(4,temp.getValue());
-					break;
 				//수정 안하는 부분은 기본 data로 채운다.
-				case "num":
+				case "employee_num":
 					p_st.setString(5,temp.getValue());
-					rs = stmt.executeQuery("select employee_id,employee_paswword,name,phone where employee_num = " + temp.getValue());
-					if(rs.next())
-					{
-						p_st.setString(1,rs.getString("employee_id"));
-						p_st.setString(2,rs.getString("employee_password"));
-						p_st.setString(3,rs.getString("name"));
-						p_st.setString(4,rs.getString("phone"));
-						break;
-					}
-					else
-						throw new SQLException("not exist employee number!");
+					break;
 				default:
 					break;
 				}
@@ -1824,19 +1864,10 @@ public class ServerConnector {
      */
 	protected boolean deleteEmployee()
 	{
-		return false;
-	}
-	/*
-	 * employee_Login일 경우 동작하는 부분  (test 미완료)
-	 * 개발일 : 14.09.27
-	 * 개발자 : 김필기 
-	 */
-	protected boolean loginEmployee(){
 		int i=0;
 		Data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("SELECT employee_id, employee_password FROM employee WHERE employee_id = ? and employee_password = ?");
+		StringBuffer sql = new StringBuffer("delete FROM employee WHERE employee_num = ?");
 		String id = null;
-		//parameter 순서 1-id / 2-password 
 		PreparedStatement p_st = null;
 
 		try {
@@ -1850,15 +1881,61 @@ public class ServerConnector {
 				//test로 들어오는 data 확인하는 부분
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 				switch (temp.getType()) {
-				case "id":
-					id = temp.getValue();
+				case "employee_num":
 					p_st.setString(1,id);
 					break;
-				case "password":
-					p_st.setString(2,temp.getValue());
+				default:
+					throw new SQLException("emplyee_num 만 type으로 보낼 수 있습니다.");					
+				}
+			}
+			//Query 구문을 날려 result가 도착한다면 존재하는 아이디/패스워드 이다.
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			ResultSet rs = p_st.executeQuery();
+			if(rs.next())
+			{
+				reply_data.addContent("employee_DELETE", "OK");
+				return true;
+			}
+			else
+			{
+				reply_data.addContent("employee_DELETE","FAIL");
+				return false;
+			}
+			} catch (SQLException e) {
+				e.printStackTrace();
+				sqlErrorCheck(e);
+				return false;
+			}
+
+	}
+	/*
+	 * employee_Login일 경우 동작하는 부분  (test 미완료)
+	 * 개발일 : 14.09.27
+	 * 개발자 : 김필기 
+	 */
+	protected boolean loginEmployee(){
+		int i=0;
+		Data.data_structure temp ;
+		StringBuffer sql = new StringBuffer("SELECT * FROM employee WHERE employee_num = ?");
+		String id = null;
+		PreparedStatement p_st = null;
+
+		try {
+			p_st = con.prepareStatement(sql.toString());
+			//정상독작인지 test 하는 부분
+			System.out.println("server:" + s_id + " - " +"employee_login 확인 ㄱㄱㄱ size:"+recv_data.content.size());
+			while(recv_data.getContent(i)!=null)
+			{
+				//gettype으로 가져온 자료가 LOGIN 일 경우 실행될 부분
+				temp = recv_data.getContent(i++);
+				//test로 들어오는 data 확인하는 부분
+				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
+				switch (temp.getType()) {
+				case "employee_num":
+					p_st.setString(1,id);
 					break;
 				default:
-					break;
+					throw new SQLException("emplyee_num 만 type으로 보낼 수 있습니다.");					
 				}
 			}
 			//Query 구문을 날려 result가 도착한다면 존재하는 아이디/패스워드 이다.
@@ -1872,16 +1949,6 @@ public class ServerConnector {
 			else
 			{
 				reply_data.addContent("LOGIN","FAIL");
-				sql = new StringBuffer("SELECT * FROM employee WHERE employee_id = ?");
-				p_st = con.prepareStatement(sql.toString());
-				p_st.setString(1,id);
-				rs = p_st.executeQuery();
-				if(rs.next())
-				{
-					reply_data.addContent("ERROR CODE", "WORNG PASSWORD");
-				}
-				else
-					reply_data.addContent("ERROR CODE", "ID does not exist");
 				return false;
 			}
 			} catch (SQLException e) {
