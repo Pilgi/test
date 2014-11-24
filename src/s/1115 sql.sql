@@ -5,19 +5,10 @@ use cafe;
 CREATE TABLE coupon
 (
 	coupon_num  integer NOT NULL,
-	menu_num integer not null,
-	menu_name  varchar(50) NULL,
 	create_date  timestamp NULL DEFAULT current_timestamp,
 	use_date  timestamp NULL,
 	available  tinyint NULL,
-	picture  varchar(200) NULL,
-	message  varchar(200) NULL,
-	user_id  varchar(18) NULL,
-	from_user_id  varchar(18) NULL,
-	name  varchar(18) NULL,
-	from_user_name  varchar(18) NULL,
-	size  VARCHAR(20) NULL,
-	price  integer NULL
+	user_num int(11)
 );
 
 
@@ -76,8 +67,8 @@ CREATE TABLE order_info
 	num_total_item integer not null,
 	user_num  integer NULL,
 	total_price  integer NOT NULL,
-	payment  tinyint NOT NULL,
-	complete tinyint NOT NULL,
+	payment  tinyint NOT NULL DEFAULT 0,
+	complete tinyint NOT NULL DEFAULT 0,
 	table_name  varchar(20) NULL,
 	etc  varchar(20) NULL
 );
@@ -153,7 +144,8 @@ CREATE TABLE employee
 	employee_num integer not null,
 	name varchar(18),
 	register_date timestamp not null default current_timestamp,
-	phone varchar(20)
+	phone varchar(20),
+	invisible tinyint NOT NULL DEFUALT 0
 );
 
 ALTER TABLE employee
@@ -178,13 +170,7 @@ ALTER TABLE password
 	ADD primary key (password);
 
 ALTER TABLE coupon
-	ADD FOREIGN KEY coupon_ibfk_3 (user_id,name) REFERENCES user_info(user_id,name);
-
-ALTER TABLE coupon
-	ADD FOREIGN KEY coupon_ibfk_2 (from_user_id,from_user_name) REFERENCES user_info(user_id,name);
-
-ALTER TABLE coupon
-	ADD FOREIGN KEY coupon_ibfk_1 (menu_num) REFERENCES menu(menu_num);
+	ADD FOREIGN KEY coupon_ibfk_3 (user_num) REFERENCES user_info(user_num);
 
 ALTER TABLE order_info
 	ADD FOREIGN KEY order_info_ibfk_1 (user_num) REFERENCES user_info(user_num);

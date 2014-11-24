@@ -21,9 +21,10 @@ public class Client {
     static FileInputStream fis = null;
     static BufferedInputStream bis = null;
     public static void main(String[] args) {
-    	//String hostname = "54.92.16.107";
+    	String hostname = "54.65.6.112";
     	//String hostname = "203.252.118.17";
-    	String hostname = "127.0.0.1";
+    	
+    	//String hostname = "127.0.0.1";
     	
 		
 		int port = 6795;
@@ -110,12 +111,16 @@ public class Client {
 			k.addContent("total", "total");
 			k.addContent("month", "month");
 			*/
-			k = new Data("SHOW BALANCE");
-			k.addContent("user_num", "1");
-
+			/*k = new Data("DELETE EMPLOYEE");
+			k.addContent("employee_num", "141116001");
+			 */
 			/*k.addContent("employe_num", "141115001");
 			k.addContent("increase", "8000");
 */
+			k = new Data("REQUEST MUSIC");
+			k.addContent("user_num", "3");
+			k.addContent("message", "아이유!아이유! 우윳빛깔아유이유이유");
+			
 			oos.reset();
 			oos.writeObject(k);
 			oos.flush();

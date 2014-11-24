@@ -182,25 +182,28 @@ public class Server extends Thread{
 
 	               try{
 	            	   //CALL BACK SENDER 부분
-	            	   if(recv_data.getPurpose().equals("ADD ORDER"))
-	            		   cbs.send(recv_data); //인터페이스 callback 부분 제대로 추가해야함
-	            	   else if(recv_data.getPurpose().equals("REQUEST MUSIC"))
-	            		   cbs.send(recv_data);
+
 	               }
 	               catch(Exception e)
 	               {
 	            	   //e.printStackTrace();
 	            	   System.out.println("CallBackSender error :" + e);
 	               }
+	               for(int j = 0 ; j < recv_data.getContentSize() ; j++)
+	               {
+	            	   System.out.println(j + "__" +recv_data.getContent(j));
+	               }
 	               sc = new ServerConnector(recv_data,s_id);
 	               oos.reset();
 	               oos.writeObject(sc.reply());
 	               //메뉴추가를 했을 경우 data 클래스를 받아온 후에 이미지파일도 받아온다.
-	               
-	               if(recv_data.purpose.equals("ADD MENU"))
+            	   if(recv_data.getPurpose().equals("ORDER MENU"))
+            		   cbs.send(sc.reply()); //인터페이스 callback 부분 제대로 추가해야함
+            	   else if(recv_data.getPurpose().equals("REQUEST MUSIC"))
+            		   cbs.send(sc.reply());
+            	   else  if(recv_data.purpose.equals("ADD MENU") || recv_data.purpose.equals("MODIFY MENU"))
 	               {
 		             addPhoto();             
-	            	   
 	               }
 	             } 
 	            
@@ -357,13 +360,13 @@ public class Server extends Thread{
 			Data recvdata = null;
 			try{
 				byte[] b = new byte [1024];
-				int size = bis.read(b);
 				int count = 0;
 				String protocol_id = new String(b,0,1);
 				int buffer_point = 0;
 				int data_length = 0 , data_type = 0;
 				String recv_type = null , recv_value;
 				boolean while_stop = true;
+				int size = bis.read(b);
 
 				while(while_stop)
 				{
@@ -482,8 +485,10 @@ public class Server extends Thread{
 
 				buffer.put(intToByteArray(2));
 				buffer.put(intToByteArray(num_of_node));
-
-							
+				for(int i = 0 ; i < recv_data.getContentSize() ; i++)
+				{
+					System.out.println(recv_data.getContent(i));
+				}			
 				for(int i = 0; i < num_of_node ; i++)
 				{
 
@@ -536,6 +541,7 @@ public class Server extends Thread{
 					bos.write(buffer.array());
 					bos.flush();
 					buffer.clear();
+					buffer.position(0);
 					buffer.put((byte) 'C');
 				}
 				if(protocol == 3)
@@ -565,8 +571,8 @@ public class Server extends Thread{
 		private static byte[] intToByteArray(final int integer) {
 			ByteBuffer buff = ByteBuffer.allocate(Integer.SIZE / 8);
 			buff.putInt(integer);
-			buff.order(ByteOrder.BIG_ENDIAN);
-			//buff.order(ByteOrder.LITTLE_ENDIAN);
+		//	buff.order(ByteOrder.BIG_ENDIAN);
+			buff.order(ByteOrder.LITTLE_ENDIAN);
 			return buff.array();
 		}
 		private static int byteArrayToInt(byte[] bytes , int idx ) {
@@ -591,10 +597,16 @@ public class Server extends Thread{
 		public void send(Data d) {
 			// TODO Auto-generated method stub
 			// bytestream을 통해 전송할 부분을 구현하면 된다.
+//			String hostname = "203.252.118.13";
 			String hostname = "127.0.0.1";
 		    BufferedOutputStream send_bos = null;
 		    Socket send_socket = null;
 			int port = 4545;
+			
+			for(int i = 0; i < d.getContentSize() ; i++)
+			{
+				System.out.println(i + "__" + d.getContent(i));
+			}
 			System.out.println("callback sender_동작");
 	        try {
 	        	send_socket = new Socket(hostname, port);           
@@ -617,31 +629,52 @@ public class Server extends Thread{
 	         * 소켓 연결 완료
 	         */
 			try{
+
 				ByteBuffer buffer = ByteBuffer.allocate(1024);
-				System.out.println("접속합니다아아아아ㅏ아222222");
+				
 				int num_of_node;
 				num_of_node = d.getContentSize();
 				buffer.put((byte) 'S');
 				buffer.put(intToByteArray(1));
+				
 				buffer.put(intToByteArray(d.purpose.length()));
 				buffer.put(CharConversion.K2E(d.purpose).getBytes("8859_1"));
+
+				buffer.put(intToByteArray(2));
+				buffer.put(intToByteArray(num_of_node));
 				
 				for(int i = 0; i < num_of_node ; i++)
 				{
+
+					//node 인것을 표시
+
+					pushStream(buffer,3,
+							intToByteArray(i),
+							send_bos);
+					/*
 					buffer.put(intToByteArray(2));
 					buffer.put(intToByteArray(num_of_node));
-					
+					*/
 					//Type 전송
+					pushStream(buffer,4,
+							CharConversion.K2E(d.getContent(i).getType()).getBytes("8859_1"),
+							send_bos);
+					/*
 					buffer.put(intToByteArray(3));
-					byte[] temp = CharConversion.K2E(d.getContent(i).getType()).getBytes("8859_1");
+					byte[] temp = CharConversion.K2E(recv_data.getContent(i).getType()).getBytes("8859_1");
 					buffer.put(intToByteArray(temp.length));
 					buffer.put(temp);
-					
+					*/
 					//Value 전송
+					pushStream(buffer, 5,
+							CharConversion.K2E(d.getContent(i).getValue()).getBytes("8859_1"),
+							send_bos);
+					/*
 					buffer.put(intToByteArray(4));
-					temp = CharConversion.K2E(d.getContent(i).getValue()).getBytes("8859_1");
+					temp = CharConversion.K2E(recv_data.getContent(i).getValue()).getBytes("8859_1");
 					buffer.put(intToByteArray(temp.length));
-					buffer.put(temp);	
+					buffer.put(temp);
+					*/	
 				}
 				send_bos.write(buffer.array());
 				send_bos.flush();

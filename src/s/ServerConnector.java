@@ -6,6 +6,7 @@ package s;
  * 수정완료
  * 14.08.01
  */
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -27,8 +28,8 @@ public class ServerConnector {
 	private Data reply_data = null;
 	private int s_id;
 	Statement stmt;
-	
-	
+	Runnable g = new Gmail();
+	Thread t = new Thread(g);
 	ServerConnector(Data param , int ser_id) throws ClassNotFoundException, SQLException
 	{
 		if(param == null)
@@ -100,11 +101,17 @@ public class ServerConnector {
 		case "ORDER MENU":
 			orderMenu();
 			break;
+		case "SHOW ORDER":
+			showOrder();
+			break;
 		case "SHOW PAYMENT":
 			showPayment();
 			break;
 		case "PAY ORDER":
 			payOrder();
+			break;
+		case "COMPLETE ORDER":
+			completeOrder();
 			break;
 		case "ADD MENU":
 			addMenu();
@@ -296,10 +303,10 @@ public class ServerConnector {
 		int i=0;
 		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("SELECT user_id, password, user_num FROM user_info WHERE user_id = ? and password = ?");
-		String id = null;
+		String id = null , device_id = "";
 		//parameter 순서 1-id / 2-password / 3-user_number / 4-name / 5-sex / 6-e-mail
 		PreparedStatement p_st = null;
-
+		PreparedStatement ps_dev = null;
 		try {
 			p_st = con.prepareStatement(sql.toString());
 			//정상독작인지 test 하는 부분
@@ -318,11 +325,11 @@ public class ServerConnector {
 				case "password":
 					p_st.setString(2,temp.getValue());
 					break;
-				case "device id":
-					PreparedStatement ps_dev = con.prepareStatement("update user_info set device_id = ? where id = ?");
-					ps_dev.setString(1, temp.getValue());
+				case "device_id":
+					ps_dev = con.prepareStatement("update user_info set device_id = ? where user_id = ?");
+					device_id = temp.getValue();
+					ps_dev.setString(1, device_id);
 					ps_dev.setString(2, id);
-					ps_dev.executeQuery();
 					break;
 				default:
 					throw new SQLException("temp.type error in login _" + temp.getType());
@@ -335,6 +342,8 @@ public class ServerConnector {
 			{
 				reply_data.addContent("LOGIN", "OK");
 				reply_data.addContent("user_num",rs.getString("user_num"));
+				ps_dev.execute();
+
 				return true;
 			}
 			else
@@ -401,7 +410,7 @@ public class ServerConnector {
 			}
 			else
 			{
-				reply_data.addContent("ID CHECK","OK");
+				reply_data.addContent("ID CHECK","NOTDUPLICATE");
 				return true;
 			}
 			} catch (SQLException e) {
@@ -812,7 +821,7 @@ public class ServerConnector {
 	protected boolean showCateogory()
 	{	
 		int count=0;
-		StringBuffer sql = new StringBuffer("SELECT DISTINCT category FROM menu");
+		StringBuffer sql = new StringBuffer("SELECT DISTINCT category FROM menu where category != '0'");
 		PreparedStatement p_st = null;
 		try {
 			p_st = con.prepareStatement(sql.toString());
@@ -847,6 +856,7 @@ public class ServerConnector {
 	protected boolean showMenu()
 	{	
 		int i=0;
+		boolean isAll = false;
 		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("SELECT menu_num,menu_name,size,price FROM menu WHERE category = ?");
 		//parameter 순서 1 - category 이름
@@ -864,9 +874,15 @@ public class ServerConnector {
 				//test로 들어오는 data 확인하는 부분
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 				switch (temp.getType()) {
+				case "all":
+					isAll = true;
+					p_st = con.prepareStatement("SELECT category,menu_num,menu_name,size,price FROM menu where category != '0' ORDER BY category DESC, category_order DESC");
+					reply_data.addContent("ALL", "OK");
+					break;
 				case "category":
 					category = temp.getValue();
 					p_st.setString(1,category);
+					reply_data.addContent(category, "OK");
 					break;
 				default:
 					break;
@@ -876,10 +892,11 @@ public class ServerConnector {
 			System.out.println("server:" + s_id + " - " +p_st.toString());
 			ResultSet rs = p_st.executeQuery();
 			int count=0;
-			reply_data.addContent(category, "OK");
 			while(rs.next())
 			{
 				count++;
+				if(isAll)
+					reply_data.addContent(count +"_category" , rs.getString("category"));
 				reply_data.addContent(count +"_menu_name", rs.getString("menu_name"));
 				reply_data.addContent(count +"_size", rs.getString("size"));
 				reply_data.addContent(count +"_price", rs.getString("price"));
@@ -963,22 +980,23 @@ public class ServerConnector {
 		
 	}
 	//주문할 경우 실행될 부분
-	@SuppressWarnings("null")
+	@SuppressWarnings({ "null", "resource" })
 	protected boolean orderMenu()
 	{
 		int i = 0 , order_num = 0, total_count = 0 , item_count=0 , total_price = 0;
 		int same_menu = 0;
 		Data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("insert into order_info(order_num, num_total_item, user_num, total_price, payment, table_name, etc) values (?,?,?,?,?,?,?,?)");
+		StringBuffer sql = new StringBuffer("insert into order_info(order_num, num_total_item, user_num, total_price, payment, table_name, etc) values (?,?,?,?,?,?,?)");
 		//parameter 순서 1 - order_num / 2 - num_totatl_item / 3 - user_num / 4 - total_price
 		// 5 - payment /  6 - table_name / 7 - etc
-		StringBuffer sql2 = new StringBuffer("insert into order_list(order_num,item_num,menu_num,payment,payment_option,coupon_num,menu_name,size,price) values (?,?,?,?,?,?,?,?,?,?)");
+		StringBuffer sql2 = new StringBuffer("insert into order_list(order_num, item_num, menu_num, payment, payment_option, "
+													+ "coupon_num, menu_name, size, price) values (?,?,?,?,?,?,?,?,?)");
 		//parameter 순서 1 - order_num / 2 - item_num / 3 - menu_num / 4 - payment / 5 - payment_option  / 6 - coupon_num / 7 - menu_name / 8 - size / 9 - price
-		String item_num = "1" , menu_num = null, table_name = null, user_num = null , temp_menu_name = null;
+		String item_num = "1" , menu_num = null, table_name = null, user_num = null , temp_menu_name = "" , etc = "";
 		PreparedStatement p_st = null , p_st2 = null;
 		try {
 			p_st = con.prepareStatement(sql.toString());
-			p_st = con.prepareStatement(sql2.toString());
+			p_st2 = con.prepareStatement(sql2.toString());
 			//정상독작인지 test 하는 부분
 			System.out.println("server:" + s_id + " - " +"order_Menu 확인 ㄱㄱㄱ size:"+recv_data.content.size());
 			
@@ -1007,46 +1025,53 @@ public class ServerConnector {
 					p_st.setString(6,table_name);
 					break;
 				case "etc":
-					p_st.setString(7,temp.getValue());
+					etc = temp.getValue();
+					p_st.setString(7,etc);
 					break;
 				case "total_count":
 					total_count = Integer.valueOf(temp.getValue());
 					p_st.setString(2,temp.getValue());
+					p_st.setString(5,"0");
 					break;
 				default:
 					//order_list 를 추가하기위해
-					if(temp.getValue().startsWith(item_num))
+					if(temp.getType().startsWith(item_num))
 					{
+						if(item_num == "1" && item_count == 0)
+						{
+							p_st.setString(4,"0");
+							 p_st.execute();
+						}
 						item_count++;
-						if(temp.getValue().contains("menu_num"))
+						if(temp.getType().contains("menu_num"))
 						{
 							String tempString;
-							tempString = temp.getValue().substring(item_num.length()+1);
+							tempString = temp.getValue();
 							menu_num = tempString;
 							p_st2.setString(3,tempString);
 						}
-						else if(temp.getValue().contains("payment"))
+						else if(temp.getType().contains("payment_option"))
 						{
 							String tempString;
-							tempString = temp.getValue().substring(item_num.length()+1);
-							p_st2.setString(4,tempString);
-						}
-						else if(temp.getValue().contains("payment_option"))
-						{
-							String tempString;
-							tempString = temp.getValue().substring(item_num.length()+1);
+							tempString = temp.getValue();
 							p_st2.setString(5,tempString);
 						}
-						else if(temp.getValue().contains("coupon_num"))
+						else if(temp.getType().contains("payment"))
 						{
 							String tempString;
-							tempString = temp.getValue().substring(item_num.length()+1);
+							tempString = temp.getValue();
+							p_st2.setString(4,tempString);
+						}
+						else if(temp.getType().contains("coupon_num"))
+						{
+							String tempString;
+							tempString = temp.getValue();
 							p_st2.setString(6,tempString);
 						}
 						
 					}
 					//주문 정보 4개가 다 들어왔을 경우에
-					if(item_count>4)
+					if(item_count>3)
 					{
 						if(Integer.parseInt(item_num)>total_count)
 							throw new SQLException("error: item num is larger than total item number!!");
@@ -1056,29 +1081,32 @@ public class ServerConnector {
 						ResultSet rs1 = stmt.executeQuery("select menu_name, size , price from menu where menu_num = '"+ menu_num +"'");
 						if(rs1.next())
 						{
-							p_st2.setString(7,rs.getString("menu_name"));
-							p_st2.setString(8,rs.getString("size"));
-							p_st2.setString(9,rs.getString("price"));
-							total_price = total_price + Integer.parseInt(rs.getString("price"));
+							p_st2.setString(7,rs1.getString("menu_name"));
+							p_st2.setString(8,rs1.getString("size"));
+							p_st2.setString(9,rs1.getString("price"));
+							total_price = total_price + Integer.parseInt(rs1.getString("price"));
 						}
 						item_num = (Integer.parseInt(item_num) + 1) + "";
 						//order list에 추가
-						p_st2.executeQuery();
+						p_st2.execute();
+						p_st2 = con.prepareStatement(sql2.toString());
 					}
 					break;
 				}
 			}
 
 			p_st.setString(4, total_price+"");
-			System.out.println("server:" + s_id + " - " +p_st.toString());
-			reply_data.addContent("ORDER NUM", order_num+"");
-			reply_data.addContent("ORDER COUNT", total_count+"");
+			System.out.println("server:" + s_id + " - " +p_st.toString());		
+			reply_data.addContent("BEFORE / AFTER", 0+"");
+			reply_data.addContent("BEFORE / AFTER COUNT", 1+"");
+			reply_data.addContent("order num", order_num+"");
+			reply_data.addContent("ORDER COUNT", ""+(Integer.parseInt(item_num)-1));
 			reply_data.addContent("table name", table_name);
-			ResultSet rs2 = stmt.executeQuery("select name from user_num where user_num ='"+ user_num +"'");
+			ResultSet rs2 = stmt.executeQuery("select name from user_info where user_num ='"+ user_num +"'");
 			if(rs2.next())
 				reply_data.addContent("name", rs2.getString("name"));
 			//시간 받아오기
-			rs2 = stmt.executeQuery("select order_time from order_info whrer order_num ='"+ order_num +"'");
+			rs2 = stmt.executeQuery("select order_time from order_info where order_num ='"+ order_num +"'");
 			if(rs2.next())
 				reply_data.addContent("order_time", rs2.getString("order_time"));
 			/*
@@ -1103,7 +1131,8 @@ public class ServerConnector {
 				}
 				
 			}
-			return p_st.execute();
+			reply_data.addContent("etc", etc);
+			return true;
 			
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -1121,68 +1150,66 @@ public class ServerConnector {
 	 */
 	protected boolean showOrder()
 	{
-		int i = 0 ;
 		int same_menu = 0;
-		Data.data_structure temp ;
-		PreparedStatement p_st = null;
+		PreparedStatement p_st = null , p_st2 = null;
 		try {
 			System.out.println("server:" + s_id + " - " +"show order 확인 ㄱㄱㄱ size:"+recv_data.content.size());
-			p_st = con.prepareStatement("SELECT * FROM order_info where payment = 0 and complete = ?");
-			while(recv_data.getContent(i)!=null)
+			for(int i = 0 ; i < 2 ; i ++)
 			{
-				//gettype으로 가져온 자료가 LOGIN 일 경우 실행될 부분
-				temp = recv_data.getContent(i++);
-				//test로 들어오는 data 확인하는 부분
-				//System.out.println("type = " + temp.getType() + ",  value =" + temp.getValue());
-				switch (temp.getType()) {
-				case "complete":
-					p_st.setString(1,temp.getValue());
-					break;
-				default:
-					throw new SQLException("invalid type!! in show order__"+temp.getType());
-				}
-			}
-			ResultSet rs = p_st.executeQuery();
-			while(rs.next())
-			{
-				reply_data.addContent("ORDER COUNT", rs.getString("num_total_item"));
-				reply_data.addContent("table name", rs.getString("table_name"));
-				String user_num = rs.getString("user_num");
-				String order_num = rs.getString("order_num");
-				String temp_menu_name = null;
-				ResultSet rs2 = stmt.executeQuery("select name from user_num where user_num ='"+ user_num +"'");
-				if(rs2.next())
-					reply_data.addContent("name", rs2.getString("name"));
-				//시간 받아오기
-				rs2 = stmt.executeQuery("select order_time from order_info whrer order_num ='"+ order_num +"'");
-				if(rs2.next())
-					reply_data.addContent("order_time", rs2.getString("order_time"));
-				/*
-				 * while 문으로 주문받은 것들 reply에 넣을것.
-				 */
-				//메뉴번호로 오더해서 받아올 것.
-				rs2 = stmt.executeQuery("select menu_name from order_list where order_num = '"+ order_num +"'");
-				while(rs2.next())
+				p_st = con.prepareStatement("SELECT * FROM order_info where payment = ? and complete = 0");
+				p_st2 = con.prepareStatement("SELECT count(*) FROM order_info where payment = ? and complete = 0");
+				p_st.setString(1, i+"");
+				p_st2.setString(1, i+"");
+				reply_data.addContent("BEFORE / AFTER", i+"");
+				ResultSet rs = p_st2.executeQuery();
+				if(rs.next())
 				{
-					if(temp_menu_name.equals(rs2.getString("menu_name")))
+					reply_data.addContent("BEFORE / AFTER COUNT", rs.getString(1));
+				}
+				rs = p_st.executeQuery();
+				while(rs.next())
+				{
+					String user_num = rs.getString("user_num");
+					String order_num = rs.getString("order_num");
+					String temp_menu_name = "";
+					reply_data.addContent("order num", order_num);
+					reply_data.addContent("ORDER COUNT", rs.getString("num_total_item"));
+					reply_data.addContent("table name", rs.getString("table_name"));
+					ResultSet rs2 = stmt.executeQuery("select name from user_info where user_num ='"+ user_num +"'");
+					if(rs2.next())
+						reply_data.addContent("name", rs2.getString("name"));
+					//시간 받아오기
+					rs2 = stmt.executeQuery("select order_time from order_info where order_num ='"+ order_num +"'");
+					if(rs2.next())
+						reply_data.addContent("order_time", rs2.getString("order_time"));
+					/*
+					 * while 문으로 주문받은 것들 reply에 넣을것.
+					 */
+					//메뉴번호로 오더해서 받아올 것.
+					rs2 = stmt.executeQuery("select menu_name from order_list where order_num = '"+ order_num +"'");
+					while(rs2.next())
 					{
-						reply_data.deleteContent(reply_data.getContentSize());
-						reply_data.addContent("menu_name",temp_menu_name);
-						reply_data.addContent("menu_count",++same_menu+"");
+						if(temp_menu_name.equals(rs2.getString("menu_name")))
+						{
+							reply_data.deleteContent(reply_data.getContentSize());
+							reply_data.addContent("menu_name",temp_menu_name);
+							reply_data.addContent("menu_count",++same_menu+"");
+						}
+						else
+						{
+							same_menu = 1;
+							temp_menu_name = rs2.getString("menu_name");
+							reply_data.addContent("menu_name",temp_menu_name);
+							reply_data.addContent("menu_count",same_menu+"");
+						}
+						
 					}
-					else
-					{
-						same_menu = 1;
-						temp_menu_name = rs2.getString("menu_name");
-						reply_data.addContent("menu_name",temp_menu_name);
-						reply_data.addContent("menu_count",same_menu+"");
-					}
+					reply_data.addContent("etc", rs.getString("etc"));
 					
 				}
-
-				
 			}
-			return p_st.execute();
+
+			return true;
 			
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -1235,8 +1262,8 @@ public class ServerConnector {
 			ResultSet rs2 = p_st2.executeQuery();
 			if(rs.next() && rs2.next())
 			{
-				reply_data.addContent("deferred payment",rs.getString("price"));
-				reply_data.addContent("prepaid ",rs.getString("price"));
+				reply_data.addContent("deferred payment",rs.getString("sum(price)"));
+				reply_data.addContent("prepaid ",rs.getString("sum(price)"));
 			}
 			else
 				throw new SQLException("No ordered information!");
@@ -1260,7 +1287,6 @@ public class ServerConnector {
 	protected boolean payOrder()
 	{
 		int i=0;
-		int price = 0, ordered_price = 0;
 		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("update order_list set payment = ? , payment_option = ?  where order_num = ?");
 		PreparedStatement p_st = null;
@@ -1268,7 +1294,6 @@ public class ServerConnector {
 		String order_num = "";
 		try {
 			p_st = con.prepareStatement(sql.toString());
-			p_st2 = con.prepareStatement("SELECT SUM(price) FROM odre_list WHERE order_num = ?");
 			//정상독작인지 test 하는 부분
 			System.out.println("server:" + s_id + " - " +"payMenu ㄱㄱㄱ size:"+recv_data.content.size());
 			
@@ -1283,54 +1308,82 @@ public class ServerConnector {
 				switch (temp.getType()) {
 				case "order_num":
 					order_num = temp.getValue();
-					p_st.setString(2,order_num);
-					p_st2.setString(1, order_num);
-					break;
-				case "price":
-					price = Integer.parseInt(temp.getValue());
+					p_st.setString(3,order_num);
 					break;
 				default :
 					throw new SQLException("invalid type!! in pay Order__"+temp.getType());
 				}
 			}
 			
-			System.out.println("server:" + s_id + " - " +p_st.toString());
-			ResultSet rs = p_st2.executeQuery();
-			if(rs.next())
-			{
-				ordered_price=Integer.parseInt(rs.getString("price"));
-			}
-			if(ordered_price != price)
-				throw new SQLException("No ordered information!");
-			p_st2 = con.prepareStatement("update order_info set payment = 1 where order_num = ?");
+			ResultSet rs =null;
+			p_st2 = con.prepareStatement("update order_info set payment = '1' where order_num = ?");
 			p_st.setString(1,"1");
-			p_st.setString(2,"직접결제");
-			if(p_st.execute())
+			p_st.setString(2,"1");
+			System.out.println("server:" + s_id + " - " +p_st.toString());
+			p_st.execute();
+			p_st2.setString(1, order_num);
+			//결제 완료로 order_info 수정
+			System.out.println("server:" + s_id + " - " +p_st2.toString());
+			p_st2.execute();
+			//stamp 수정
+			p_st2 = con.prepareStatement("select user_num from order_info where order_num = ?");
+			p_st2.setString(1, order_num);
+			System.out.println("server:" + s_id + " - " +p_st2.toString());
+			rs = p_st2.executeQuery();
+			if(!(rs.next()))
+				throw new SQLException("user num을 못가져왔습니다");
+			p_st2 = con.prepareStatement("select user_num from order_info where order_num = ?");
+			String user_num = rs.getString("user_num");
+			
+			//가져온 user_num 으로 total count를 구하고 stamp를 total count 만큼 증가시켜준다.
+			Statement stmt = con.createStatement();
+			rs = stmt.executeQuery("select num_total_item from order_info where user_num = '" + user_num + "'");
+			if(!(rs.next()))
+				throw new SQLException("num_total_item를 못가져왔습니다");
+			int total_count = rs.getInt("num_total_item");
+			stmt.execute("update user_info set stamp_total=stamp_total+"+total_count
+					+ " ,stamp_available=stamp_available+"+total_count+",stamp_month=stamp_month+"+total_count
+					+" where user_num = '"+user_num+"'");
+			rs = stmt.executeQuery("select stamp_available from user_info where user_num = ' " + user_num + "'");
+			if(!(rs.next()))
+					throw new SQLException("stamp_available를 못가져왔습니다");
+			if(Integer.parseInt(rs.getString(1)) > 6)
 			{
-				p_st2.setString(1, order_num);
-				//결제 완료로 order_info 수정
-				p_st2.execute();
-				//stamp 수정
-				p_st2 = con.prepareStatement("select user_num from order_info where order_num = ?");
-				p_st2.setString(1, order_num);
-				rs = p_st2.executeQuery();
-				if(!(rs.next()))
-					throw new SQLException("user num을 못가져왔습니다");
-				p_st2 = con.prepareStatement("select user_num from order_info where order_num = ?");
-				String user_num = rs.getString("user_num");
-				
-				//가져온 user_num 으로 total count를 구하고 stamp를 total count 만큼 증가시켜준다.
-				Statement stmt = con.createStatement();
-				rs = stmt.executeQuery("select total_count from order_info where user_num = '" + user_num + "'");
-				if(!(rs.next()))
-					throw new SQLException("total_count를 못가져왔습니다");
-				int total_count = rs.getInt("total_count");
-				stmt.execute("update user_info set stamp_total=stamp_total+"+total_count
-						+ " ,stamp_available=stamp_available+"+total_count+",stamp_month=stamp_month+"+total_count
-						+" where user_num = '"+user_num+"'");
+				//TODO stamp 갯수 조절 및 coupon 발행
+				int coupon_num = Integer.parseInt(rs.getString(1)) / 7;
+				stmt.execute("update user_info set stamp_available ='" + (Integer.parseInt(rs.getString(1))%7)
+						+ "' where user_num = '" + user_num +"'");
+				for(int j = 0 ; j < coupon_num ; j++)
+				{
+					String max_num = "1";
+					rs = stmt.executeQuery("select max(coupon_num)+1 from coupon");
+					if(rs.next())
+					{
+						max_num = rs.getString(1);
+					}
+					stmt.execute("insert into coupon(coupon_num,user_num) values('" +max_num+"','"+user_num+"')");
+				}
 			}
 			
-			return p_st.execute();
+			p_st2 = con.prepareStatement("select device_id from user_info where user_num = ?");
+			p_st2.setString(1, user_num);
+			String device_id = "";
+			System.out.println("server:" + s_id + " - " +p_st2.toString());
+			rs = p_st2.executeQuery();
+			if(rs.next())
+			{
+				device_id = rs.getString("device_id");
+			}
+			//TODO android push 알림
+			Push push = new Push();
+			try {
+				System.out.println("d_"+device_id+"\n");
+				push.sendMessage(device_id, "주문 하신 음료의 결제 완료되었습니다.");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return true;
 			
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
@@ -1351,9 +1404,9 @@ public class ServerConnector {
 		Data.data_structure temp ;
 		String order_num = "";
 		try {
-			PreparedStatement p_st = con.prepareStatement("update order_info set complete where order_num = ?");
+			PreparedStatement p_st = con.prepareStatement("update order_info set complete = '1' where order_num = ?");
 			//정상독작인지 test 하는 부분
-			System.out.println("server:" + s_id + " - " +"payMenu ㄱㄱㄱ size:"+recv_data.content.size());
+			System.out.println("server:" + s_id + " - " +"COMPLETE ORDER ㄱㄱㄱ size:"+recv_data.content.size());
 			
 			while(recv_data.getContent(i)!=null)
 			{
@@ -1375,9 +1428,33 @@ public class ServerConnector {
 			
 			System.out.println("server:" + s_id + " - " +p_st.toString());
 			
+			PreparedStatement p_st2 = con.prepareStatement("select user_num from order_info where order_num = ?");
+			p_st2.setString(1, order_num);
+			ResultSet rs = p_st2.executeQuery();
+			String user_num = "";
+			if(rs.next())
+			{
+				user_num = rs.getString("user_num");
+			}
 			
+			p_st2 = con.prepareStatement("select device_id from user_info where user_num = ?");
+			p_st2.setString(1, user_num);
+			String device_id = "";
+			System.out.println("server:" + s_id + " - " +p_st2.toString());
+			rs = p_st2.executeQuery();
+			if(rs.next())
+			{
+				device_id = rs.getString("device_id");
+			}
 			//TODO android push 알림
-			
+			Push push = new Push();
+			try {
+				System.out.println("d_"+device_id+"\n");
+				push.sendMessage(device_id, "음료가 모두 완성되었습니다.");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return p_st.execute();
 			
 			} catch (SQLException e) {
@@ -1478,7 +1555,7 @@ public class ServerConnector {
 		int 	menu_num = 0, category_num = 0;
 		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("update menu set menu_name = ? , category = ? , price = ? ,"
-				+ "detail = ?, category_order = ?, size = ? where menu_num = ?");
+				+ "detail = ?,  size = ? where menu_num = ?");
 		//parameter 순서 1-menuname / 2-category / 3-price /  4-detail / 5-category_odrer / 6-size / 7-menu_num
 		PreparedStatement p_st = null;
 		try {
@@ -1500,7 +1577,6 @@ public class ServerConnector {
 				case "category":
 					//category 내에서 순서를 조정할때 menu_num과 상관없이 정렬하기 위해서 category_order를 사용한다.
 					p_st.setString(2,temp.getValue());
-					category_num = Integer.parseInt(temp.getValue());
 					break;
 				case "price":
 					p_st.setString(3,temp.getValue());
@@ -1514,22 +1590,6 @@ public class ServerConnector {
 				case "menu_num":
 					menu_num = Integer.parseInt(temp.getValue());
 					p_st.setString(7, temp.getValue());
-					break;
-				//category order가 0인 경우는 카테고리를 바꾸면서 새로운 카테고리로 들어갈 경우
-				case "category_odrer":
-					if(temp.getValue().equals("0") && category_num != 0)
-					{
-						ResultSet rs = stmt.executeQuery("select max(category_order) from menu where category = '"+temp.getValue()+"'");
-						int cat_num=0;
-						if(rs.next())
-						{
-							cat_num=rs.getInt(1);
-							p_st.setString(5,++cat_num+"");
-						}
-					}
-				//0이 아닌 경우는 사용자가 category order를 정해줬을 경우
-					else
-						p_st.setString(5, temp.getValue());
 					break;
 				default:
 					throw new SQLException("invalid type!! in modify menu__"+temp.getType());
@@ -1561,7 +1621,7 @@ public class ServerConnector {
 		int i=0;
 		int 	menu_num = 0,category_order = 0;
 		Data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("update menu set category = ? category_order = ? where menu_num = ?");
+		StringBuffer sql = new StringBuffer("update menu set category = ? ,category_order = ? where menu_num = ?");
 		//parameter 순서 1- category / 2 - category_order / 3 - munu_num
 		PreparedStatement p_st = null;
 		try {
@@ -1578,7 +1638,7 @@ public class ServerConnector {
 				switch (temp.getType()) {
 				case "menu_num":
 					menu_num = Integer.parseInt(temp.getValue());
-					p_st.setString(3, temp.getValue());
+					p_st.setString(3, ""+menu_num);
 					p_st.setString(1, "0");
 					break;
 				default:
@@ -1586,7 +1646,7 @@ public class ServerConnector {
 				}
 			}
 			//column 에 있는 menu num중 최대값을 가져와 그위에 +1을 해준다. (menu 번호의 중복을 막기 위해서)
-			ResultSet rs = stmt.executeQuery("select max(category_order) from menu where menu_num =" + menu_num);
+			ResultSet rs = stmt.executeQuery("select max(category_order) from menu where category = '0'");
 			if(rs.next())
 			{
 				category_order=rs.getInt(1);
@@ -1687,6 +1747,7 @@ public class ServerConnector {
 		int i=0;
 		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("update user_info set balance = balance + ? WHERE user_num = ?");
+		String name = null, user_num = null;
 		int balance = 0;
 		//parameter 순서 1 -추가된 blance / 1-user_num
 		PreparedStatement p_st = null;
@@ -1705,10 +1766,11 @@ public class ServerConnector {
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 				switch (temp.getType()) {
 				case "user_num":
-					p_st.setString(2,temp.getValue());
-					p_st2.setString(1,temp.getValue());
+					user_num = temp.getValue();
+					p_st.setString(2,user_num);
+					p_st2.setString(1,user_num);
 					PreparedStatement p_st3 = con.prepareStatement("select balance from user_info where user_num = ?");
-					p_st3.setString(1, temp.getValue());
+					p_st3.setString(1, user_num);
 					ResultSet r_s = p_st3.executeQuery();
 					if(r_s.next())
 					{
@@ -1728,7 +1790,10 @@ public class ServerConnector {
 					p_st3.setString(1, temp.getValue());
 					r_s = p_st3.executeQuery();
 					if(r_s.next())
+					{
 						p_st2.setString(5,r_s.getString("name"));
+						name = r_s.getString("name");
+					}
 					break;
 				default:
 					break;
@@ -1736,8 +1801,10 @@ public class ServerConnector {
 			}
 			
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			p_st.execute();
 			p_st2.execute();
+			p_st.execute();
+			((Gmail) g).send("cafe1944mailsender@gmail.com","예치금 추가 메일" + name +"/" + balance , name + " 직원이"+balance+"만큼 회원번호_" +user_num+ "에 예치금을 충전했습니다." );
+			t.start();
 			return true;
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -1964,7 +2031,7 @@ public class ServerConnector {
 					break;
 				//수정 안하는 부분은 기본 data로 채운다.
 				case "employee_num":
-					p_st.setString(5,temp.getValue());
+					p_st.setString(3,temp.getValue());
 					break;
 				default:
 					break;
@@ -1989,8 +2056,7 @@ public class ServerConnector {
 	{
 		int i=0;
 		Data.data_structure temp ;
-		StringBuffer sql = new StringBuffer("delete FROM employee WHERE employee_num = ?");
-		String id = null;
+		StringBuffer sql = new StringBuffer("update employee set invisible = 1 WHERE employee_num = ?");
 		PreparedStatement p_st = null;
 
 		try {
@@ -2005,7 +2071,7 @@ public class ServerConnector {
 				//System.out.println("type =" + temp.getType() + ",  value =" + temp.getValue());
 				switch (temp.getType()) {
 				case "employee_num":
-					p_st.setString(1,id);
+					p_st.setString(1,temp.getValue());
 					break;
 				default:
 					throw new SQLException("emplyee_num 만 type으로 보낼 수 있습니다.");					
@@ -2013,17 +2079,9 @@ public class ServerConnector {
 			}
 			//Query 구문을 날려 result가 도착한다면 존재하는 아이디/패스워드 이다.
 			System.out.println("server:" + s_id + " - " +p_st.toString());
-			ResultSet rs = p_st.executeQuery();
-			if(rs.next())
-			{
-				reply_data.addContent("employee_DELETE", "OK");
-				return true;
-			}
-			else
-			{
-				reply_data.addContent("employee_DELETE","FAIL");
-				return false;
-			}
+			reply_data.addContent("employee_DELETE", "OK");
+			
+			return p_st.execute();
 			} catch (SQLException e) {
 				e.printStackTrace();
 				sqlErrorCheck(e);
@@ -2093,7 +2151,7 @@ public class ServerConnector {
 		try {
 			//정상독작인지 test 하는 부분
 			System.out.println("server:" + s_id + " - " +"show Employee 보여주기 ㄱㄱㄱ size:"+recv_data.content.size());
-			p_st = con.prepareStatement("select * from employee");
+			p_st = con.prepareStatement("select * from employee where invisible = 0");
 			
 			System.out.println("server:" + s_id + " - " +p_st.toString());
 			ResultSet rs = p_st.executeQuery();
@@ -2361,7 +2419,7 @@ public class ServerConnector {
 		Data.data_structure temp ;
 		StringBuffer sql = new StringBuffer("insert into music(user_num, message) values (?, ?)");
 		PreparedStatement p_st = null;
-		String user_num=null;
+		String user_num=null , message = "";
 		try {
 			p_st = con.prepareStatement(sql.toString());
 			//정상독작인지 test 하는 부분
@@ -2379,6 +2437,7 @@ public class ServerConnector {
 					p_st.setString(1,temp.getValue());
 					break;
 				case "message":
+					message = temp.getValue();
 					p_st.setString(2,temp.getValue());
 					break;
 				default:
@@ -2395,6 +2454,7 @@ public class ServerConnector {
 			if(rs.next())
 			{
 				reply_data.addContent("user_name", rs.getString("name"));
+				reply_data.addContent("message", message);
 			}
 			return p_st.execute();
 			
@@ -2453,8 +2513,8 @@ public class ServerConnector {
 			}
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				Gmail g = new Gmail("cafe1944mailsender@gmail.com", "CAFE1944");
-				g.send("관리자 암호 입니다", "관리자 접속에 실패하셨습니다. <br> 관리자 암호는 " + passsword + "입니다." );
+				((Gmail) g).send("cafe1944mailsender@gmail.com","관리자 암호 입니다", "관리자 접속에 실패하셨습니다. <br> 관리자 암호는 " + passsword + "입니다." );
+				t.start();
 				e.printStackTrace();
 				if(sqlErrorCheck(e))
 					return true;
@@ -2536,8 +2596,8 @@ public class ServerConnector {
 			reply_data.addContent("PASSWORD", "OK");
 			if(rs.next())
 			{
-				Gmail g = new Gmail(rs.getString("e_mail"), rs.getString("name"));
-				g.send("CAFE1944 비밀번호 찾기 메일 입니다.", "고객님의 비밀번호는. <br> 고객님의 암호는 [" + rs.getString("password")+ "] 입니다." );
+				((Gmail) g).send(rs.getString("e_mail"),"CAFE1944 비밀번호 찾기 메일 입니다.", rs.getString("name") + "고객님의 비밀번호는 [" + rs.getString("password")+ "] 입니다." );
+				t.start();
 				return true;
 			}
 			else
