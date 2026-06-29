@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>고1 진로 안내 | 장교가 되는 길</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --paper:#ffffff;
+      --ink:#172033;
+      --sub:#475467;
+      --muted:#667085;
+      --line:#e4e7ec;
+      --blue:#1d4ed8;
+      --green:#0f766e;
+      --navy:#111827;
+      --soft-blue:#eaf1ff;
+      --soft-green:#e9fbf7;
+      --soft-yellow:#fff7ed;
+      --soft-red:#fff1f2;
+      --radius:22px;
+      --shadow:0 16px 38px rgba(16,24,40,.08);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;
+      color:var(--ink);
+      background:linear-gradient(180deg,#eef4ff 0%,var(--bg) 360px);
+      line-height:1.65;
+      word-break:keep-all;
+    }
+    a{color:var(--blue); text-decoration:none; font-weight:800}
+    a:hover{text-decoration:underline}
+    .wrap{width:min(1080px,calc(100% - 32px)); margin:0 auto}
+    .skip{position:absolute; left:-9999px}
+    .skip:focus{left:16px; top:16px; z-index:99; background:#fff; padding:10px 14px; border-radius:10px}
+    header{padding:34px 0 22px}
+    .hero{
+      display:grid;
+      grid-template-columns:1.25fr .75fr;
+      gap:22px;
+      align-items:stretch;
+    }
+    .hero-card,.hero-side{
+      border-radius:32px;
+      box-shadow:var(--shadow);
+    }
+    .hero-card{
+      background:rgba(255,255,255,.92);
+      border:1px solid rgba(255,255,255,.75);
+      padding:34px;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 12px;
+      border-radius:999px;
+      background:var(--soft-blue);
+      color:#1e40af;
+      font-weight:900;
+      font-size:.88rem;
+    }
+    h1{
+      font-size:clamp(2rem,5vw,4rem);
+      line-height:1.08;
+      margin:18px 0 14px;
+      letter-spacing:-.06em;
+    }
+    .lead{
+      margin:0;
+      max-width:750px;
+      color:#344054;
+      font-size:clamp(1.02rem,2.2vw,1.22rem);
+    }
+    .hero-side{
+      background:var(--navy);
+      color:#fff;
+      padding:28px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .hero-side h2{font-size:1.45rem; line-height:1.28; margin:0 0 10px; letter-spacing:-.035em}
+    .hero-side p{color:#d1d5db; margin:0}
+    .quick-list{display:grid; gap:10px; margin-top:22px}
+    .quick-item{display:flex; gap:10px; color:#f3f4f6; font-size:.96rem}
+    .dot{width:9px; height:9px; border-radius:50%; background:#60a5fa; flex:0 0 9px; margin-top:9px}
+    nav.sticky{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:rgba(244,247,251,.92);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(228,231,236,.86);
+    }
+    .nav-inner{display:flex; gap:9px; padding:12px 0; overflow-x:auto; scrollbar-width:none}
+    .nav-inner::-webkit-scrollbar{display:none}
+    .nav-inner a{
+      white-space:nowrap;
+      padding:9px 13px;
+      border-radius:999px;
+      background:#fff;
+      border:1px solid var(--line);
+      color:#344054;
+      font-weight:900;
+      font-size:.91rem;
+    }
+    section{padding:26px 0}
+    .section-head{display:flex; justify-content:space-between; align-items:flex-end; gap:18px; margin-bottom:16px}
+    .section-head h2{font-size:clamp(1.5rem,3vw,2.2rem); line-height:1.2; letter-spacing:-.045em; margin:0}
+    .section-head p{margin:7px 0 0; color:var(--muted)}
+    .print-btn{border:0; background:var(--green); color:#fff; font-weight:900; padding:11px 15px; border-radius:999px; cursor:pointer; white-space:nowrap}
+
+    .big-answer{
+      background:linear-gradient(135deg,#1e3a8a,#0f766e);
+      color:#fff;
+      border-radius:30px;
+      padding:28px;
+      box-shadow:var(--shadow);
+      margin-bottom:18px;
+    }
+    .big-answer h2{margin:0 0 10px; font-size:clamp(1.5rem,3vw,2.2rem); letter-spacing:-.04em}
+    .big-answer p{margin:0; color:#e5e7eb; font-size:1.05rem}
+    .highlight{color:#fff; font-weight:1000; background:rgba(255,255,255,.16); padding:2px 6px; border-radius:8px}
+
+    .route-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px}
+    .route-card{
+      position:relative;
+      background:var(--paper);
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:20px;
+      box-shadow:0 10px 25px rgba(16,24,40,.045);
+      overflow:hidden;
+      min-height:265px;
+    }
+    .route-card::before{content:""; position:absolute; inset:0 0 auto; height:5px; background:linear-gradient(90deg,#1d4ed8,#0f766e)}
+    .route-name{display:inline-flex; padding:5px 9px; border-radius:999px; background:var(--soft-blue); color:#1e40af; font-weight:1000; font-size:.82rem; margin-bottom:10px}
+    .route-card h3{margin:0 0 10px; font-size:1.17rem; letter-spacing:-.025em; line-height:1.32}
+    .route-card p{margin:0 0 10px; color:var(--sub); font-size:.95rem}
+    .route-card ol{margin:0; padding-left:20px; color:#475467; font-size:.92rem}
+    .route-card li{margin:4px 0}
+
+    .simple-note{
+      background:var(--soft-yellow);
+      border:1px solid #fed7aa;
+      color:#7c2d12;
+      border-radius:22px;
+      padding:18px 20px;
+      font-weight:900;
+      margin-top:16px;
+    }
+    .green-note{
+      background:#ecfdf3;
+      border:1px solid #a7f3d0;
+      color:#065f46;
+      border-radius:22px;
+      padding:18px 20px;
+      font-weight:900;
+      margin-top:16px;
+    }
+
+    .why-wrap{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:stretch}
+    .why-main{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:28px;
+      padding:24px;
+      box-shadow:0 12px 28px rgba(16,24,40,.045);
+    }
+    .why-main h3{margin:0 0 10px; font-size:1.35rem; letter-spacing:-.035em}
+    .why-main p{margin:0; color:#475467}
+    .why-main ul{margin:12px 0 0; padding-left:20px; color:#475467}
+    .why-main li{margin:7px 0}
+    .choice-tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px}
+    .choice-tags span{
+      display:inline-flex;
+      align-items:center;
+      padding:7px 11px;
+      border-radius:999px;
+      background:#fff;
+      border:1px solid #bfdbfe;
+      color:#1e3a8a;
+      font-weight:1000;
+      font-size:.88rem;
+      box-shadow:0 3px 10px rgba(15,23,42,.1);
+    }
+    .truth-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:16px}
+    .truth-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:0 8px 20px rgba(16,24,40,.04);
+    }
+    .truth-card b{display:block; margin-bottom:8px; color:#101828}
+    .truth-card span{display:block; color:#475467; font-size:.94rem}
+
+    .academy-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px}
+    .academy-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:20px;
+      box-shadow:0 10px 24px rgba(16,24,40,.045);
+    }
+    .academy-card h3{margin:0 0 8px; font-size:1.2rem; letter-spacing:-.025em}
+    .academy-card p{margin:0; color:#475467}
+    .red-note{background:var(--soft-red); border:1px solid #fecdd3; color:#9f1239; border-radius:20px; padding:16px; font-weight:900; margin-top:14px}
+
+    .action-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+    .action-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:16px;
+      min-height:155px;
+      box-shadow:0 9px 20px rgba(16,24,40,.04);
+    }
+    .action-card em{display:inline-block; font-style:normal; font-weight:1000; color:#047857; background:#ecfdf3; border-radius:999px; padding:4px 8px; font-size:.76rem; margin-bottom:8px}
+    .action-card b{display:block; margin-bottom:8px; color:#101828}
+    .action-card span{display:block; color:#667085; font-size:.92rem}
+
+    .week-plan{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:24px;
+      overflow:hidden;
+      box-shadow:0 12px 28px rgba(16,24,40,.045);
+    }
+    .week-row{display:grid; grid-template-columns:130px 1fr; border-bottom:1px solid var(--line)}
+    .week-row:last-child{border-bottom:0}
+    .week-title{background:#f8fafc; padding:16px; font-weight:1000; color:#1e40af}
+    .week-task{padding:16px; color:#475467}
+
+    .filters{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 18px}
+    .filter-btn{border:1px solid var(--line); background:#fff; color:#344054; border-radius:999px; padding:10px 14px; font-weight:1000; cursor:pointer}
+    .filter-btn.active{background:var(--blue); color:#fff; border-color:var(--blue)}
+    .path-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+    .path-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:26px;
+      padding:22px;
+      box-shadow:0 14px 30px rgba(16,24,40,.055);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-height:310px;
+    }
+    .path-card.hide{display:none}
+    .tag-row{display:flex; gap:7px; flex-wrap:wrap}
+    .tag{font-size:.78rem; font-weight:1000; padding:5px 9px; border-radius:999px; background:var(--soft-blue); color:#1e40af}
+    .tag.green{background:var(--soft-green); color:#047857}
+    .path-card h3{font-size:1.32rem; margin:0; letter-spacing:-.035em; line-height:1.28}
+    .path-card p{margin:0; color:#475467}
+    .plain-box{background:#f8fafc; border:1px dashed #cbd5e1; border-radius:18px; padding:13px; color:#334155; font-weight:900}
+    .card-list{margin:0; padding-left:18px; color:#475467}
+    .card-list li{margin:4px 0}
+    .fit{margin-top:auto; border-top:1px solid var(--line); padding-top:12px; color:#101828; font-weight:900}
+
+    .compare-wrap{overflow:auto; border-radius:24px; box-shadow:0 12px 28px rgba(16,24,40,.045); background:#fff; border:1px solid var(--line)}
+    table{width:100%; border-collapse:collapse; min-width:820px; background:#fff}
+    th,td{padding:15px 16px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top}
+    th{background:#f8fafc; font-size:.92rem; color:#344054}
+    td{font-size:.95rem; color:#344054}
+    tr:last-child td{border-bottom:0}
+
+    .checklist{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
+    .check{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+    }
+    .check input{width:20px; height:20px; margin-top:3px; accent-color:var(--blue)}
+    .check strong{display:block; margin-bottom:3px}
+    .check span span{color:var(--muted); font-size:.92rem}
+
+    .decision{display:grid; grid-template-columns:.9fr 1.1fr; gap:18px; align-items:start}
+    .question-panel,.answer-panel{background:#fff; border:1px solid var(--line); border-radius:26px; padding:22px; box-shadow:0 12px 28px rgba(16,24,40,.045)}
+    .choice{display:block; width:100%; text-align:left; margin:8px 0; padding:13px 14px; border:1px solid var(--line); border-radius:16px; background:#fff; color:#344054; font-weight:1000; cursor:pointer}
+    .choice.active{background:#111827; color:#fff; border-color:#111827}
+    .recommend{display:none}
+    .recommend.active{display:block}
+    .recommend h3{margin-top:0; font-size:1.35rem}
+    .recommend ul{padding-left:20px; color:#475467}
+
+    .source-box{background:#fff; border:1px solid var(--line); border-radius:24px; padding:20px}
+    .source-box ol{margin:0; padding-left:22px}
+    .source-box li{margin:8px 0; color:#475467}
+    footer{padding:30px 0 44px; color:#667085; font-size:.95rem; text-align:center}
+    footer .copyright{font-weight:900; color:#344054}
+
+    @media (max-width:960px){
+      .hero,.why-wrap,.decision{grid-template-columns:1fr}
+      .route-grid,.truth-grid,.action-grid{grid-template-columns:repeat(2,1fr)}
+      .path-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:640px){
+      .wrap{width:min(100% - 22px,1080px)}
+      header{padding-top:18px}
+      .hero-card,.hero-side,.big-answer{border-radius:24px; padding:22px}
+      .route-grid,.truth-grid,.academy-grid,.action-grid,.path-grid,.checklist{grid-template-columns:1fr}
+      .section-head{display:block}
+      .print-btn{width:100%; margin-top:12px}
+      .week-row{grid-template-columns:1fr}
+      .week-title{padding-bottom:6px}
+      .week-task{padding-top:8px}
+      h1{letter-spacing:-.05em}
+    }
+    @media print{
+      body{background:#fff}
+      nav.sticky,.filters,.print-btn,.decision{display:none!important}
+      .hero,.route-grid,.why-wrap,.truth-grid,.academy-grid,.action-grid,.path-grid,.checklist{display:block}
+      .hero-card,.hero-side,.route-card,.why-main,.truth-card,.academy-card,.action-card,.path-card,.check,.source-box,.simple-note,.green-note{box-shadow:none; break-inside:avoid; margin-bottom:12px}
+      .hero-side{color:#111827; background:#fff}
+      .hero-side p,.quick-item{color:#344054}
+      a{text-decoration:underline; color:#111827}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">본문으로 이동</a>
+
+  <header>
+    <div class="wrap hero">
+      <div class="hero-card">
+        <span class="badge">고1 진로 탐색 · 군 장교</span>
+        <h1>장교가 되고 싶다면,<br>지금부터 준비할 수 있습니다.</h1>
+        <p class="lead">장교가 되는 길은 하나가 아닙니다. 중요한 것은 <strong>사관학교, ROTC, 학사장교, 육군3사관학교 편입</strong> 같은 길을 알고, 지금부터 공부·체력·태도를 조금씩 준비하는 것입니다.</p>
+      </div>
+      <aside class="hero-side" aria-label="핵심 요약">
+        <div>
+          <h2>먼저 이것만 기억하세요</h2>
+          <p>장교는 그냥 지원한다고 되는 직업이 아닙니다. 대부분 선발 과정을 통과해야 합니다.</p>
+        </div>
+        <div class="quick-list">
+          <div class="quick-item"><span class="dot"></span><span>고3 때 바로 도전: 사관학교</span></div>
+          <div class="quick-item"><span class="dot"></span><span>대학 다니며 도전: ROTC, 육군3사관학교 편입</span></div>
+          <div class="quick-item"><span class="dot"></span><span>대학 졸업 후 도전: 학사장교, 전문 분야 장교</span></div>
+        </div>
+      </aside>
+    </div>
+  </header>
+
+  <nav class="sticky" aria-label="페이지 이동">
+    <div class="wrap nav-inner">
+      <a href="#routes">4가지 큰길</a>
+      <a href="#study">왜 공부할까?</a>
+      <a href="#academy">사관학교 장점</a>
+      <a href="#action">지금 할 일</a>
+      <a href="#paths">경로 카드</a>
+      <a href="#check">자기 체크</a>
+      <a href="#choice">나에게 맞는 길</a>
+      <a href="#sources">출처</a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <section id="routes">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>1. 장교가 되는 4가지 큰길</h2>
+            <p>먼저 복잡한 이름을 줄여서 봅시다. 고등학생이 꼭 알아야 할 길은 아래 4가지입니다.</p>
+          </div>
+          <button class="print-btn" onclick="window.print()">인쇄 / PDF 저장</button>
+        </div>
+
+        <div class="big-answer">
+          <h2>장교가 되는 길 = <span class="highlight">선발을 통과하는 길</span></h2>
+          <p>그래서 공부, 체력, 학교생활 태도는 따로 노는 것이 아닙니다. 나중에 내가 선택할 수 있는 길을 넓혀주는 준비입니다.</p>
+        </div>
+
+        <div class="route-grid">
+          <article class="route-card">
+            <span class="route-name">1번 길 · 사관학교</span>
+            <h3>고3 때 지원해서 장교 코스로 바로 들어가는 길</h3>
+            <p>육군·해군·공군사관학교, 국군간호사관학교가 여기에 들어갑니다.</p>
+            <ol>
+              <li>고등학교 때 준비</li>
+              <li>고3 때 지원</li>
+              <li>4년 동안 공부와 군사교육</li>
+              <li>졸업 후 장교 임관</li>
+            </ol>
+          </article>
+          <article class="route-card">
+            <span class="route-name">2번 길 · ROTC</span>
+            <h3>일반 대학을 다니면서 장교를 준비하는 길</h3>
+            <p>대학 생활을 하면서 군사교육을 받고, 졸업 후 장교가 됩니다.</p>
+            <ol>
+              <li>학군단이 있는 대학 진학</li>
+              <li>대학 재학 중 지원</li>
+              <li>대학 공부와 군사교육 병행</li>
+              <li>졸업 후 장교 임관</li>
+            </ol>
+          </article>
+          <article class="route-card">
+            <span class="route-name">3번 길 · 학사장교</span>
+            <h3>대학을 졸업하고 장교로 지원하는 길</h3>
+            <p>먼저 대학에서 전공을 공부한 뒤 장교에 도전합니다.</p>
+            <ol>
+              <li>일반 대학 진학</li>
+              <li>전공 공부</li>
+              <li>졸업 또는 졸업예정 때 지원</li>
+              <li>군사교육 후 장교 임관</li>
+            </ol>
+          </article>
+          <article class="route-card">
+            <span class="route-name">4번 길 · 육군3사관학교 편입</span>
+            <h3>대학을 다니다가 사관학교로 다시 도전하는 길</h3>
+            <p>고3 때 사관학교를 못 갔어도, 대학에 간 뒤 다시 도전할 수 있습니다.</p>
+            <ol>
+              <li>일반 대학 또는 전문대 진학</li>
+              <li>일정 과정 이수</li>
+              <li>육군3사관학교 편입 지원</li>
+              <li>졸업 후 육군 장교 임관</li>
+            </ol>
+          </article>
+        </div>
+
+        <p class="simple-note">핵심: 장교 임관 경로는 여러 개입니다. 하지만 공통점은 모두 “준비한 사람을 뽑는다”는 점입니다.</p>
+      </div>
+    </section>
+
+    <section id="study">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>2. 장교가 되고 싶은데 왜 공부를 해야 할까?</h2>
+            <p>공부는 “군인이 되기 싫어서 하는 것”이 아닙니다. 장교가 되고 싶어도 공부가 필요합니다.</p>
+          </div>
+        </div>
+
+        <div class="why-wrap">
+          <div class="why-main">
+            <h3>공부를 하면 선택지가 늘어납니다</h3>
+            <p>지금 성적이 낮아도 괜찮습니다. 하지만 계속 아무것도 하지 않으면 나중에 지원할 수 있는 길이 줄어듭니다.</p>
+            <div class="choice-tags" aria-label="공부와 연결되는 기회">
+              <span>사관학교 지원</span>
+              <span>좋은 대학 선택</span>
+              <span>ROTC 기회</span>
+              <span>학사장교 준비</span>
+              <span>전문 분야 장교</span>
+            </div>
+          </div>
+          <div class="why-main">
+            <h3>장교는 생각하고 설명하는 사람입니다</h3>
+            <ul>
+              <li>명령과 규정을 정확히 읽어야 합니다.</li>
+              <li>상황을 판단하고 부하에게 설명해야 합니다.</li>
+              <li>보고서와 문서를 이해해야 합니다.</li>
+              <li>컴퓨터·항공·해군·사이버 분야는 전공 공부도 중요합니다.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="truth-grid">
+          <article class="truth-card"><b>공부를 안 하면?</b><span>사관학교, 좋은 대학, ROTC, 학사장교, 전문 분야 장교의 기회가 줄어들 수 있습니다.</span></article>
+          <article class="truth-card"><b>조금이라도 시작하면?</b><span>당장 상위권이 아니어도 “준비하는 학생”이 됩니다. 면접에서도 변화와 노력을 말할 수 있습니다.</span></article>
+          <article class="truth-card"><b>무엇부터 하면 될까?</b><span>국어·영어·수학 중 하나만 골라 하루 30분부터 시작하면 됩니다. 처음 목표는 “습관 만들기”입니다.</span></article>
+        </div>
+
+        <p class="green-note">한 문장으로 정리하면, 공부는 장교 진로를 막는 것이 아니라 장교가 될 수 있는 길을 열어두는 준비입니다.</p>
+      </div>
+    </section>
+
+    <section id="academy">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>3. 직업군인을 생각한다면 사관학교가 왜 좋을까?</h2>
+            <p>사관학교는 처음부터 “장교를 길러내기 위한 학교”입니다.</p>
+          </div>
+        </div>
+        <div class="academy-grid">
+          <article class="academy-card">
+            <h3>장교가 되는 가장 직접적인 길입니다</h3>
+            <p>4년 동안 공부와 군사교육을 받고, 졸업 후 장교로 임관하는 대표적인 경로입니다.</p>
+          </article>
+          <article class="academy-card">
+            <h3>생활 자체가 훈련입니다</h3>
+            <p>규칙적인 생활, 체력, 책임감, 리더십을 매일 훈련합니다. 직업군인을 생각한다면 큰 장점입니다.</p>
+          </article>
+          <article class="academy-card">
+            <h3>같은 목표를 가진 친구들이 있습니다</h3>
+            <p>장교를 목표로 하는 동기들과 함께 생활합니다. 서로 자극을 받고 정보를 나눌 수 있습니다.</p>
+          </article>
+          <article class="academy-card">
+            <h3>고1부터 준비할 이유가 생깁니다</h3>
+            <p>고3 때 지원하려면 성적, 체력, 면접, 학교생활 태도를 미리 준비해야 합니다.</p>
+          </article>
+        </div>
+        <p class="red-note">다만 사관학교는 멋있어 보여서만 선택하면 힘들 수 있습니다. 규칙, 단체생활, 책임감이 많은 길이라는 점도 함께 생각해야 합니다.</p>
+      </div>
+    </section>
+
+    <section id="action">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>4. 고1이 지금 해볼 것</h2>
+            <p>거창한 활동보다 “작게 시작해서 기록하는 것”이 중요합니다.</p>
+          </div>
+        </div>
+        <div class="action-grid">
+          <article class="action-card"><em>공부</em><b>하루 30분 앉기</b><span>국어·영어·수학 중 한 과목만 고릅니다. 처음 목표는 성적보다 습관입니다.</span></article>
+          <article class="action-card"><em>체력</em><b>주 3회 운동 기록</b><span>걷기, 달리기, 팔굽혀펴기, 플랭크처럼 숫자로 기록할 수 있는 운동을 합니다.</span></article>
+          <article class="action-card"><em>진로</em><b>4가지 길 비교</b><span>사관학교, ROTC, 학사장교, 육군3사관학교 편입 중 끌리는 길을 표시합니다.</span></article>
+          <article class="action-card"><em>태도</em><b>기본 생활 바로잡기</b><span>지각 줄이기, 과제 제출, 약속 지키기처럼 기본을 지키는 연습을 합니다.</span></article>
+          <article class="action-card"><em>말하기</em><b>지원 이유 5문장</b><span>“나는 왜 장교가 되고 싶은가?”를 짧게 써봅니다. 면접 준비의 시작입니다.</span></article>
+          <article class="action-card"><em>정보</em><b>관심 군 조사</b><span>육군, 해군, 공군, 해병대, 간호, 사이버 중 관심 있는 분야를 찾아봅니다.</span></article>
+          <article class="action-card"><em>수업</em><b>정보·영어 챙기기</b><span>사이버, 항공, 해군, 기술 분야를 생각한다면 정보와 영어가 도움이 됩니다.</span></article>
+          <article class="action-card"><em>기록</em><b>변화 남기기</b><span>공부 시간, 운동 기록, 읽은 자료를 남기면 “준비했다”는 증거가 됩니다.</span></article>
+        </div>
+
+        <div class="section-head" style="margin-top:28px">
+          <div>
+            <h2>5. 30일 시작 계획</h2>
+            <p>현재 공부를 거의 안 하고 있다면 이 정도부터 시작하면 됩니다.</p>
+          </div>
+        </div>
+        <div class="week-plan">
+          <div class="week-row"><div class="week-title">1주차</div><div class="week-task">장교가 되는 4가지 길을 읽고, 가장 끌리는 길 1개를 고릅니다.</div></div>
+          <div class="week-row"><div class="week-title">2주차</div><div class="week-task">하루 30분, 한 과목만 공부합니다. 공부한 날짜를 체크합니다.</div></div>
+          <div class="week-row"><div class="week-title">3주차</div><div class="week-task">주 3회 운동을 시작합니다. 운동 시간이나 개수를 숫자로 남깁니다.</div></div>
+          <div class="week-row"><div class="week-title">4주차</div><div class="week-task">“내가 장교가 되고 싶은 이유”와 “지금 고쳐야 할 습관”을 각각 5문장씩 씁니다.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="paths">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>6. 장교 경로 카드</h2>
+            <p>조금 더 자세히 보고 싶다면 아래 카드를 확인하세요.</p>
+          </div>
+        </div>
+        <div class="filters" role="toolbar" aria-label="경로 필터">
+          <button class="filter-btn active" data-filter="all">전체</button>
+          <button class="filter-btn" data-filter="high">고3 지원</button>
+          <button class="filter-btn" data-filter="college">대학 재학 중</button>
+          <button class="filter-btn" data-filter="graduate">대학 졸업 후</button>
+          <button class="filter-btn" data-filter="special">전문 분야</button>
+        </div>
+
+        <div class="path-grid">
+          <article class="path-card" data-cat="high">
+            <div class="tag-row"><span class="tag">고3 지원</span><span class="tag green">가장 직접적</span></div>
+            <h3>육군·해군·공군사관학교</h3>
+            <p class="plain-box">군에서 운영하는 대학에 들어가 4년 동안 공부와 군사교육을 받고 장교가 되는 길입니다.</p>
+            <ul class="card-list">
+              <li>고1부터 성적과 체력을 준비하면 좋습니다.</li>
+              <li>직업군인 목표가 뚜렷한 학생에게 잘 맞습니다.</li>
+              <li>면접에서 지원 이유를 말할 수 있어야 합니다.</li>
+            </ul>
+            <div class="fit">추천: 처음부터 장교를 강하게 생각하는 학생</div>
+          </article>
+
+          <article class="path-card" data-cat="high special">
+            <div class="tag-row"><span class="tag">고3 지원</span><span class="tag green">간호</span></div>
+            <h3>국군간호사관학교</h3>
+            <p class="plain-box">간호학과 군사교육을 함께 배우고, 졸업 후 간호장교가 되는 길입니다.</p>
+            <ul class="card-list">
+              <li>간호, 보건, 의료 분야 관심이 필요합니다.</li>
+              <li>공부, 체력, 면접 준비가 필요합니다.</li>
+              <li>사람을 돌보는 일과 장교 역할을 함께 합니다.</li>
+            </ul>
+            <div class="fit">추천: 간호·의료와 군 장교를 함께 생각하는 학생</div>
+          </article>
+
+          <article class="path-card" data-cat="college">
+            <div class="tag-row"><span class="tag">대학 재학 중</span><span class="tag green">편입</span></div>
+            <h3>육군3사관학교 편입</h3>
+            <p class="plain-box">대학을 다니다가 육군3사관학교 3학년으로 편입해 장교가 되는 길입니다.</p>
+            <ul class="card-list">
+              <li>고3 때 바로 사관학교에 가지 않아도 다시 도전할 수 있습니다.</li>
+              <li>대학 성적과 체력, 면접이 중요합니다.</li>
+              <li>육군 장교를 목표로 하는 학생에게 맞습니다.</li>
+            </ul>
+            <div class="fit">추천: 대학에 간 뒤 장교 진로를 다시 선택하고 싶은 학생</div>
+          </article>
+
+          <article class="path-card" data-cat="college">
+            <div class="tag-row"><span class="tag">대학 재학 중</span><span class="tag green">일반 대학</span></div>
+            <h3>ROTC</h3>
+            <p class="plain-box">일반 대학을 다니면서 군사교육을 받고 졸업 후 장교가 되는 길입니다.</p>
+            <ul class="card-list">
+              <li>ROTC 학군단이 있는 대학인지 확인해야 합니다.</li>
+              <li>대학 생활과 장교 준비를 함께 할 수 있습니다.</li>
+              <li>대학 진학이 중요하게 연결됩니다.</li>
+            </ul>
+            <div class="fit">추천: 일반 대학 생활도 해보고 싶은 학생</div>
+          </article>
+
+          <article class="path-card" data-cat="graduate">
+            <div class="tag-row"><span class="tag">대학 졸업 후</span><span class="tag green">전공 활용</span></div>
+            <h3>학사장교</h3>
+            <p class="plain-box">대학을 졸업하거나 졸업할 때 장교로 지원하는 길입니다.</p>
+            <ul class="card-list">
+              <li>먼저 대학에서 전공을 공부합니다.</li>
+              <li>졸업 전후에 장교 지원을 검토합니다.</li>
+              <li>고등학교 때 확신이 없어도 나중에 선택할 수 있습니다.</li>
+            </ul>
+            <div class="fit">추천: 대학 전공을 먼저 공부하고 싶은 학생</div>
+          </article>
+
+          <article class="path-card" data-cat="special graduate college">
+            <div class="tag-row"><span class="tag">전문 분야</span><span class="tag green">컴퓨터·의료·법</span></div>
+            <h3>전문 분야 장교</h3>
+            <p class="plain-box">컴퓨터, 사이버보안, 간호, 의료, 법, 수의 등 전문성을 살려 장교가 되는 길입니다.</p>
+            <ul class="card-list">
+              <li>전공이나 자격이 중요합니다.</li>
+              <li>정보·영어·전공 공부가 도움이 됩니다.</li>
+              <li>모집 분야는 해마다 달라질 수 있습니다.</li>
+            </ul>
+            <div class="fit">추천: 특정 전공이나 기술을 군에서 살리고 싶은 학생</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="compare">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>7. 한눈에 비교하기</h2>
+            <p>모바일에서는 표를 좌우로 움직여서 보면 됩니다.</p>
+          </div>
+        </div>
+        <div class="compare-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>길</th>
+                <th>언제 준비?</th>
+                <th>쉽게 말하면</th>
+                <th>공부가 필요한 이유</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>사관학교</td>
+                <td>고등학교 때, 고3 지원</td>
+                <td>장교가 되기 위한 학교로 바로 가는 길</td>
+                <td>선발 시험, 학교 성적, 면접 준비에 필요</td>
+              </tr>
+              <tr>
+                <td>ROTC</td>
+                <td>대학 진학 후</td>
+                <td>일반 대학을 다니며 장교를 준비하는 길</td>
+                <td>ROTC가 있는 대학에 가야 하므로 대학 선택이 중요</td>
+              </tr>
+              <tr>
+                <td>학사장교</td>
+                <td>대학 졸업 전후</td>
+                <td>대학을 졸업하고 장교로 지원하는 길</td>
+                <td>대학 진학과 전공 공부가 바탕이 됨</td>
+              </tr>
+              <tr>
+                <td>육군3사관학교 편입</td>
+                <td>대학 재학 후</td>
+                <td>대학을 다니다가 사관학교로 편입하는 길</td>
+                <td>대학 성적, 체력, 면접 준비가 필요</td>
+              </tr>
+              <tr>
+                <td>전문 분야 장교</td>
+                <td>전공·자격 준비 후</td>
+                <td>컴퓨터·의료·법 등 전문성을 살리는 길</td>
+                <td>전공 공부와 자격 준비가 중요</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="check">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2>8. 나의 장교 준비 체크</h2>
+            <p>체크가 적어도 괜찮습니다. 지금부터 무엇을 시작하면 되는지 확인하는 용도입니다.</p>
+          </div>
+        </div>
+        <div class="checklist">
+          <label class="check"><input type="checkbox"><span><strong>나는 장교가 되는 4가지 길을 안다.</strong><span>사관학교, ROTC, 학사장교, 육군3사관학교 편입을 구분할 수 있다.</span></span></label>
+          <label class="check"><input type="checkbox"><span><strong>공부가 장교 진로와 연결된다는 것을 안다.</strong><span>공부는 사관학교, 대학 선택, ROTC, 학사장교, 전문 분야 장교의 기회를 넓힌다.</span></span></label>
+          <label class="check"><input type="checkbox"><span><strong>내가 관심 있는 길을 1개 고를 수 있다.</strong><span>아직 확정하지 않아도, 끌리는 길을 하나 표시할 수 있다.</span></span></label>
+          <label class="check"><input type="checkbox"><span><strong>하루 30분 공부를 시작할 수 있다.</strong><span>처음부터 완벽할 필요는 없다. 한 과목부터 시작하면 된다.</span></span></label>
+          <label class="check"><input type="checkbox"><span><strong>주 3회 운동을 기록할 수 있다.</strong><span>장교 준비에는 체력도 필요하다. 숫자로 기록하면 좋다.</span></span></label>
+          <label class="check"><input type="checkbox"><span><strong>내가 고쳐야 할 습관을 말할 수 있다.</strong><span>지각, 과제, 수업 태도, 휴대폰 사용 등 하나를 고르면 된다.</span></span></label>
+          <label class="check"><input type="checkbox"><span><strong>사관학교가 왜 직접적인 길인지 안다.</strong><span>사관학교는 장교를 길러내기 위한 학교이기 때문이다.</span></span></label>
+          <label class="check"><input type="checkbox"><span><strong>이번 주에 할 행동 1개를 정했다.</strong><span>공부 30분, 운동, 진로 조사, 지원 이유 5문장 쓰기 중 하나를 선택한다.</span></span></label>
+        </div>
+      </div>
+    </section>
+
+    <section id="choice">
+      <div class="wrap decision">
+        <div class="question-panel">
+          <div class="section-head" style="margin-bottom:8px"><div><h2>9. 나는 어떤 길을 먼저 볼까?</h2><p>가장 가까운 문장을 눌러보세요.</p></div></div>
+          <button class="choice active" data-choice="a">고등학교 졸업 후 바로 장교 코스로 가고 싶다.</button>
+          <button class="choice" data-choice="b">일반 대학 생활도 해보고 싶다.</button>
+          <button class="choice" data-choice="c">컴퓨터·사이버보안 쪽이 좋다.</button>
+          <button class="choice" data-choice="d">의료·간호·법·수의 같은 전문 분야가 좋다.</button>
+          <button class="choice" data-choice="e">아직 잘 모르겠다.</button>
+        </div>
+        <div class="answer-panel">
+          <div class="recommend active" id="rec-a">
+            <h3>먼저 볼 길: 사관학교</h3>
+            <ul><li>육군·해군·공군사관학교, 국군간호사관학교를 살펴봅니다.</li><li>고1부터 성적, 체력, 면접, 학교생활 태도를 준비합니다.</li><li>“왜 장교가 되고 싶은가?”를 말할 수 있어야 합니다.</li></ul>
+          </div>
+          <div class="recommend" id="rec-b">
+            <h3>먼저 볼 길: ROTC, 학사장교, 육군3사관학교 편입</h3>
+            <ul><li>일반 대학에 가도 장교가 되는 길이 있습니다.</li><li>ROTC를 생각한다면 학군단이 있는 대학인지 확인합니다.</li><li>대학 성적과 전공 공부도 중요합니다.</li></ul>
+          </div>
+          <div class="recommend" id="rec-c">
+            <h3>먼저 볼 길: 사이버·전산·정보통신 장교</h3>
+            <ul><li>정보, 프로그래밍, 네트워크, 정보보호 공부가 도움이 됩니다.</li><li>컴퓨터공학, 정보보호학, 소프트웨어 관련 전공을 살펴봅니다.</li><li>영어와 수학 기초도 도움이 됩니다.</li></ul>
+          </div>
+          <div class="recommend" id="rec-d">
+            <h3>먼저 볼 길: 국군간호사관학교, 전문 분야 장교</h3>
+            <ul><li>간호는 국군간호사관학교도 볼 수 있습니다.</li><li>의료·법·수의 분야는 전공과 자격이 중요합니다.</li><li>장기적인 진학 계획이 필요합니다.</li></ul>
+          </div>
+          <div class="recommend" id="rec-e">
+            <h3>먼저 할 일: 4가지 길 중 하나 표시하기</h3>
+            <ul><li>사관학교, ROTC, 학사장교, 육군3사관학교 편입 중 가장 덜 낯선 길을 고릅니다.</li><li>고1 때는 확정하지 않아도 됩니다.</li><li>공부, 체력, 기본 생활을 준비해두면 나중에 선택지가 많아집니다.</li></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources">
+      <div class="wrap">
+        <div class="section-head"><div><h2>10. 참고 출처</h2><p>지원 자격과 일정은 매년 바뀔 수 있습니다. 실제 지원할 때는 최신 모집요강을 확인해야 합니다.</p></div></div>
+        <div class="source-box">
+          <ol>
+            <li>병무청 복무제도: 학군사관후보생(ROTC) 안내 — <a href="https://www.mma.go.kr/contents.do?mc=mma0000782" target="_blank" rel="noopener">바로가기</a></li>
+            <li>병무청 복무제도: 군 가산복무 지원금 지급대상자 안내 — <a href="https://www.mma.go.kr/contents.do?mc=mma0000998&mc1=usr0000184&num=8" target="_blank" rel="noopener">바로가기</a></li>
+            <li>병무청 복무제도: 특수병과 사관후보생 안내 — <a href="https://www.mma.go.kr/contents.do?mc=mma0000777" target="_blank" rel="noopener">바로가기</a></li>
+            <li>육군사관학교 2027학년도 모집요강 관련 보도 — <a href="https://news.kma.ac.kr/news/articleView.html?idxno=10221" target="_blank" rel="noopener">바로가기</a></li>
+            <li>육군사관학교 졸업 및 임관식 보도: 4년 교육, 학위, 임관 참고 — <a href="https://news.kma.ac.kr/news/articleView.html?idxno=991" target="_blank" rel="noopener">바로가기</a></li>
+            <li>육군3사관학교 2027학년도 정시생도 모집 안내 예시 — <a href="https://www.dongyang.ac.kr/bbs/dmu/677/250672/artclView.do" target="_blank" rel="noopener">바로가기</a></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="copyright">© 2026 pirugiru · 자유롭게 사용하세요</div>
+    </div>
+  </footer>
+
+  <script>
+    const buttons = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.path-card');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.dataset.filter;
+        cards.forEach(card => {
+          const cats = card.dataset.cat.split(' ');
+          card.classList.toggle('hide', filter !== 'all' && !cats.includes(filter));
+        });
+      });
+    });
+
+    const choices = document.querySelectorAll('.choice');
+    const recs = document.querySelectorAll('.recommend');
+    choices.forEach(choice => {
+      choice.addEventListener('click', () => {
+        choices.forEach(c => c.classList.remove('active'));
+        choice.classList.add('active');
+        recs.forEach(r => r.classList.remove('active'));
+        document.getElementById('rec-' + choice.dataset.choice).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
