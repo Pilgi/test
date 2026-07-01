@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>말투 돌아보기 — 언어습관 자가진단</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Pretendard-Regular&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  :root{
+    --bg: #EEF1EF;
+    --panel: #FFFFFF;
+    --ink: #22262A;
+    --ink-soft: #5B6360;
+    --line: #D8DDD9;
+    --accent: #3D6B5C;      /* 차분한 파인그린 - 성찰/성장 */
+    --accent-soft: #DCE7E2;
+    --warn: #C08A2E;        /* 보통/주의 - 앰버 */
+    --warn-soft: #F3E7D0;
+    --alert: #B5533C;       /* 개선 필요 - 브릭 */
+    --alert-soft: #F2E0DA;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Pretendard-Regular','Pretendard',-apple-system,sans-serif;
+    line-height:1.6;
+    padding-bottom:80px;
+  }
+  .progress-wrap{
+    position:sticky; top:0; z-index:50;
+    background:var(--bg);
+    padding:10px 20px 6px;
+    border-bottom:1px solid var(--line);
+  }
+  .progress-track{
+    height:8px; background:var(--panel); border:1px solid var(--line);
+    border-radius:99px; overflow:hidden; max-width:720px; margin:0 auto;
+  }
+  .progress-fill{
+    height:100%; width:0%; background:var(--accent);
+    transition:width .3s ease;
+  }
+  .progress-label{
+    max-width:720px; margin:6px auto 0; font-size:12px; color:var(--ink-soft); text-align:right;
+  }
+  main{ max-width:720px; margin:0 auto; padding:28px 20px 0; }
+  header.hero{ margin-bottom:32px; }
+  .eyebrow{
+    font-size:13px; letter-spacing:.08em; color:var(--accent); font-weight:700;
+    text-transform:uppercase;
+  }
+  h1{
+    font-family:'Gowun Batang', serif;
+    font-size:clamp(28px,5vw,38px);
+    margin:8px 0 12px;
+    line-height:1.35;
+  }
+  .lede{ color:var(--ink-soft); font-size:15px; max-width:60ch; }
+  .notice{
+    margin-top:16px; padding:14px 16px; background:var(--accent-soft);
+    border-radius:var(--radius); font-size:13.5px; color:#2E4A40;
+  }
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:22px 20px; margin-bottom:18px;
+  }
+  .cat-title{
+    font-family:'Gowun Batang', serif; font-size:20px; margin:0 0 4px;
+  }
+  .cat-desc{ font-size:13px; color:var(--ink-soft); margin:0 0 16px; }
+  .item{ padding:16px 0; border-top:1px solid var(--line); }
+  .item:first-of-type{ border-top:none; }
+  .item p{ margin:0 0 10px; font-size:15px; }
+  .scale{ display:flex; gap:6px; }
+  .scale label{ flex:1; text-align:center; }
+  .scale input{ position:absolute; opacity:0; pointer-events:none; }
+  .scale .opt{
+    display:block; padding:9px 4px; border:1px solid var(--line); border-radius:10px;
+    font-size:12px; color:var(--ink-soft); cursor:pointer; transition:all .15s ease;
+  }
+  .scale input:checked + .opt{
+    background:var(--accent); border-color:var(--accent); color:#fff; font-weight:700;
+  }
+  .scale .opt:hover{ border-color:var(--accent); }
+  .meta-row{ display:flex; gap:12px; flex-wrap:wrap; }
+  .field{ flex:1; min-width:140px; }
+  .field label{ display:block; font-size:12px; color:var(--ink-soft); margin-bottom:6px; }
+  .field input{
+    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px;
+    font-size:14px; font-family:inherit;
+  }
+  .submit-btn{
+    width:100%; padding:16px; border:none; border-radius:var(--radius);
+    background:var(--accent); color:#fff; font-size:16px; font-weight:700;
+    cursor:pointer; margin-top:6px;
+  }
+  .submit-btn:disabled{ background:#B7C2BD; cursor:not-allowed; }
+  .submit-btn:not(:disabled):hover{ background:#325A4D; }
+  .hint{ font-size:12px; color:var(--ink-soft); margin-top:8px; text-align:center; }
+
+  #result{ display:none; }
+  .score-row{ margin-bottom:20px; }
+  .score-row .label-line{ display:flex; justify-content:space-between; font-size:14px; margin-bottom:6px; }
+  .bar-track{ height:12px; background:var(--bg); border-radius:99px; overflow:hidden; border:1px solid var(--line); }
+  .bar-fill{ height:100%; border-radius:99px; }
+  .tier-tag{ font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; }
+  .tier-good{ background:var(--accent-soft); color:var(--accent); }
+  .tier-warn{ background:var(--warn-soft); color:var(--warn); }
+  .tier-alert{ background:var(--alert-soft); color:var(--alert); }
+  .tip-box{ background:var(--bg); border-radius:10px; padding:14px 16px; font-size:13.5px; margin-top:8px; }
+  .overall-summary{
+    background:var(--accent-soft); color:#2E4A40; border-radius:var(--radius);
+    padding:16px 18px; font-size:14.5px; margin-bottom:22px; font-weight:600;
+  }
+  .tip-desc{ margin:0 0 12px; }
+  .example-list{ display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
+  .example-row{
+    display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px;
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 12px;
+  }
+  .ex-label{ display:block; font-size:10.5px; color:var(--ink-soft); margin-bottom:2px; }
+  .example-before{ font-size:13px; color:var(--alert); }
+  .example-after{ font-size:13px; color:var(--accent); font-weight:600; }
+  .example-arrow{ color:var(--ink-soft); font-size:16px; }
+  .tip-action{ margin:0; font-size:13.5px; font-weight:700; }
+  footer{ max-width:720px; margin:32px auto 0; padding:0 20px; font-size:12px; color:var(--ink-soft); text-align:center; }
+</style>
+</head>
+<body>
+
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-label" id="progressLabel">0 / 15 문항 응답</div>
+</div>
+
+<main>
+  <header class="hero">
+    <div class="eyebrow">1학년 언어습관 자가진단</div>
+    <h1>내 말투, 오늘 한 번<br>솔직하게 돌아보기</h1>
+    <p class="lede">평소 친구에게 하는 말과 비속어 사용 습관을 15개 문항으로 점검합니다. 정답은 없습니다 — 지금의 나를 있는 그대로 체크해 보세요.</p>
+  </header>
+
+  <form id="surveyForm">
+    <!-- 카테고리별 카드는 JS가 렌더링 -->
+    <div id="cardsRoot"></div>
+
+    <div class="card">
+      <div class="cat-title" style="font-size:17px;">성별</div>
+      <div class="cat-desc">개인 식별 없이 통계용으로만 사용됩니다.</div>
+      <div class="scale" data-id="gender" style="max-width:260px;">
+        <label>
+          <input type="radio" name="gender" value="남">
+          <span class="opt">남</span>
+        </label>
+        <label>
+          <input type="radio" name="gender" value="여">
+          <span class="opt">여</span>
+        </label>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">결과 확인하기</button>
+    <p class="hint" id="validationMsg" style="color:var(--alert); display:none;"></p>
+    <p class="hint">제출 후에는 답변을 수정할 수 없습니다.</p>
+  </form>
+
+  <section id="result" class="card">
+    <div class="cat-title">나의 언어습관 리포트</div>
+    <div id="resultBody"></div>
+  </section>
+</main>
+
+<footer>본 진단은 자기 성찰용 도구이며 의학적·심리학적 진단이 아닙니다.</footer>
+
+<script>
+/* ===================== 1. 설문 문항 정의 ===================== */
+// reverse: true 인 문항은 점수를 6-value 로 뒤집어서 채점합니다.
+// (모든 카테고리는 "점수가 높을수록 언어습관 개선이 더 필요함"으로 방향을 통일)
+const CATEGORIES = [
+  {
+    key: "A",
+    title: "A. 언어습관 전반",
+    desc: "평소 말하는 방식에 대한 인식",
+    items: [
+      { id:"a1", text:"나는 화가 나면 말투가 거칠어진다.", reverse:false },
+      { id:"a2", text:"나는 대화 중 상대방의 말을 끝까지 듣지 않고 끊는 편이다.", reverse:false },
+      { id:"a3", text:"나는 상황에 맞게 존댓말과 반말을 구분해서 사용한다.", reverse:true },
+      { id:"a4", text:"나는 내 말이 상대방에게 상처를 줄 수 있다는 것을 생각하지 않고 말할 때가 있다.", reverse:false },
+      { id:"a5", text:"나는 말하기 전에 어떤 표현을 쓸지 한 번 더 생각하는 편이다.", reverse:true },
+    ]
+  },
+  {
+    key: "B",
+    title: "B. 친구에게 하는 말",
+    desc: "친구 관계 속 말투와 태도",
+    items: [
+      { id:"b1", text:"나는 친한 친구에게는 편하다는 이유로 함부로 말해도 된다고 생각한다.", reverse:false },
+      { id:"b2", text:"나는 친구를 놀릴 때 상대가 기분 나빠할 수 있다는 것을 신경 쓴다.", reverse:true },
+      { id:"b3", text:"나는 친구의 외모, 성적, 가정환경 등을 농담 소재로 삼은 적이 있다.", reverse:false },
+      { id:"b4", text:"나는 내 말투 때문에 친구가 상처받았다는 이야기를 들어본 적이 있다.", reverse:false },
+      { id:"b5", text:"나는 친구와 다툴 때 감정적으로 심한 말을 하지 않으려고 노력한다.", reverse:true },
+    ]
+  },
+  {
+    key: "C",
+    title: "C. 비속어 사용",
+    desc: "욕설·거친 표현 사용 빈도",
+    items: [
+      { id:"c1", text:"나는 하루에 여러 번 비속어(욕설)를 사용한다.", reverse:false },
+      { id:"c2", text:"나는 비속어를 쓰지 않고도 감정을 충분히 표현할 수 있다.", reverse:true },
+      { id:"c3", text:"나는 습관적으로 특정 비속어를 별 생각 없이 사용한다.", reverse:false },
+      { id:"c4", text:"나는 오프라인보다 온라인(게임, SNS, 메신저)에서 비속어를 더 많이 쓴다.", reverse:false },
+      { id:"c5", text:"나는 비속어를 사용한 뒤 그 표현이 적절했는지 스스로 돌아본다.", reverse:true },
+    ]
+  }
+];
+const SCALE_LABELS = ["전혀 아니다","아니다","보통이다","그렇다","매우 그렇다"];
+
+/* ===================== 2. Google Apps Script 웹앱 URL =====================
+   3단계에서 배포한 URL로 반드시 교체하세요. 예:
+   const GAS_URL = "https://script.google.com/macros/s/AKfycb.../exec";
+============================================================================ */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyssJ6EwN9TBYvp0PlL9SFpIssFEUWWT2sjZl-ZdydGDgOD0RUolUQJ6ccAieSDUbkyow/exec";
+
+/* ===================== 3. 문항 렌더링 ===================== */
+const cardsRoot = document.getElementById("cardsRoot");
+const answers = {};
+
+CATEGORIES.forEach(cat => {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <h2 class="cat-title">${cat.title}</h2>
+    <p class="cat-desc">${cat.desc}</p>
+    ${cat.items.map(item => `
+      <div class="item">
+        <p>${item.text}</p>
+        <div class="scale" data-id="${item.id}">
+          ${SCALE_LABELS.map((lbl,i) => `
+            <label>
+              <input type="radio" name="${item.id}" value="${i+1}">
+              <span class="opt">${lbl}</span>
+            </label>
+          `).join("")}
+        </div>
+      </div>
+    `).join("")}
+  `;
+  cardsRoot.appendChild(card);
+});
+
+/* ===================== 4. 진행률 & 활성화 처리 ===================== */
+const totalItems = CATEGORIES.reduce((n,c)=>n+c.items.length,0);
+const progressFill = document.getElementById("progressFill");
+const progressLabel = document.getElementById("progressLabel");
+const submitBtn = document.getElementById("submitBtn");
+
+let gender = "";
+document.getElementById("surveyForm").addEventListener("change", (e) => {
+  if (e.target.type !== "radio") return;
+  if (e.target.name === "gender") {
+    gender = e.target.value;
+  } else {
+    answers[e.target.name] = Number(e.target.value);
+  }
+  const answered = Object.keys(answers).length;
+  progressFill.style.width = (answered/totalItems*100) + "%";
+  progressLabel.textContent = `${answered} / ${totalItems} 문항 응답`;
+});
+
+/* ===================== 5. 채점 로직 ===================== */
+function scoreCategory(cat){
+  let raw = 0;
+  cat.items.forEach(item => {
+    const v = answers[item.id];
+    raw += item.reverse ? (6 - v) : v;
+  });
+  // raw 범위: 5(최상) ~ 25(최하) → 0~100% (높을수록 개선 필요)
+  const pct = Math.round((raw - 5) / 20 * 100);
+  let tier;
+  if (pct < 34) tier = { label:"양호", cls:"tier-good", color:"var(--accent)" };
+  else if (pct < 67) tier = { label:"주의", cls:"tier-warn", color:"var(--warn)" };
+  else tier = { label:"개선 필요", cls:"tier-alert", color:"var(--alert)" };
+  return { raw, pct, tier };
+}
+
+const GUIDANCE = {
+  A: {
+    good: {
+      desc: "화가 나도 감정을 조절하고, 상대 말을 끝까지 듣는 편이에요.",
+      examples: [],
+      action: "지금처럼 말하기 전에 한 번 생각하는 습관을 유지해보세요."
+    },
+    warn: {
+      desc: "가끔 감정이 앞서서 말이 세게 나가거나, 상대 말을 끊을 때가 있어요.",
+      examples: [
+        { before:"됐어, 됐어, 그만해.", after:"잠깐만, 나 아직 얘기 안 끝났어." },
+        { before:"(상대 말 끊고 바로 반박하기)", after:"(끝까지 듣고) 나는 이렇게 생각하는데 어때?" }
+      ],
+      action: "오늘 하루, 끼어들고 싶을 때 3초만 참고 끝까지 들어보세요."
+    },
+    alert: {
+      desc: "화가 나면 말투가 많이 거칠어지고, 상대 입장은 잘 생각하지 못할 때가 많아요.",
+      examples: [
+        { before:"아 짜증나 죽겠네, 진짜.", after:"나 지금 좀 화났어. 잠깐 시간 줄래?" },
+        { before:"(생각 없이 바로 내뱉기)", after:"(감정에 이름 붙이기) 지금 화난 상태야, 이따 다시 얘기하자." }
+      ],
+      action: "화났을 때 바로 말하지 말고, '나 지금 화났어'라고 감정부터 말로 표현하는 연습을 해보세요."
+    }
+  },
+  B: {
+    good: {
+      desc: "친구를 배려하는 말투가 잘 잡혀 있어요.",
+      examples: [],
+      action: "지금 관계를 잘 유지하고 있어요. 계속 이대로 가면 됩니다."
+    },
+    warn: {
+      desc: "친하다는 이유로 편하게, 툭툭 던지는 말이 있을 수 있어요.",
+      examples: [
+        { before:"야, 살쪘냐?", after:"요즘 컨디션 어때?" },
+        { before:"(놀리는 말) 너 진짜 못한다 ㅋㅋ", after:"괜찮아, 다음엔 잘할 수 있어." }
+      ],
+      action: "이번 주엔 외모·성적 얘기 대신 다른 화제로 대화를 시작해보세요."
+    },
+    alert: {
+      desc: "외모, 성적, 가정환경을 농담 소재로 삼는 습관이 있고, 실제로 친구가 상처받은 적도 있어요.",
+      examples: [
+        { before:"(외모나 집안 얘기로 농담하기)", after:"(그 얘긴 빼고) 오늘 뭐하고 놀까?" },
+        { before:"장난이었는데 왜 정색해?", after:"내가 생각 없이 말했던 것 같아, 미안해." }
+      ],
+      action: "상처받았을 수 있는 친구에게 직접 미안하다고 말해보는 것부터 시작하세요. 필요하면 담임 선생님과 상담해도 좋아요."
+    }
+  },
+  C: {
+    good: {
+      desc: "비속어 없이도 감정을 잘 표현하고 있어요.",
+      examples: [],
+      action: "지금 습관을 잘 유지하고 있어요."
+    },
+    warn: {
+      desc: "특정 상황(온라인 등)에서 비속어가 습관적으로 나올 수 있어요.",
+      examples: [
+        { before:"아 ㅅㅂ 짜증나", after:"아 진짜 짜증난다" },
+        { before:"와 개꿀ㅋㅋ", after:"오, 완전 좋다" }
+      ],
+      action: "비속어 대신 쓸 표현 2~3개를 미리 정해서 이번 주에 써보세요."
+    },
+    alert: {
+      desc: "온라인과 오프라인을 가리지 않고, 습관적으로 비속어를 자주 사용해요.",
+      examples: [
+        { before:"미친놈아, 장난하냐", after:"야, 그건 좀 아니지 않아?" },
+        { before:"(무의식적으로 튀어나오는 욕)", after:"(멈칫하고) 아, 진짜 화난다" }
+      ],
+      action: "하루 동안 비속어를 쓸 때마다 스스로 체크해보고, 얼마나 자주 쓰는지 눈으로 먼저 확인해보세요."
+    }
+  }
+};
+
+function overallSummary(avg){
+  if (avg < 34) return "전반적으로 안정적인 언어습관을 갖고 있어요. 지금처럼 유지해보세요.";
+  if (avg < 67) return "가끔 조절이 필요한 순간들이 있어요. 아래 항목 중 오늘 하나만 골라 시도해보세요.";
+  return "말투 때문에 관계에서 오해가 생기기 쉬운 편이에요. 아래 제안 중 딱 하나만 골라 이번 주에 실천해보세요.";
+}
+
+/* ===================== 6. 제출 & 결과 표시 ===================== */
+document.getElementById("surveyForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const validationMsg = document.getElementById("validationMsg");
+  const missing = Object.keys(answers).length < totalItems;
+
+  if (missing || !gender) {
+    const parts = [];
+    if (missing) parts.push(`문항 ${totalItems - Object.keys(answers).length}개`);
+    if (!gender) parts.push("성별");
+    validationMsg.textContent = `${parts.join(", ")} 응답이 남았어요. 위로 올라가 마저 체크해주세요.`;
+    validationMsg.style.display = "block";
+    validationMsg.scrollIntoView({ behavior:"smooth", block:"center" });
+    return;
+  }
+  validationMsg.style.display = "none";
+
+  const scores = {};
+  CATEGORIES.forEach(cat => { scores[cat.key] = scoreCategory(cat); });
+
+  // 결과 렌더링
+  const avgPct = Math.round((scores.A.pct + scores.B.pct + scores.C.pct) / 3);
+  const resultBody = document.getElementById("resultBody");
+  resultBody.innerHTML = `
+    <div class="overall-summary">${overallSummary(avgPct)}</div>
+    ${CATEGORIES.map(cat => {
+      const s = scores[cat.key];
+      const tierKey = s.tier.label === "양호" ? "good" : s.tier.label === "주의" ? "warn" : "alert";
+      const g = GUIDANCE[cat.key][tierKey];
+      return `
+        <div class="score-row">
+          <div class="label-line">
+            <span>${cat.title}</span>
+            <span class="tier-tag ${s.tier.cls}">${s.tier.label} · ${s.pct}%</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:${s.pct}%; background:${s.tier.color};"></div></div>
+          <div class="tip-box">
+            <p class="tip-desc">${g.desc}</p>
+            ${g.examples.length ? `
+              <div class="example-list">
+                ${g.examples.map(ex => `
+                  <div class="example-row">
+                    <div><span class="ex-label">이렇게 말했다면</span><span class="example-before">${ex.before}</span></div>
+                    <div class="example-arrow">→</div>
+                    <div><span class="ex-label">이렇게 바꿔보기</span><span class="example-after">${ex.after}</span></div>
+                  </div>
+                `).join("")}
+              </div>
+            ` : ""}
+            <p class="tip-action">✅ 이번 주 실천 목표: ${g.action}</p>
+          </div>
+        </div>
+      `;
+    }).join("")}
+  `;
+
+  document.getElementById("result").style.display = "block";
+  document.getElementById("result").scrollIntoView({ behavior:"smooth" });
+  submitBtn.disabled = true;
+  submitBtn.textContent = "제출 완료";
+
+  // Google Sheet 전송 (no-cors: 응답 본문은 읽을 수 없지만 정상 기록됨)
+  const payload = {
+    gender,
+    answers,
+    scoreA: scores.A.pct,
+    scoreB: scores.B.pct,
+    scoreC: scores.C.pct
+  };
+
+  if (GAS_URL.startsWith("http")) {
+    try {
+      await fetch(GAS_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.error("전송 실패:", err);
+    }
+  } else {
+    console.warn("GAS_URL이 아직 설정되지 않았습니다. index.html 상단의 GAS_URL 값을 배포한 웹앱 URL로 교체하세요.");
+  }
+});
+</script>
+</body>
+</html>
