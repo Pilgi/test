@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026학년도 교육과정 박람회 안내</title>
+<style>
+  :root{
+    --navy:#1c2f4d;
+    --blue:#2f6fed;
+    --blue-light:#eaf1ff;
+    --green:#22a878;
+    --purple:#8256c9;
+    --orange:#e08a2c;
+    --gray-text:#5b6472;
+    --gray-line:#e6e9ef;
+    --bg:#f5f7fb;
+    --card-bg:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+    background:var(--bg);
+    color:var(--navy);
+    line-height:1.55;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:24px 16px 60px;}
+
+  header{
+    background:linear-gradient(135deg,var(--navy),#2a4270);
+    color:#fff;
+    border-radius:18px;
+    padding:28px 24px;
+    margin-bottom:20px;
+    box-shadow:0 8px 24px rgba(28,47,77,0.18);
+  }
+  header .eyebrow{
+    display:inline-block;
+    background:rgba(255,255,255,0.15);
+    padding:4px 12px;
+    border-radius:999px;
+    font-size:12.5px;
+    margin-bottom:12px;
+  }
+  header h1{margin:0 0 8px;font-size:clamp(20px,5.5vw,26px);font-weight:800;}
+  header p.sub{margin:0;font-size:14px;color:#c9d6ee;}
+
+  .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px;}
+  .info-card{background:var(--card-bg);border:1px solid var(--gray-line);border-radius:14px;padding:12px 14px;}
+  .info-card .label{font-size:11.5px;color:var(--gray-text);font-weight:600;margin-bottom:3px;}
+  .info-card .value{font-size:13.5px;font-weight:700;}
+
+  .guide-box{
+    background:var(--blue-light);border:1px solid #c9def9;border-radius:14px;
+    padding:14px 16px;margin-bottom:18px;font-size:13.5px;color:#294a7a;
+  }
+  .guide-box strong{color:var(--navy);}
+
+  .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12.5px;color:var(--gray-text);margin-bottom:16px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:0 0 auto;}
+  .dot.social{background:var(--blue);}
+  .dot.science{background:var(--green);}
+  .dot.etc{background:var(--purple);}
+  .dot.mixed{background:var(--orange);}
+
+  .hint{font-size:12px;color:#9aa2b0;margin-bottom:16px;}
+
+  /* ===== Day blocks (stacked vertically) ===== */
+  .day-block{margin-bottom:18px;}
+  .day-block-head{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:8px;
+  }
+  .day-block-head h2{
+    margin:0;font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:7px;
+  }
+  .day-badge{
+    font-size:11.5px;font-weight:700;color:#fff;background:var(--navy);
+    padding:4px 10px;border-radius:999px;white-space:nowrap;
+  }
+  .day-badge.closed{background:#98a0ac;}
+
+  .day-timeline{display:flex;gap:6px;align-items:stretch;}
+  .day-gutter{flex:0 0 38px;display:flex;flex-direction:column;}
+  .day-gutter .g-row{
+    flex:1 1 0;min-height:64px;
+    font-size:10.5px;color:var(--gray-text);font-weight:700;
+    padding-top:3px;border-top:1px dashed var(--gray-line);
+  }
+
+  .day-grid{
+    flex:1 1 auto;min-width:0;
+    border:1px solid var(--gray-line);border-radius:12px;background:var(--card-bg);
+    display:grid;grid-template-rows:repeat(2, minmax(64px,auto));gap:6px;padding:6px;
+  }
+
+  .evt{
+    border-radius:9px;padding:8px 4px;font-size:12.5px;font-weight:700;color:#fff;
+    cursor:pointer;display:flex;flex-direction:column;justify-content:center;
+    align-items:center;text-align:center;line-height:1.25;
+    transition:transform .1s ease, box-shadow .1s ease;
+    min-width:0;overflow:hidden;
+    word-break:keep-all;overflow-wrap:break-word;
+  }
+  .evt:active{transform:scale(0.97);}
+  .evt.social{background:var(--blue);}
+  .evt.science{background:var(--green);}
+  .evt.etc{background:var(--purple);}
+  .evt.mixed{background:var(--orange);}
+
+  .closed-panel{
+    background:repeating-linear-gradient(135deg,#f1f2f5,#f1f2f5 10px,#e9eaee 10px,#e9eaee 20px);
+    border:1px solid var(--gray-line);border-radius:12px;
+    padding:20px;text-align:center;color:#8a5a1c;font-weight:700;font-size:13px;
+  }
+
+  .note{margin-top:8px;font-size:11.5px;color:var(--gray-text);background:#fff;border:1px dashed var(--gray-line);border-radius:10px;padding:8px 12px;}
+
+  /* ===== Modal ===== */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(20,28,45,0.55);
+    z-index:50;align-items:center;justify-content:center;padding:16px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:#fff;border-radius:16px;max-width:400px;width:100%;
+    padding:22px 22px 18px;box-shadow:0 20px 50px rgba(0,0,0,0.25);
+  }
+  .modal-box .m-tag{
+    display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;
+    background:var(--blue-light);color:var(--blue);margin-bottom:8px;
+  }
+  .modal-box h3{margin:0 0 4px;font-size:18px;font-weight:800;}
+  .modal-box .m-time{font-size:13px;color:var(--gray-text);margin-bottom:14px;font-weight:600;}
+  .modal-box .m-courses .row-line{font-size:13.5px;margin-bottom:7px;}
+  .modal-box .grade{
+    display:inline-block;font-size:11px;font-weight:700;color:#fff;background:#9aa5b5;
+    border-radius:5px;padding:1px 6px;margin-right:6px;
+  }
+  .modal-box .grade.g2{background:#5b8def;}
+  .modal-box .grade.g3{background:#22a878;}
+  .modal-close{
+    margin-top:14px;width:100%;padding:10px;border:none;border-radius:10px;
+    background:var(--navy);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;
+  }
+
+  .bottom-note{margin-top:20px;font-size:12.5px;color:var(--gray-text);background:#fff;border:1px dashed var(--gray-line);border-radius:10px;padding:10px 14px;}
+  footer{text-align:center;font-size:12px;color:#9aa2b0;margin-top:26px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">1·2학년 대상</span>
+    <h1>2026학년도 교육과정 박람회 안내</h1>
+    <p class="sub">2027학년도 선택과목 신청 &amp; 진로·진학 설계를 위한 교과별 상담 부스가 운영됩니다.</p>
+  </header>
+
+  <div class="info-grid">
+    <div class="info-card"><div class="label">기간</div><div class="value">7.6(월)~7.10(금), 4일간</div></div>
+    <div class="info-card"><div class="label">시간</div><div class="value">점심시간 13:00~14:00</div></div>
+    <div class="info-card"><div class="label">장소</div><div class="value">전관 2층 다온실</div></div>
+    <div class="info-card"><div class="label">대상</div><div class="value">1, 2학년 학생</div></div>
+  </div>
+
+  <div class="guide-box">
+    <strong>안내 :</strong> 7월 6일(월)에 배부되는 <strong>교과목 선택 가이드북</strong>과 <strong>맞춤형 진학설계 워크지</strong>를 활용해 자신의 적성·진로에 맞는 과목을 설계해 보세요. 상담부스 옆 전시된 <strong>내년도 교과서</strong>도 자유롭게 열람 가능합니다. <strong>7월 8일(수)은 3학년 전국연합학력평가로 부스가 운영되지 않습니다.</strong>
+  </div>
+
+  <div class="legend">
+    <span><i class="dot social"></i>사회</span>
+    <span><i class="dot science"></i>과학·수학</span>
+    <span><i class="dot etc"></i>기술·가정·정보·제2외국어</span>
+    <span><i class="dot mixed"></i>7/10 통합상담</span>
+  </div>
+
+  <div class="hint">칸을 눌러 학년별 과목 상세를 확인하세요.</div>
+
+  <!-- 7/6 월 -->
+  <div class="day-block">
+    <div class="day-block-head">
+      <h2><i class="dot social"></i>7월 6일(월) · 사회</h2>
+      <span class="day-badge">13:00~14:00</span>
+    </div>
+    <div class="day-timeline">
+      <div class="day-gutter"><div class="g-row">13:00</div><div class="g-row">13:30</div></div>
+      <div class="day-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="evt social" style="grid-row:1/3;grid-column:1;" data-tag="사회" data-name="일반사회" data-time="13:00~14:00" data-courses='[["g2","사회와 문화, 법과 사회, 경제"],["g3","사회문제 탐구, 금융과 경제생활, 융합사회 탐구"]]'>일반<br>사회</div>
+        <div class="evt social" style="grid-row:1/3;grid-column:2;" data-tag="사회" data-name="윤리" data-time="13:00~14:00" data-courses='[["g2","윤리문제 탐구, 현대사회와 윤리"],["g3","윤리와 사상, 인문학과 윤리"]]'>윤리</div>
+        <div class="evt social" style="grid-row:1/3;grid-column:3;" data-tag="사회" data-name="지리" data-time="13:00~14:00" data-courses='[["g2","세계시민과 지리, 도시의 미래탐구, 기후변화와 지속가능한 세계"],["g3","한국지리 탐구, 여행지리"]]'>지리</div>
+        <div class="evt social" style="grid-row:1/3;grid-column:4;" data-tag="사회" data-name="역사" data-time="13:00~14:00" data-courses='[["g2","세계사, 역사로 탐구하는 현대세계"],["g3","동아시아 역사기행, 세계유산 탐구"]]'>역사</div>
+      </div>
+    </div>
+    <div class="note">전 과목 13:00~14:00 운영</div>
+  </div>
+
+  <!-- 7/7 화 -->
+  <div class="day-block">
+    <div class="day-block-head">
+      <h2><i class="dot science"></i>7월 7일(화) · 과학·수학</h2>
+      <span class="day-badge">13:00~14:00</span>
+    </div>
+    <div class="day-timeline">
+      <div class="day-gutter"><div class="g-row">13:00</div><div class="g-row">13:30</div></div>
+      <div class="day-grid" style="grid-template-columns:repeat(5,1fr);">
+        <div class="evt science" style="grid-row:2/3;grid-column:1;" data-tag="과학" data-name="물리" data-time="13:30~14:00" data-courses='[["g2","물리학, 역학과 에너지"],["g3","전자기와 양자, 고급 물리학"]]'>물리</div>
+        <div class="evt science" style="grid-row:1/3;grid-column:2;" data-tag="과학" data-name="화학" data-time="13:00~14:00" data-courses='[["g2","화학, 물질과 에너지"],["g3","화학 반응의 세계, 고급화학"]]'>화학</div>
+        <div class="evt science" style="grid-row:1/3;grid-column:3;" data-tag="과학" data-name="생명과학" data-time="13:00~14:00" data-courses='[["g2","생명과학, 생물의 유전"],["g3","세포와 물질대사, 고급생명과학"]]'>생명<br>과학</div>
+        <div class="evt science" style="grid-row:2/3;grid-column:4;" data-tag="과학" data-name="지구과학" data-time="13:30~14:00" data-courses='[["g2","지구과학, 지구시스템과학"],["g3","행성우주과학, 고급지구과학"]]'>지구<br>과학</div>
+        <div class="evt science" style="grid-row:1/3;grid-column:5;" data-tag="수학" data-name="수학" data-time="13:00~14:00" data-courses='[["g2","기하"],["g3","미적분II"]]'>수학</div>
+      </div>
+    </div>
+    <div class="note">물리·지구과학은 13:30~14:00만 운영 / '융합과학 탐구', '과학의 역사와 문화'는 과학 선생님께 상담 가능</div>
+  </div>
+
+  <!-- 7/8 수 -->
+  <div class="day-block">
+    <div class="day-block-head">
+      <h2>7월 8일(수)</h2>
+      <span class="day-badge closed">모의고사</span>
+    </div>
+    <div class="closed-panel">3학년 전국연합학력평가로 상담 부스가 운영되지 않습니다.</div>
+  </div>
+
+  <!-- 7/9 목 -->
+  <div class="day-block">
+    <div class="day-block-head">
+      <h2><i class="dot etc"></i>7월 9일(목) · 기가정보·외국어</h2>
+      <span class="day-badge">13:00~14:00</span>
+    </div>
+    <div class="day-timeline">
+      <div class="day-gutter"><div class="g-row">13:00</div><div class="g-row">13:30</div></div>
+      <div class="day-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="evt etc" style="grid-row:1/2;grid-column:1;" data-tag="기술" data-name="기술" data-time="13:00~13:30" data-courses='[["g3","창의공학 설계, 지식재산 일반"]]'>기술</div>
+        <div class="evt etc" style="grid-row:2/3;grid-column:1;" data-tag="가정" data-name="가정" data-time="13:30~14:00" data-courses='[["g3","아동발달과 부모, 식품과 영양"]]'>가정</div>
+        <div class="evt etc" style="grid-row:1/3;grid-column:2;" data-tag="정보" data-name="정보" data-time="13:00~14:00" data-courses='[["g2","프로그래밍, 인공지능 기초"]]'>정보</div>
+        <div class="evt etc" style="grid-row:1/3;grid-column:3;" data-tag="제2외국어" data-name="일본어" data-time="13:00~14:00" data-courses='[["g2","일본어, 일본문화"],["g3","일본어회화, 심화일본어"]]'>일본어</div>
+        <div class="evt etc" style="grid-row:1/3;grid-column:4;" data-tag="제2외국어" data-name="중국어" data-time="13:00~14:00" data-courses='[["g2","중국어, 중국문화"],["g3","중국어회화, 심화중국어"]]'>중국어</div>
+      </div>
+    </div>
+    <div class="note">기술 13:00~13:30, 가정 13:30~14:00 / 나머지는 13:00~14:00</div>
+  </div>
+
+  <!-- 7/10 금 -->
+  <div class="day-block">
+    <div class="day-block-head">
+      <h2><i class="dot mixed"></i>7월 10일(금) · 통합상담</h2>
+      <span class="day-badge">13:00~14:00</span>
+    </div>
+    <div class="day-timeline">
+      <div class="day-gutter"><div class="g-row">13:00</div><div class="g-row">13:30</div></div>
+      <div class="day-grid" style="grid-template-columns:repeat(2,1fr);">
+        <div class="evt mixed" style="grid-row:1/3;grid-column:1;" data-tag="사회 전체" data-name="사회 전체" data-time="13:00~14:00" data-courses='[["","일반사회, 윤리, 지리, 역사, 화학, 생명과학"]]'>사회<br>전체</div>
+        <div class="evt mixed" style="grid-row:2/3;grid-column:2;" data-tag="물리·지구과학" data-name="물리 / 지구과학" data-time="13:30~14:00" data-courses='[["","물리, 지구과학"]]'>물리·<br>지구과학</div>
+      </div>
+    </div>
+    <div class="note">사회 전체 13:00~14:00 / 물리·지구과학 13:30~14:00</div>
+  </div>
+
+  <div class="bottom-note">※ 상담부스를 운영하지 않는 교과는 해당 교과 선생님께 직접 방문하여 상담받을 수 있습니다.</div>
+
+  <footer>2026학년도 교육과정 박람회 · 전관 2층 다온실</footer>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <span class="m-tag" id="mTag">사회</span>
+    <h3 id="mName">과목명</h3>
+    <div class="m-time" id="mTime">운영시간</div>
+    <div class="m-courses" id="mCourses"></div>
+    <button class="modal-close" id="mClose">닫기</button>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById('modal');
+  const mTag = document.getElementById('mTag');
+  const mName = document.getElementById('mName');
+  const mTime = document.getElementById('mTime');
+  const mCourses = document.getElementById('mCourses');
+
+  document.querySelectorAll('.evt').forEach(function(evt){
+    evt.addEventListener('click', function(){
+      mTag.textContent = evt.dataset.tag;
+      mName.textContent = evt.dataset.name;
+      mTime.textContent = '운영시간 ' + evt.dataset.time;
+      const courses = JSON.parse(evt.dataset.courses);
+      mCourses.innerHTML = courses.map(function(pair){
+        const grade = pair[0], text = pair[1];
+        const badge = grade ? ('<span class="grade ' + grade + '">' + (grade==='g2'?'2학년':'3학년') + '</span>') : '';
+        return '<div class="row-line">' + badge + text + '</div>';
+      }).join('');
+      modal.classList.add('show');
+    });
+  });
+  document.getElementById('mClose').addEventListener('click', function(){ modal.classList.remove('show'); });
+  modal.addEventListener('click', function(e){ if(e.target===modal) modal.classList.remove('show'); });
+</script>
+</body>
+</html>
