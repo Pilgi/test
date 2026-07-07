@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 SLAT 학생주도 프로젝트 안내</title>
+<style>
+  :root{
+    --navy:#4a2c1f;
+    --yellow:#fbe08a;
+    --yellow-line:#e0b84f;
+    --yellow-text:#7a5a00;
+    --gray:#b0a08c;
+    --gray-bg:#f5ede1;
+    --gray-text:#8a7566;
+    --gray-line:#ece2d6;
+    --bg:#fdf8f2;
+    --card-bg:#fffefb;
+    --danger:#c0392b;
+    --danger-bg:#fdeae5;
+    --blue:#c1553d;
+    --blue-light:#fbe9e2;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+    background:var(--bg);
+    color:var(--navy);
+    line-height:1.6;
+    font-size:16px;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:24px 16px 60px;}
+  header{
+    background:linear-gradient(135deg,var(--navy),#8a4a30);
+    color:#fff;
+    border-radius:18px;
+    padding:26px 22px;
+    margin-bottom:18px;
+    text-align:center;
+    box-shadow:0 8px 24px rgba(28,47,77,0.18);
+  }
+  header h1{margin:0 0 8px;font-size:clamp(21px,6vw,28px);font-weight:800;}
+  header p.sub{margin:0;font-size:16px;color:#f3ded2;font-weight:700;}
+  .summary{
+    background:#fff8e1;border:1px solid var(--yellow-line);border-radius:14px;
+    padding:16px 18px;margin-bottom:22px;
+  }
+  .summary .s-title{font-weight:800;font-size:16px;margin-bottom:8px;color:var(--yellow-text);}
+  .summary ul{margin:0;padding-left:18px;font-size:15px;}
+  .summary li{margin-bottom:6px;}
+  .summary li:last-child{margin-bottom:0;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:14px;color:var(--gray-text);margin-bottom:18px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:4px;display:inline-block;flex:0 0 auto;}
+  .dot.proj{background:var(--yellow);border:1px solid var(--yellow-line);}
+  .dot.care{background:var(--gray);}
+  .dot.etc{background:var(--blue);}
+  .section-title{
+    display:flex;align-items:center;gap:8px;
+    font-size:19px;font-weight:800;margin:26px 0 10px;
+  }
+  .section-title .num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;
+    font-size:14px;flex:0 0 auto;
+  }
+  .table-card{
+    background:var(--card-bg);border:1px solid var(--gray-line);border-radius:14px;
+    overflow-x:auto;margin-bottom:8px;
+  }
+  table{border-collapse:collapse;width:100%;font-size:14px;}
+  th,td{border:1px solid var(--gray-line);padding:9px 5px;text-align:center;vertical-align:middle;}
+  thead th{background:var(--navy);color:#fff;font-size:13.5px;padding:9px 5px;}
+  tbody th{background:#f5ede1;font-weight:800;color:var(--navy);width:14%;}
+  td.yellow{background:var(--yellow);font-weight:700;}
+  td.empty{color:#c9bba8;}
+  .legend-note{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--gray-text);margin:8px 0 4px;}
+  .legend-note .swatch{width:13px;height:13px;border-radius:4px;background:var(--yellow);border:1px solid var(--yellow-line);flex:0 0 auto;}
+  .day-card{
+    background:var(--card-bg);border:1px solid var(--gray-line);border-radius:14px;
+    padding:16px 16px;margin-bottom:14px;
+  }
+  .day-card-head{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;}
+  .day-card-head .d-no{font-size:12.5px;font-weight:700;color:#fff;background:var(--navy);padding:3px 9px;border-radius:999px;}
+  .day-card-head h2{margin:0;font-size:17.5px;font-weight:800;}
+  .period-row{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 4px;border-top:1px dashed var(--gray-line);
+  }
+  .period-row:first-of-type{border-top:none;}
+  .p-time{flex:0 0 62px;font-size:13.5px;font-weight:700;color:var(--gray-text);}
+  .p-bar{width:5px;align-self:stretch;border-radius:3px;flex:0 0 5px;}
+  .p-bar.proj{background:var(--yellow-line);}
+  .p-bar.care{background:var(--gray);}
+  .p-bar.etc{background:var(--blue);}
+  .p-content{flex:1 1 auto;}
+  .p-name{font-size:15.5px;font-weight:700;}
+  .p-note{font-size:13.5px;color:var(--gray-text);margin-top:2px;}
+  .p-tag{
+    display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;
+    margin-left:6px;vertical-align:middle;
+  }
+  .p-tag.proj{background:var(--yellow);color:var(--yellow-text);}
+  .p-tag.care{background:var(--gray-bg);color:var(--gray-text);}
+  .p-tag.etc{background:var(--blue-light);color:var(--blue);}
+  .card{
+    background:var(--card-bg);border:1px solid var(--gray-line);border-radius:14px;
+    padding:16px 18px;margin-bottom:4px;
+  }
+  .card p{margin:0 0 8px;font-size:15.5px;}
+  .card p:last-child{margin-bottom:0;}
+  .card ul, .card ol{margin:6px 0 8px;padding-left:20px;font-size:15px;}
+  .card li{margin-bottom:6px;}
+  .card li:last-child{margin-bottom:0;}
+  .warn{
+    background:var(--danger-bg);border:1px solid #f0c4b8;border-radius:10px;
+    padding:11px 13px;font-size:15px;color:var(--danger);font-weight:700;
+    margin:8px 0;
+  }
+  .subhead{font-weight:800;font-size:15px;color:var(--navy);margin:12px 0 4px;}
+  .ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;}
+  @media(max-width:480px){.ab-grid{grid-template-columns:1fr;}}
+  .ab-card{
+    border:1px solid var(--blue-light);background:var(--blue-light);border-radius:10px;
+    padding:10px 12px;font-size:14.5px;
+  }
+  .ab-card b{color:var(--blue);display:block;margin-bottom:4px;font-size:15px;}
+  .qa{border-left:4px solid var(--navy);padding-left:12px;margin:10px 0;}
+  .qa .q{font-weight:800;font-size:15px;margin-bottom:4px;}
+  .qa .a{font-size:15px;color:var(--gray-text);}
+  footer{text-align:center;font-size:13px;color:#a8927a;margin-top:26px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>2026 SLAT 학생주도 프로젝트 안내</h1>
+    <p class="sub">7/9(목) ~ 7/13(월)</p>
+  </header>
+
+  <div class="summary">
+    <div class="s-title">📌 이것만은 꼭!</div>
+    <ul>
+      <li><b>소감문은 대충 쓰지 않기</b> — 팀 결과물과 함께 생기부 기초자료로 그대로 들어갑니다.</li>
+      <li><b>최성보 정서지원 시간</b>은 미도달자·위험군에게 보충학습 시간이니 반드시 출석하세요. (결석 시 방학 중 보충 가능)</li>
+      <li><b>월요일(3일차)</b>은 발표·전시·보고서로 마무리하는 날입니다. 전시 자료를 미리 준비해두세요.</li>
+    </ul>
+  </div>
+
+  <div class="legend">
+    <span><i class="dot proj"></i>학생주도 프로젝트</span>
+    <span><i class="dot care"></i>최성보 정서지원</span>
+    <span><i class="dot etc"></i>기타 수업</span>
+  </div>
+
+  <div class="section-title"><span class="num">1</span>일자별 시간표</div>
+
+  <div class="day-card">
+    <div class="day-card-head"><span class="d-no">1일차</span><h2>7월 9일(목)</h2></div>
+    <div class="period-row"><div class="p-time">1~2교시</div><div class="p-bar proj"></div><div class="p-content"><span class="p-name">학생주도 프로젝트</span><span class="p-tag proj">프로젝트</span></div></div>
+    <div class="period-row"><div class="p-time">3~4교시</div><div class="p-bar care"></div><div class="p-content"><span class="p-name">최성보 정서지원</span><span class="p-tag care">인성교육</span></div></div>
+    <div class="period-row"><div class="p-time">5~6교시</div><div class="p-bar proj"></div><div class="p-content"><span class="p-name">학생주도 프로젝트</span><span class="p-tag proj">프로젝트</span></div></div>
+    <div class="period-row"><div class="p-time">7교시</div><div class="p-bar etc"></div><div class="p-content"><span class="p-name">화요일 1교시 대체 수업</span><div class="p-note">7/21(화) 1교시 수업을 미리 당겨서 진행합니다.</div></div></div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-card-head"><span class="d-no">2일차</span><h2>7월 10일(금)</h2></div>
+    <div class="period-row"><div class="p-time">1~2교시</div><div class="p-bar proj"></div><div class="p-content"><span class="p-name">학생주도 프로젝트</span><span class="p-tag proj">프로젝트</span></div></div>
+    <div class="period-row"><div class="p-time">3~4교시</div><div class="p-bar care"></div><div class="p-content"><span class="p-name">최성보 정서지원</span><span class="p-tag care">인성교육</span></div></div>
+    <div class="period-row"><div class="p-time">5~6교시</div><div class="p-bar proj"></div><div class="p-content"><span class="p-name">학생주도 프로젝트</span><span class="p-tag proj">프로젝트</span></div></div>
+    <div class="period-row"><div class="p-time">7교시</div><div class="p-bar etc"></div><div class="p-content"><span class="p-name">학생 맞춤형 개별 학습 및 영양 식생활 교육</span></div></div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-card-head"><span class="d-no">3일차</span><h2>7월 13일(월) · 발표·전시·마무리</h2></div>
+    <p style="margin:-4px 0 10px;font-size:13.5px;color:var(--gray-text);">※ 3일차는 방학식 전날입니다. (방학식 당일 아님)</p>
+    <div class="period-row"><div class="p-time">1교시</div><div class="p-bar proj"></div><div class="p-content"><span class="p-name">발표 준비</span><span class="p-tag proj">프로젝트</span></div></div>
+    <div class="period-row"><div class="p-time">2교시</div><div class="p-bar proj"></div><div class="p-content"><span class="p-name">모둠별 발표</span><span class="p-tag proj">프로젝트</span></div></div>
+    <div class="period-row"><div class="p-time">3~4교시</div><div class="p-bar proj"></div><div class="p-content"><span class="p-name">전시 자료 제작</span><span class="p-tag proj">프로젝트</span></div></div>
+    <div class="period-row"><div class="p-time">5교시</div><div class="p-bar proj"></div><div class="p-content"><span class="p-name">전시회 운영</span><span class="p-tag proj">프로젝트</span><div class="p-note">모둠별 A·B조로 나뉘어 이동팀 / 교실팀으로 활동 (아래 A·B팀 시간표 참고)</div></div></div>
+    <div class="period-row"><div class="p-time">6교시</div><div class="p-bar proj"></div><div class="p-content"><span class="p-name">보고서 및 소감문 작성</span><span class="p-tag proj">프로젝트</span></div></div>
+    <div class="period-row"><div class="p-time">7교시</div><div class="p-bar" style="background:var(--gray-line);"></div><div class="p-content"><span class="p-name" style="color:var(--gray-text);">없음</span></div></div>
+  </div>
+
+  <div class="section-title"><span class="num">2</span>표로 한눈에 보기</div>
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>교시</th>
+          <th>1일차<br>7/9(목)</th>
+          <th>2일차<br>7/10(금)</th>
+          <th>3일차<br>7/13(월)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>1교시</th>
+          <td class="yellow" rowspan="2">학생주도<br>프로젝트</td>
+          <td class="yellow" rowspan="2">학생주도<br>프로젝트</td>
+          <td class="yellow">발표 준비</td>
+        </tr>
+        <tr>
+          <th>2교시</th>
+          <td class="yellow">모둠별 발표</td>
+        </tr>
+        <tr>
+          <th>3교시</th>
+          <td rowspan="2">최성보<br>정서지원</td>
+          <td rowspan="2">최성보<br>정서지원</td>
+          <td class="yellow" rowspan="2">전시 자료 제작</td>
+        </tr>
+        <tr>
+          <th>4교시</th>
+        </tr>
+        <tr>
+          <th>5교시</th>
+          <td class="yellow" rowspan="2">학생주도<br>프로젝트</td>
+          <td class="yellow" rowspan="2">학생주도<br>프로젝트</td>
+          <td class="yellow">전시회 운영</td>
+        </tr>
+        <tr>
+          <th>6교시</th>
+          <td class="yellow">보고서 및<br>소감문 작성</td>
+        </tr>
+        <tr>
+          <th>7교시</th>
+          <td>화 1교시 수업</td>
+          <td>학생 맞춤형 개별 학습 및<br>영양 식생활 교육</td>
+          <td class="empty">-</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="legend-note"><span class="swatch"></span>노란색 = 학생주도 프로젝트 관련 활동 (팀 작업 · 발표 · 전시 · 보고서, 모두 같은 프로젝트예요)</div>
+
+  <div class="section-title"><span class="num">3</span>학생주도 프로젝트 자세히 보기</div>
+  <div class="card">
+    <p>내가 들어간 SLAT 팀에서 결과물을 준비하고 제작하는 시간입니다.</p>
+    <div class="warn">⚠ 생기부에 들어가니 꼭 제대로 참여하기!!<br>생기부 기초 자료 = 팀의 결과물 + 내 소감문 (소감문 대충 작성하지 말기)</div>
+    <div class="subhead">활동일지 · 소감문 (생기부 작성용)</div>
+    <p>밴드, 패들렛 업로드 및 종이 출력물 배부 예정</p>
+    <div class="subhead">발표 (3일차 2교시)</div>
+    <p>활동교실 내에서 모둠끼리 발표합니다.</p>
+    <div class="subhead">전시 (3일차 5교시)</div>
+    <p>교실 안이나 복도 등 자유롭게 전시합니다. (내용 작성 후 우드락 부착, 실험·실습·동영상 재생 등)</p>
+    <div class="ab-grid">
+      <div class="ab-card"><b>A팀</b>14:00~14:25 이동(관람)<br>14:25~14:50 교실(전시관리·설명)</div>
+      <div class="ab-card"><b>B팀</b>14:00~14:25 교실(전시관리·설명)<br>14:25~14:50 이동(관람)</div>
+    </div>
+  </div>
+
+  <div class="section-title"><span class="num">4</span>최성보 정서지원</div>
+  <div class="card">
+    <p>외부 강사를 초청한 인성 교육 시간입니다.</p>
+    <div class="warn">⚠ 최성보 미도달자(또는 위험군)는 보충학습 시간으로 들어가니 반드시 출석할 것!!!!<br>(특히 출결이 부족한 학생들 — 이때도 안 오면 방학에 나오게 될 수 있습니다.)</div>
+  </div>
+
+  <div class="section-title"><span class="num">5</span>자주 묻는 질문</div>
+  <div class="card">
+    <div class="qa">
+      <div class="q">Q. 목요일(1일차)에 왜 7교시까지 해요? ㅠㅠ</div>
+      <div class="a">A. 방학식 날 더 일찍 끝내드리기 위해서예요. (7/21(화) 수업을 미리 당겨서 하는 셈이에요)</div>
+    </div>
+  </div>
+
+  <footer>
+    2026 SLAT 학생주도 프로젝트<br>
+    © 2026 pirugiru. All rights reserved.
+  </footer>
+</div>
+</body>
+</html>
