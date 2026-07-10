@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>부곡고 리로스쿨 가입 안내 | 2027학년도 선택과목 신청(2차)</title>
+<style>
+  :root{
+    --blue:#1f6feb;
+    --blue-dark:#1352b4;
+    --blue-light:#eaf2ff;
+    --red:#e5484d;
+    --gray-900:#1a1d21;
+    --gray-600:#5b6470;
+    --gray-300:#dfe3e8;
+    --gray-100:#f5f7fa;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",Roboto,sans-serif;
+    background:var(--gray-100);
+    color:var(--gray-900);
+    line-height:1.5;
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:0 0 60px;}
+
+  header{
+    background:linear-gradient(135deg,var(--blue) 0%,var(--blue-dark) 100%);
+    color:#fff;
+    padding:36px 20px 28px;
+    text-align:center;
+  }
+  header .tag{
+    display:inline-block;
+    background:rgba(255,255,255,0.18);
+    padding:4px 12px;
+    border-radius:20px;
+    font-size:13px;
+    margin-bottom:10px;
+  }
+  header h1{font-size:22px;margin:0 0 6px;font-weight:800;}
+  header p{margin:0;font-size:14px;opacity:.9;}
+
+  .period-banner{
+    background:#fff;
+    margin:-18px 16px 0;
+    border-radius:var(--radius);
+    box-shadow:0 6px 20px rgba(0,0,0,0.08);
+    padding:16px 18px;
+    position:relative;
+    z-index:2;
+    text-align:center;
+  }
+  .period-banner .label{font-size:12px;color:var(--gray-600);font-weight:700;}
+  .period-banner .value{font-size:16px;font-weight:800;color:var(--blue-dark);margin-top:2px;}
+
+  section{padding:28px 20px 0;}
+  .step-num{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:26px;height:26px;
+    background:var(--blue);
+    color:#fff;
+    border-radius:50%;
+    font-size:13px;
+    font-weight:800;
+    margin-right:8px;
+    flex:none;
+  }
+  h2{
+    display:flex;
+    align-items:center;
+    font-size:17px;
+    margin:0 0 4px;
+  }
+  .sub{font-size:13px;color:var(--gray-600);margin:0 0 14px 34px;}
+
+  .card{
+    background:#fff;
+    border-radius:var(--radius);
+    padding:18px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom:14px;
+  }
+
+  /* mandatory install alert */
+  .must-card{
+    background:#fff5f5;
+    border:1.5px solid #ffd2d4;
+    border-radius:var(--radius);
+    padding:16px 18px;
+    margin-bottom:16px;
+  }
+  .must-card .must-title{
+    color:var(--red);
+    font-weight:800;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:4px;
+  }
+  .must-card p{font-size:13px;color:#7a2b2e;margin:0;}
+
+  .store-btns{display:flex;gap:10px;margin-top:14px;}
+  .store-btn{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    background:var(--gray-900);
+    color:#fff;
+    text-decoration:none;
+    padding:12px 8px;
+    border-radius:12px;
+    font-size:13px;
+    font-weight:700;
+    transition:opacity .15s;
+  }
+  .store-btn:active{opacity:.7;}
+  .store-btn .icon{font-size:22px;}
+
+  .qr-note{
+    font-size:12px;
+    color:var(--gray-600);
+    text-align:center;
+    margin-top:10px;
+  }
+
+  /* phone mockups (illustrative only — not real, interactive screens) */
+  .phone-mock{
+    position:relative;
+    background:var(--gray-100);
+    border:1.5px dashed #b9c0c9;
+    border-radius:16px;
+    padding:16px 14px;
+    margin:14px 0;
+    overflow:hidden;
+    filter:saturate(.55);
+    pointer-events:none;
+    user-select:none;
+  }
+  .phone-mock::before{
+    content:"예시 화면 · SAMPLE";
+    position:absolute;
+    top:40%;
+    left:50%;
+    transform:translate(-50%,-50%) rotate(-22deg);
+    font-size:22px;
+    font-weight:900;
+    color:rgba(31,111,235,0.16);
+    letter-spacing:2px;
+    white-space:nowrap;
+    pointer-events:none;
+    z-index:5;
+  }
+  .phone-mock .mock-badge{
+    position:absolute;
+    top:8px;
+    right:8px;
+    background:var(--blue-dark);
+    color:#fff;
+    font-size:10px;
+    font-weight:800;
+    padding:3px 8px;
+    border-radius:20px;
+    z-index:6;
+    opacity:.9;
+  }
+  .phone-mock .mtitle{font-size:12px;font-weight:700;color:var(--gray-600);text-align:center;margin-bottom:10px;}
+  .mock-caption{
+    font-size:11px;
+    color:var(--gray-600);
+    text-align:center;
+    margin-top:-6px;
+    margin-bottom:10px;
+  }
+  .mock-search{
+    display:flex;
+    gap:6px;
+    background:#fff;
+    border:1px solid var(--gray-300);
+    border-radius:10px;
+    padding:8px 10px;
+    font-size:13px;
+    align-items:center;
+  }
+  .mock-search .x{color:var(--gray-600);}
+  .mock-search .go{
+    margin-left:auto;
+    background:var(--blue);
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:6px;
+  }
+  .mock-result{
+    background:#fff;
+    border:1px solid var(--gray-300);
+    border-radius:10px;
+    padding:10px 12px;
+    margin-top:10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:13px;
+  }
+  .mock-result .name{font-weight:700;}
+  .mock-result .addr{font-size:11px;color:var(--gray-600);}
+  .mock-select{
+    background:var(--blue);
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    padding:6px 12px;
+    border-radius:8px;
+    white-space:nowrap;
+  }
+
+  .mock-login{
+    background:#fff;
+    border:1px solid var(--gray-300);
+    border-radius:10px;
+    padding:14px;
+    margin-top:10px;
+  }
+  .mock-login .greet{font-size:13px;font-weight:700;text-align:center;margin-bottom:10px;}
+  .mock-input{
+    background:var(--gray-100);
+    border:1px solid var(--gray-300);
+    border-radius:8px;
+    padding:9px 10px;
+    font-size:12px;
+    color:var(--gray-600);
+    margin-bottom:8px;
+  }
+  .mock-input.filled{color:var(--gray-900);font-weight:700;}
+  .mock-loginbtn{
+    background:var(--blue);
+    color:#fff;
+    text-align:center;
+    font-size:13px;
+    font-weight:800;
+    padding:10px;
+    border-radius:8px;
+    margin-top:4px;
+  }
+
+  .kv{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:8px 0;
+    border-bottom:1px dashed var(--gray-300);
+    font-size:13px;
+  }
+  .kv:last-child{border-bottom:none;}
+  .kv .k{color:var(--gray-600);}
+  .kv .v{font-weight:800;color:var(--blue-dark);}
+  .example{
+    background:var(--blue-light);
+    border-radius:8px;
+    padding:8px 10px;
+    font-size:12px;
+    color:var(--blue-dark);
+    margin-top:8px;
+  }
+
+  /* prominent login info block */
+  .login-info{
+    background:var(--blue-light);
+    border:1.5px solid #cfe0ff;
+    border-radius:12px;
+    padding:14px 16px;
+    margin:14px 0;
+  }
+  .login-info-title{
+    font-weight:800;
+    font-size:13px;
+    color:var(--blue-dark);
+    margin-bottom:8px;
+  }
+  .kv-big{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:7px 0;
+    border-bottom:1px dashed #cfe0ff;
+    font-size:14px;
+  }
+  .kv-big:last-child{border-bottom:none;}
+  .kv-big .k{color:var(--blue-dark);font-weight:600;}
+  .kv-big .v{font-weight:900;font-size:19px;color:var(--blue-dark);letter-spacing:.3px;}
+
+  /* login method options */
+  .login-option{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    padding:12px 0;
+    border-bottom:1px solid var(--gray-100);
+  }
+  .login-option:last-of-type{border-bottom:none;}
+  .lo-icon{
+    flex:none;
+    width:34px;height:34px;
+    border-radius:10px;
+    background:var(--blue-light);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:17px;
+  }
+  .lo-text{font-size:13.5px;line-height:1.5;}
+  .lo-text b{display:block;font-size:14px;margin-bottom:2px;color:var(--gray-900);}
+
+  .checklist{list-style:none;padding:0;margin:0;}
+  .checklist li{
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+    font-size:13.5px;
+    padding:7px 0;
+    border-bottom:1px solid var(--gray-100);
+  }
+  .checklist li:last-child{border-bottom:none;}
+  .checklist .chk{
+    flex:none;
+    width:18px;height:18px;
+    border-radius:5px;
+    background:var(--blue);
+    color:#fff;
+    font-size:11px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:1px;
+  }
+  .checklist b{color:var(--red);}
+
+  .primary-link{
+    display:block;
+    text-align:center;
+    background:var(--blue);
+    color:#fff;
+    text-decoration:none;
+    font-weight:800;
+    font-size:15px;
+    padding:15px;
+    border-radius:12px;
+    margin:14px 0 6px;
+    box-shadow:0 6px 16px rgba(31,111,235,0.28);
+  }
+  .primary-link:active{opacity:.85;}
+  .link-note{font-size:12px;color:var(--gray-600);text-align:center;margin:0 0 6px;}
+  .link-url{
+    font-size:11px;
+    color:var(--gray-600);
+    text-align:center;
+    word-break:break-all;
+    margin-top:2px;
+  }
+
+  .notice-box{
+    background:var(--gray-900);
+    color:#fff;
+    border-radius:var(--radius);
+    padding:18px;
+    margin:14px 0;
+  }
+  .notice-box .kv{border-bottom:1px dashed #444;}
+  .notice-box .kv .k{color:#aab1bb;}
+  .notice-box .kv .v{color:#fff;}
+
+  footer{
+    padding:30px 20px 10px;
+    text-align:center;
+    font-size:12px;
+    color:var(--gray-600);
+  }
+
+  .tag-red{color:var(--red);font-weight:800;}
+
+  .shot{
+    display:block;
+    max-width:100%;
+    height:auto;
+    margin:12px auto 4px;
+    border-radius:12px;
+    border:1px solid var(--gray-300);
+    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+  }
+  .shot-caption{
+    font-size:12px;
+    color:var(--gray-600);
+    text-align:center;
+    margin:0 0 14px;
+  }
+  .shot-row{
+    display:flex;
+    gap:10px;
+    margin:12px 0 4px;
+  }
+  .shot-row .shot{margin:0;flex:1;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="tag">가정통신문 · 2차 안내</span>
+    <h1>2027학년도 교육과정<br>선택과목 신청 방법</h1>
+    <p>부곡고등학교 · 리로스쿨(RIRO School) 가입 안내</p>
+  </header>
+
+  <div class="period-banner">
+    <div class="label">📅 신청 기간</div>
+    <div class="value">2026. 7. 13.(월) 9:00 ~ 7. 15.(수) 17:00</div>
+    <div class="sub" style="margin:4px 0 0;">신청 기간 내에는 언제든지 수정할 수 있습니다.</div>
+  </div>
+
+  <!-- STEP 0 : 앱 설치 필수 -->
+  <section style="padding-top:22px;">
+    <div class="must-card">
+      <div class="must-title">⚠️ 앱 설치는 필수입니다</div>
+      <p>과목 신청 <b>‘알림’</b>은 리로스쿨 <b>앱</b>을 설치해야만 받을 수 있습니다. 아래 버튼으로 스토어에서 바로 검색해 설치하세요.</p>
+    </div>
+
+    <h2><span class="step-num">1</span>리로스쿨 앱 설치</h2>
+    <p class="sub">Android / iOS 스토어에서 검색 후 설치</p>
+
+    <div class="card">
+      <div class="store-btns">
+        <a class="store-btn" href="https://play.google.com/store/apps/details?id=com.rirosoft.riroschool&hl=ko" target="_blank" rel="noopener">
+          <span class="icon">▶</span> Google Play<br>(Android)
+        </a>
+        <a class="store-btn" href="https://apps.apple.com/kr/app/%EB%A6%AC%EB%A1%9C%EC%8A%A4%EC%BF%A8/id995221497" target="_blank" rel="noopener">
+          <span class="icon">🍎</span> App Store<br>(iOS)
+        </a>
+      </div>
+      <p class="qr-note">버튼이 안 열리면 스토어에서 <b>‘리로스쿨’</b>을 직접 검색하세요.</p>
+
+      <img class="shot" src="1.png" alt="리로스쿨 앱 학교 검색 화면 - 부곡고등학교 검색 결과">
+      <p class="shot-caption">앱 실행 → ‘부곡고등학교’ 검색 → 선택</p>
+    </div>
+  </section>
+
+  <!-- STEP 1 : 로그인 -->
+  <section>
+    <h2><span class="step-num">2</span>로그인하기</h2>
+    <p class="sub">아래 아이디·비밀번호로 로그인하세요</p>
+
+    <div class="card">
+      <img class="shot" src="2.png" alt="부곡고 리로스쿨 로그인 화면">
+      <p class="shot-caption">로그인 화면 예시</p>
+
+      <div class="login-info">
+        <div class="login-info-title">🔑 로그인 정보</div>
+        <div class="kv-big"><span class="k">아이디</span><span class="v">26-학번(5자리)</span></div>
+        <div class="example">예) 1학년 1반 1번 → <b>26-10101</b></div>
+        <div class="kv-big"><span class="k">초기 비밀번호</span><span class="v">123456</span></div>
+      </div>
+
+      <div class="login-option">
+        <div class="lo-icon">📱</div>
+        <div class="lo-text"><b>① 앱에서 로그인</b>1단계에서 설치한 리로스쿨 앱을 열고 위 아이디·비밀번호를 입력해 로그인하세요.</div>
+      </div>
+      <div class="login-option">
+        <div class="lo-icon">🌐</div>
+        <div class="lo-text"><b>② 모바일 웹(인터넷 브라우저)에서 로그인</b>앱 설치가 어려운 경우, 아래 버튼을 눌러 휴대폰 인터넷 브라우저로 바로 로그인할 수 있습니다.</div>
+      </div>
+
+      <a class="primary-link" href="https://bugokh.riroschool.kr/user.php?action=signin" target="_blank" rel="noopener">
+        🌐 모바일 웹에서 로그인하기 →
+      </a>
+      <p class="link-note">버튼을 누르면 인터넷 브라우저로 로그인 페이지가 열립니다</p>
+      <p class="link-url">https://bugokh.riroschool.kr/user.php?action=signin</p>
+    </div>
+  </section>
+
+  <!-- STEP 2 : 개인정보수정 (필수) -->
+  <section>
+    <h2><span class="step-num">3</span>개인정보 수정 <span class="tag-red">(필수)</span></h2>
+    <p class="sub">비밀번호를 변경하지 않으면 수강신청이 불가능합니다</p>
+
+    <div class="card">
+      <img class="shot" src="3.png" alt="개인정보수정 화면 - 비밀번호, 이메일, 전화번호, 진로/희망전공 입력란">
+      <p class="shot-caption">개인정보수정 화면에서 빨간 표시 항목을 모두 입력하세요</p>
+
+      <ul class="checklist">
+        <li><span class="chk">✓</span><span><b>비밀번호 변경</b> — 영문·숫자·특수문자 모두 포함, 8자 이상 (최종 수강신청에도 사용되니 꼭 기억해두세요)</span></li>
+        <li><span class="chk">✓</span><span><b>이메일</b> 필수 입력 (비밀번호 분실 시 이 메일로 재발급)</span></li>
+        <li><span class="chk">✓</span><span><b>진로 / 희망전공</b> 필수 입력 (‘없음’으로 작성 가능)</span></li>
+        <li><span class="chk">✓</span><span><b>전화번호</b> 확인 — 본인 · 어머니 · 아버지 번호 (추후 학부모 가입 시 필요)</span></li>
+      </ul>
+
+      <img class="shot" src="4.png" alt="비밀번호 변경 버튼 및 현재 비밀번호 확인 화면">
+      <p class="shot-caption">‘비밀번호 변경’ 클릭 → 현재 비밀번호(초기값 123456) 입력 후 새 비밀번호 설정</p>
+    </div>
+  </section>
+
+  <!-- STEP 3 : 수강신청 -->
+  <section>
+    <h2><span class="step-num">4</span>수강신청 (알림신청)</h2>
+    <p class="sub">비밀번호 변경 후 재로그인 → 수강신청 진행</p>
+
+    <div class="card">
+      <img class="shot" src="5.png" alt="가정통신문 목록 화면 - 2027학년도 교육과정 선택과목 신청">
+      <p class="shot-caption">[알림신청] → [가정통신문]에서 학년별 신청 게시글을 눌러 진행하세요</p>
+    </div>
+
+    <div class="notice-box">
+      <div class="kv"><span class="k">경로</span><span class="v">알림신청 → 가정통신문</span></div>
+      <div class="kv"><span class="k">신청 기간</span><span class="v">7.13(월) 9:00 ~ 7.15(수) 17:00</span></div>
+      <div class="kv"><span class="k">수정</span><span class="v">기간 내 언제든 가능</span></div>
+    </div>
+  </section>
+
+  <footer>
+    부곡고등학교 · 리로스쿨 통합가입 안내<br>
+    문의사항은 담임 선생님께 연락 바랍니다.
+  </footer>
+
+</div>
+</body>
+</html>
